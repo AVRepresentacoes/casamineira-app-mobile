@@ -1,59 +1,87 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#03040a",
+          borderTopColor: "#0b1220",
+          height: 64,
+          paddingBottom: 8,
+        },
+        tabBarActiveTintColor: "#facc15",
+        tabBarInactiveTintColor: "#9ca3af",
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "700",
+        },
+      }}
+    >
+      {/* INÍCIO */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: "Início",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
+
+      {/* FERRAMENTAS */}
       <Tabs.Screen
-        name="two"
+        name="ferramentas"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Ferramentas",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="tools"
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
+
+      {/* PEDIDOS */}
+      <Tabs.Screen
+        name="pedidos"
+        options={{
+          title: "Pedidos",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="clipboard-outline"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* PERFIL */}
+      <Tabs.Screen
+        name="perfil"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="person-outline"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* ⛔ TUDO ABAIXO FICA FORA DO RODAPÉ */}
+      <Tabs.Screen name="servicos" options={{ href: null }} />
+      <Tabs.Screen name="portfolio" options={{ href: null }} />
+      <Tabs.Screen name="contratos" options={{ href: null }} />
+      <Tabs.Screen name="painel-cliente" options={{ href: null }} />
+      <Tabs.Screen name="two" options={{ href: null }} />
     </Tabs>
   );
 }
