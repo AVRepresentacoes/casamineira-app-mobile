@@ -715,6 +715,23 @@ export default function HomeFornecedor() {
         />
       </View>
 
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Conta e privacidade</Text>
+        <TouchableOpacity
+          style={styles.accountOption}
+          onPress={() => router.push("/(tabs)/politica-privacidade")}
+        >
+          <View style={styles.accountOptionIcon}>
+            <Ionicons name="shield-checkmark-outline" size={18} color="#22c55e" />
+          </View>
+          <View style={styles.accountOptionCopy}>
+            <Text style={styles.accountOptionTitle}>Política de Privacidade</Text>
+            <Text style={styles.accountOptionSub}>Transparência e segurança dos seus dados</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#64748b" />
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity style={styles.buttonDanger} onPress={sair}>
         <Ionicons name="log-out-outline" size={15} color="#fecaca" />
         <Text style={styles.buttonDangerText}>Sair</Text>
@@ -1012,6 +1029,39 @@ const styles = StyleSheet.create({
   },
   quickTextPrimary: {
     color: "#022c22",
+  },
+  accountOption: {
+    minHeight: 64,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "#111827",
+    borderWidth: 1,
+    borderColor: "#334155",
+    borderRadius: 12,
+    padding: 12,
+  },
+  accountOptionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#052e16",
+    borderWidth: 1,
+    borderColor: "#166534",
+  },
+  accountOptionCopy: {
+    flex: 1,
+  },
+  accountOptionTitle: {
+    color: "#f8fafc",
+    fontWeight: "900",
+  },
+  accountOptionSub: {
+    color: "#94a3b8",
+    fontSize: 12,
+    marginTop: 3,
   },
   progressTrack: {
     marginTop: 4,

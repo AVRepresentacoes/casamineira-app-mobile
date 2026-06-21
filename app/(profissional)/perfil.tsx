@@ -467,6 +467,14 @@ export default function PerfilProfissional() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={styles.option}
+          onPress={() => router.push("/(tabs)/politica-privacidade")}
+        >
+          <Text style={styles.optionTitle}>Política de Privacidade</Text>
+          <Text style={styles.optionSub}>Transparência e segurança dos seus dados</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.switchAccountOption}
           onPress={trocarParaCliente}
         >
