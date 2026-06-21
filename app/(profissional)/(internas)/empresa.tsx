@@ -141,6 +141,19 @@ export default function EmpresaInternaScreen() {
         ) : null}
       </View>
 
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Conta da empresa</Text>
+        <Text style={styles.accountText}>
+          Para remover o acesso da conta administradora e solicitar exclusão dos dados vinculados, acesse o fluxo de exclusão de conta.
+        </Text>
+        <TouchableOpacity
+          style={styles.dangerOutlineButton}
+          onPress={() => router.push("/(tabs)/cancelamento-conta")}
+        >
+          <Text style={styles.dangerOutlineButtonText}>Excluir minha conta</Text>
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity style={[styles.button, saving ? styles.disabled : null]} onPress={() => void salvar()} disabled={saving}>
         {saving ? <ActivityIndicator color="#020617" /> : <Text style={styles.buttonText}>Salvar empresa</Text>}
       </TouchableOpacity>
@@ -272,6 +285,22 @@ const styles = StyleSheet.create({
     color: "#f59e0b",
     lineHeight: 20,
     marginTop: 8,
+  },
+  accountText: {
+    color: "#cbd5e1",
+    lineHeight: 21,
+    marginBottom: 12,
+  },
+  dangerOutlineButton: {
+    borderWidth: 1,
+    borderColor: "#f87171",
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  dangerOutlineButtonText: {
+    color: "#fecaca",
+    fontWeight: "900",
   },
   button: {
     backgroundColor: "#facc15",

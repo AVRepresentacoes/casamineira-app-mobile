@@ -12,6 +12,11 @@ const NAV_ITEMS = [
   { label: "Contato", href: "/contato" },
 ];
 
+const FOOTER_ITEMS = [
+  ...NAV_ITEMS,
+  { label: "Política de Privacidade", href: "/politica-privacidade" },
+];
+
 export function SiteShell({
   children,
 }: {
@@ -58,7 +63,7 @@ export function SiteShell({
           <Text style={styles.footerTitle}>Casa Mineira SaaS</Text>
           <Text style={styles.footerText}>Plataforma para empresas de serviços ganharem mais controle operacional, resposta comercial mais rápida e uma experiência de marca mais forte.</Text>
           <View style={styles.footerLinks}>
-            {NAV_ITEMS.map((item) => (
+            {FOOTER_ITEMS.map((item) => (
               <Pressable key={item.href} onPress={() => router.push(item.href as never)}>
                 <Text style={styles.footerLink}>{item.label}</Text>
               </Pressable>
