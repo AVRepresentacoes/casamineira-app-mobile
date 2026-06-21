@@ -1,77 +1,50 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from "react-native";
 
-import { ExternalLink } from './ExternalLink';
-import { MonoText } from './StyledText';
-import { Text, View } from './Themed';
+type Props = {
+  path: string;
+};
 
-import Colors from '@/constants/Colors';
-
-export default function EditScreenInfo({ path }: { path: string }) {
+export default function EditScreenInfo({ path }: Props) {
   return (
-    <View>
-      <View style={styles.getStartedContainer}>
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
-          Open up the code for this screen:
-        </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Tela</Text>
 
-        <View
-          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
-          darkColor="rgba(255,255,255,0.05)"
-          lightColor="rgba(0,0,0,0.05)">
-          <MonoText>{path}</MonoText>
-        </View>
+      <View style={styles.separator} />
 
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
-          Change any of the text, save the file, and your app will automatically update.
-        </Text>
-      </View>
+      <Text style={styles.description}>
+        Edite o arquivo:
+      </Text>
 
-      <View style={styles.helpContainer}>
-        <ExternalLink
-          style={styles.helpLink}
-          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet">
-          <Text style={styles.helpLinkText} lightColor={Colors.light.tint}>
-            Tap here if your app doesn't automatically update after making changes
-          </Text>
-        </ExternalLink>
-      </View>
+      <Text style={styles.path}>{path}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
+  container: {
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 32,
   },
-  homeScreenFilename: {
-    marginVertical: 7,
+  title: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#facc15",
   },
-  codeHighlightContainer: {
-    borderRadius: 3,
-    paddingHorizontal: 4,
+  separator: {
+    marginVertical: 16,
+    height: 1,
+    width: "80%",
+    backgroundColor: "#1f2933",
   },
-  getStartedText: {
-    fontSize: 17,
-    lineHeight: 24,
-    textAlign: 'center',
+  description: {
+    fontSize: 14,
+    color: "#9ca3af",
+    marginBottom: 6,
   },
-  helpContainer: {
-    marginTop: 15,
-    marginHorizontal: 20,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    textAlign: 'center',
+  path: {
+    fontSize: 13,
+    color: "#e5e7eb",
+    fontFamily: "monospace",
   },
 });

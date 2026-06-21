@@ -1,14 +1,15 @@
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { supabase } from "../lib/supabase";
+
 
 type Props = {
   visible: boolean;
@@ -18,21 +19,26 @@ type Props = {
 export default function RaioAtuacaoModal({ visible, onClose }: Props) {
   const [cep, setCep] = useState("");
   const [raio, setRaio] = useState("10");
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (visible) carregar();
+    if (visible) carregarConfiguracao();
   }, [visible]);
 
-  const carregar = async () => {
+  const carregarConfiguracao = async () => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth?.user) return;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profissionais_config")
       .select("*")
       .eq("user_id", auth.user.id)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      console.log("Erro ao carregar config:", error.message);
+      return;
+    }
 
     if (data) {
       setCep(data.cep || "");
@@ -41,61 +47,65 @@ export default function RaioAtuacaoModal({ visible, onClose }: Props) {
   };
 
   const salvar = async () => {
-    setSaving(true);
     const { data: auth } = await supabase.auth.getUser();
     if (!auth?.user) return;
 
-    await supabase.from("profissionais_config").upsert({
+    setLoading(true);
+
+    const { error } = await supabase.from("profissionais_config").upsert({
       user_id: auth.user.id,
       cep,
       raio_km: Number(raio) || 10,
       updated_at: new Date().toISOString(),
     });
 
-    setSaving(false);
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("Erro", error.message);
+      return;
+    }
+
+    Alert.alert("Sucesso", "Raio de atuação atualizado.");
     onClose();
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.title}>Raio de atuação</Text>
+          <Text style={styles.title}>Raio de Atuação</Text>
 
           <Text style={styles.label}>CEP base</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ex: 30110-012"
-            placeholderTextColor="#6b7280"
             value={cep}
             onChangeText={setCep}
+            placeholder="Ex: 30110-012"
+            placeholderTextColor="#6b7280"
           />
 
           <Text style={styles.label}>Raio (km)</Text>
           <TextInput
             style={styles.input}
-            keyboardType="numeric"
             value={raio}
             onChangeText={setRaio}
+            keyboardType="numeric"
           />
 
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancel} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancelar</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.btn, loading && { opacity: 0.6 }]}
+            onPress={salvar}
+            disabled={loading}
+          >
+            <Text style={styles.btnText}>
+              {loading ? "Salvando..." : "Salvar"}
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.save}
-              onPress={salvar}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator color="#000" />
-              ) : (
-                <Text style={styles.saveText}>Salvar</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={styles.cancel}>Cancelar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -118,13 +128,13 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#facc15",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
     marginBottom: 12,
   },
   label: {
     color: "#9ca3af",
-    marginTop: 10,
+    marginTop: 12,
     fontWeight: "700",
   },
   input: {
@@ -136,32 +146,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#0b1220",
   },
-  actions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 20,
-  },
-  cancel: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#374151",
-    alignItems: "center",
-  },
-  cancelText: {
-    color: "#9ca3af",
-    fontWeight: "800",
-  },
-  save: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 14,
+  btn: {
     backgroundColor: "#facc15",
+    marginTop: 20,
+    padding: 14,
+    borderRadius: 14,
     alignItems: "center",
   },
-  saveText: {
+  btnText: {
     color: "#000",
     fontWeight: "900",
+  },
+  cancel: {
+    color: "#9ca3af",
+    textAlign: "center",
+    marginTop: 14,
+    fontWeight: "700",
   },
 });

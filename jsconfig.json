@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "checkJs": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "android/app/build",
+    "caches",
+    "daemon",
+    "wrapper"
+  ]
+}

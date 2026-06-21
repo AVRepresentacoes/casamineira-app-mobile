@@ -46,6 +46,13 @@ node_modules
 .env.*
 dist
 build
+builds/
 android
 ios
 
+# local Gradle/IDE caches accidentally generated in the repo root
+caches/
+daemon/
+native/
+wrapper/dists/
+.idea/

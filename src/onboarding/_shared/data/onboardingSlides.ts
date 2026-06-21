@@ -11,7 +11,7 @@ export const onboardingSlides = [
     title: "Tudo que você precisa",
     subtitle: "Elétrica, hidráulica, drywall, pintura, montagem e muito mais.",
     bullets: ["Categorias prontas", "Pedido em poucos cliques", "Acompanhe o status"],
-    icon: "construct",
+    icon: "hammer",
   },
   {
     key: "profissional",

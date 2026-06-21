@@ -12,14 +12,14 @@ export default function ProfileTypeScreen() {
 
       <TouchableOpacity
         style={styles.primary}
-        onPress={() => router.replace("/(tabs)/dashboard")}
+        onPress={() => router.replace("/(tabs)")}
       >
         <Text style={styles.primaryText}>Sou Cliente</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.secondary}
-        onPress={() => router.replace("/(profissional)/dashboard")}
+        onPress={() => router.replace("/(profissional)/(internas)/dashboard")}
       >
         <Text style={styles.secondaryText}>Sou Profissional</Text>
       </TouchableOpacity>

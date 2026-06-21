@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
@@ -6,82 +6,144 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "#03040a",
-          borderTopColor: "#0b1220",
-          height: 64,
-          paddingBottom: 8,
-        },
+        tabBarStyle: { backgroundColor: "#03040a" },
         tabBarActiveTintColor: "#facc15",
         tabBarInactiveTintColor: "#9ca3af",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "700",
-        },
       }}
     >
-      {/* INÍCIO */}
+      {/* 1️⃣ HOME */}
       <Tabs.Screen
         name="index"
         options={{
-          title: "Início",
-          tabBarIcon: ({ color, size }) => (
+          title: "Home",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
 
-      {/* FERRAMENTAS */}
       <Tabs.Screen
-        name="ferramentas"
+        name="buscar/index"
         options={{
-          title: "Ferramentas",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="tools"
-              size={size}
-              color={color}
-            />
+          title: "Buscar",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="search-outline" size={size} color={color} />
           ),
         }}
       />
 
-      {/* PEDIDOS */}
+      {/* 3️⃣ PEDIDOS */}
       <Tabs.Screen
         name="pedidos"
         options={{
           title: "Pedidos",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="clipboard-outline"
-              size={size}
-              color={color}
-            />
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="list-outline" size={size} color={color} />
           ),
         }}
       />
 
-      {/* PERFIL */}
+      <Tabs.Screen
+        name="meus-dados"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="cancelamento-conta"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="central-ajuda"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="politica-privacidade"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: "Lojas",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="storefront-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="gas"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="gas-checkout"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="carrinho"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="compras"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="lojas"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      {/* 4️⃣ PERFIL */}
       <Tabs.Screen
         name="perfil"
         options={{
           title: "Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="person-outline"
-              size={size}
-              color={color}
-            />
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
 
-      {/* ⛔ TUDO ABAIXO FICA FORA DO RODAPÉ */}
-      <Tabs.Screen name="servicos" options={{ href: null }} />
-      <Tabs.Screen name="portfolio" options={{ href: null }} />
-      <Tabs.Screen name="contratos" options={{ href: null }} />
-      <Tabs.Screen name="painel-cliente" options={{ href: null }} />
-      <Tabs.Screen name="two" options={{ href: null }} />
+      <Tabs.Screen
+        name="lojas/[fornecedorId]"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
     </Tabs>
   );
 }

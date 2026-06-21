@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Assinatura() {
   return (
@@ -8,7 +8,7 @@ export default function Assinatura() {
         Desbloqueie relatórios, cálculos automáticos e ferramentas avançadas.
       </Text>
 
-      <TouchableOpacity style={styles.btn}>
+      <TouchableOpacity style={styles.btn} onPress={() => Alert.alert("Assinatura", "Fluxo de assinatura será liberado na próxima versão.")}>
         <Text style={styles.btnText}>Assinar Agora</Text>
       </TouchableOpacity>
     </View>

@@ -1,7 +1,7 @@
-import { supabase } from "../supabaseClient";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { supabase } from "@/lib/supabase";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Register() {
   const router = useRouter();
@@ -25,17 +25,17 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: email.trim(),
         password: senha,
         options: {
-          data: { nome, role },
+          data: { name: nome, role },
         },
       });
       if (error) throw error;
 
       Alert.alert("Conta criada", "Agora faça login.");
-      router.replace("/login");
+      router.replace("/(auth)/login");
     } catch (e: any) {
       Alert.alert("Erro ao criar conta", e?.message || "Falha no cadastro");
     } finally {
@@ -45,7 +45,7 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Image source={require("../assets/images/icon.png")} style={styles.logo} resizeMode="contain" />
+      <Image source={require("../assets/images/icons/icon.png")} style={styles.logo} resizeMode="contain" />
 
       <Text style={styles.title}>Criar conta</Text>
       <Text style={styles.subtitle}>Tipo: {role.toUpperCase()}</Text>
@@ -64,7 +64,7 @@ export default function Register() {
           {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.primaryText}>Criar conta</Text>}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.replace("/login")}>
+        <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.replace("/(auth)/login")}>
           <Text style={styles.secondaryText}>Já tenho conta</Text>
         </TouchableOpacity>
       </View>
@@ -74,7 +74,7 @@ export default function Register() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#03040a", alignItems: "center", justifyContent: "center", padding: 22 },
-  logo: { width: 110, height: 110, marginBottom: 18 },
+  logo: { width: 190, height: 190, marginBottom: 2 },
   title: { color: "#facc15", fontSize: 22, fontWeight: "900" },
   subtitle: { color: "#9ca3af", marginTop: 6, marginBottom: 18, textAlign: "center" },
 

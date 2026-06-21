@@ -36,7 +36,7 @@ export default function OnboardingNavigator({
       Animated.timing(fade, { toValue: 1, duration: 260, useNativeDriver: true }),
       Animated.timing(up, { toValue: 0, duration: 260, useNativeDriver: true }),
     ]).start();
-  }, [index]);
+  }, [fade, index, up]);
 
   const current = slides[index];
 

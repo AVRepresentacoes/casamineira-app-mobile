@@ -1,25 +1,27 @@
 import { useRouter } from "expo-router";
 import React from "react";
+import { useBranding } from "@/hooks/useBranding";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function OnboardingIndex() {
   const router = useRouter();
+  const { branding } = useBranding();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Casa Mineira Serviços</Text>
+      <Text style={[styles.title, { color: branding.primaryColor }]}>{branding.appName}</Text>
       <Text style={styles.sub}>
         Serviços rápidos, profissionais verificados e pagamento seguro.
       </Text>
 
       <TouchableOpacity
-        style={styles.primary}
-        onPress={() => router.push("/onboarding/screens/ProfileTypeScreen")}
+        style={[styles.primary, { backgroundColor: branding.primaryColor }]}
+        onPress={() => router.push("/(auth)/cadastro-opcao")}
       >
         <Text style={styles.primaryText}>Continuar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.secondary} onPress={() => router.push("/login")}>
+      <TouchableOpacity style={styles.secondary} onPress={() => router.push("/(auth)/login")}>
         <Text style={styles.secondaryText}>Já tenho conta</Text>
       </TouchableOpacity>
     </View>

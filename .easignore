@@ -1,0 +1,33 @@
+# Dependências
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Expo / EAS
+.expo
+.eas
+
+# Builds locais
+android
+ios
+dist
+build
+output
+
+# Cache
+.cache
+caches
+daemon
+tmp
+tmp.*
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Arquivos grandes desnecessários
+schemaspy.jar
+wrapper

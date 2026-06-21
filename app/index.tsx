@@ -1,62 +1,89 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
-import { getRole, getUser } from "../lib/auth";
+import { MarketingLandingContent } from "@/components/site/MarketingLandingContent";
+import { SiteShell } from "@/components/site/SiteShell";
+import { getActiveRole } from "@/lib/auth";
+import { getPublicSaasPlans } from "@/lib/saas-growth";
+import type { SaasPlanoComercial } from "@/lib/saas-commercial";
+import { supabase } from "@/lib/supabase";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { Platform, View } from "react-native";
 
 export default function Index() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [route, setRoute] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SaasPlanoComercial[]>([]);
 
   useEffect(() => {
-    let active = true;
-
-    const run = async () => {
+    const resolverRota = async () => {
       try {
-        const user = await getUser();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        if (!active) return;
-
-        if (!user) {
-          router.replace("/(auth)/login");
+        if (!session?.user) {
+          if (Platform.OS !== "web") {
+            setRoute("/(auth)/login");
+            return;
+          }
+          setRoute("site");
           return;
         }
 
-        const role = await getRole(user.id);
+        const { data: fornecedorData, error: fornecedorError } = await supabase
+          .from("profissionais")
+          .select("fornecedor_ativo")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
 
-        if (role === "profissional") {
-          router.replace("/(profissional)");
+        if (fornecedorError) {
+          console.log("FORNECEDOR CHECK ROUTING ERROR:", fornecedorError);
+        }
+
+        const isFornecedor = Boolean(
+          (fornecedorData as { fornecedor_ativo?: boolean } | null)?.fornecedor_ativo
+        );
+        if (isFornecedor) {
+          setRoute("/(fornecedor)");
           return;
         }
 
-        // default: cliente
-        router.replace("/(tabs)/dashboard");
-      } catch (e) {
-        router.replace("/(auth)/login");
-      } finally {
-        setLoading(false);
+        const activeRole = await getActiveRole();
+        if (activeRole === "fornecedor") {
+          setRoute("/(fornecedor)");
+          return;
+        }
+        if (activeRole === "profissional") {
+          setRoute("/(profissional)");
+          return;
+        }
+
+        setRoute("/(tabs)/index");
+      } catch (error) {
+        console.log("ERRO ROUTING INICIAL:", error);
+        setRoute("/(auth)/login");
       }
     };
 
-    run();
-
-    return () => {
-      active = false;
-    };
+    void resolverRota();
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (route !== "site") return;
+    getPublicSaasPlans()
+      .then(setPlans)
+      .catch(() => setPlans([]));
+  }, [route]);
+
+  if (!route) {
+    return <View style={{ flex: 1, backgroundColor: "#020617" }} />;
+  }
+
+  if (route === "site") {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#facc15" />
-        <Text style={styles.txt}>Carregando...</Text>
-      </View>
+      <SiteShell>
+        <MarketingLandingContent plans={plans} />
+      </SiteShell>
     );
   }
 
-  return null;
+  return <Redirect href={route} />;
 }
-
-const styles = StyleSheet.create({
-  center: { flex: 1, backgroundColor: "#03040a", justifyContent: "center", alignItems: "center" },
-  txt: { color: "#9ca3af", marginTop: 12, fontWeight: "800" },
-});

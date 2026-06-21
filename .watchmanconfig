@@ -1,0 +1,13 @@
+{
+  "ignore_dirs": [
+    "dist",
+    "caches",
+    "daemon",
+    "wrapper",
+    ".expo",
+    ".tmp",
+    "android/.gradle",
+    "android/build",
+    ".idea/caches"
+  ]
+}

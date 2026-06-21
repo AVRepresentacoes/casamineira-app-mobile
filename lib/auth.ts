@@ -1,36 +1,60 @@
-import { supabase } from "./supabase";
+import { supabase } from "@/lib/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export type UserRole = "cliente" | "profissional";
+export type ActiveRole = "cliente" | "profissional" | "fornecedor";
 
-export async function getUser() {
-  const { data } = await supabase.auth.getUser();
-  return data?.user ?? null;
+/**
+ * Busca o papel do usuário no banco
+ */
+export async function getRole(
+  userId: string
+): Promise<"cliente" | "profissional" | null> {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.log("Erro ao buscar role:", error.message);
+      return null;
+    }
+
+    if (!data?.role) {
+      console.log("Usuário sem role definida");
+      return null;
+    }
+
+    return data.role as "cliente" | "profissional";
+  } catch (err) {
+    console.log("Erro inesperado:", err);
+    return null;
+  }
 }
 
-export async function getRole(userId: string): Promise<UserRole | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", userId)
-    .single();
-
-  if (error) return null;
-  return (data?.role as UserRole) || null;
+/**
+ * Salva qual perfil o usuário escolheu usar
+ */
+export async function setActiveRole(
+  role: ActiveRole
+) {
+  await AsyncStorage.setItem("@active_role", role);
 }
 
-export async function setRole(userId: string, role: UserRole) {
-  const { error } = await supabase.from("profiles").upsert(
-    {
-      user_id: userId,
-      role,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id" }
-  );
-
-  if (error) throw error;
+/**
+ * Recupera o perfil ativo
+ */
+export async function getActiveRole(): Promise<
+  ActiveRole | null
+> {
+  return (await AsyncStorage.getItem("@active_role")) as ActiveRole | null;
 }
 
-export async function signOut() {
+/**
+ * Limpa sessão local
+ */
+export async function logout() {
+  await AsyncStorage.removeItem("@active_role");
   await supabase.auth.signOut();
 }

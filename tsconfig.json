@@ -1,15 +1,25 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "module": "node16",
+    "moduleResolution": "node16",
+    "target": "esnext",
+    "jsx": "react-native",
     "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
+  "exclude": [
+    "node_modules",
+    "dist",
+    "android/app/build",
+    "caches",
+    "daemon",
+    "wrapper"
   ]
 }

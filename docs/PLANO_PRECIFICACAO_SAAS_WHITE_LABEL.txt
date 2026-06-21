@@ -1,0 +1,89 @@
+PLANO DE PRECIFICACAO - SAAS WHITE-LABEL
+Casa Mineira Servicos
+Data: 09/03/2026
+
+1) ESTRUTURA COMERCIAL RECOMENDADA
+
+1.1 Setup inicial (implantacao)
+- Faixa recomendada: R$ 5.000 a R$ 25.000 por cliente
+- Sugestao padrao: R$ 9.900
+- Inclui: branding, configuracao de tenant, publicacao, ajustes iniciais e treinamento basico.
+
+1.2 Mensalidade da plataforma
+- Plano Start: R$ 497/mes
+- Plano Pro: R$ 997/mes
+- Plano Scale: R$ 1.997/mes
+- Enterprise: R$ 3.000+/mes
+
+1.3 Comissao por transacao
+- Faixa recomendada: 5% a 15%
+- Sugestao para escalar vendas: 8% a 12%
+- Modelo atual (20%) pode funcionar, mas tende a gerar mais friccao comercial.
+
+2) MODELO HIBRIDO (RECOMENDADO)
+
+- Combinar mensalidade + comissao
+- Exemplo:
+  - Start: R$ 497/mes + 12%
+  - Pro: R$ 997/mes + 8%
+  - Scale: R$ 1.997/mes + 5%
+
+Vantagens:
+- Receita recorrente previsivel
+- Crescimento alinhado ao volume transacionado
+- Maior sustentabilidade de caixa
+
+3) UPSSELLS (RECEITA ADICIONAL)
+
+- Gestao de trafego local: R$ 1.500 a R$ 6.000/mes
+- Suporte premium/CS dedicado: R$ 500 a R$ 3.000/mes
+- Integracoes sob demanda: preco fechado por projeto
+- Consultoria de operacao: pacote mensal
+
+4) SIMULACAO RAPIDA DE CRESCIMENTO
+
+Cenario base:
+- Ticket medio mensal por cliente (mensalidade): R$ 997
+- Custo fixo operacional: R$ 30.000/mes
+
+Break-even aproximado:
+- 30 clientes no plano Pro ja cobrem quase todo custo fixo
+- Comissoes viram margem adicional
+
+Escala:
+- 100 clientes: receita recorrente relevante + alta margem em comissao
+- 500 clientes: operacao ja exige time de CS/comercial/financeiro estruturado
+- 1.000 clientes: foco em automacao, governanca e controle de churn
+
+5) SUGESTAO DE POSICIONAMENTO
+
+- Produto: App white-label pronto para marketplace de servicos e produtos locais
+- Diferencial: pagamento integrado, operacao multi-tenant, rastreio, painel profissional e fornecedor
+- Oferta: implantacao rapida + operacao assistida + plano de crescimento
+
+6) POLITICA COMERCIAL SUGERIDA
+
+- Contrato minimo: 12 meses
+- Reajuste anual: IPCA + ganho real
+- SLA por plano
+- Limites por plano (usuarios, volume, suporte)
+- Upgrade automatico por faixa de uso
+
+7) INDICADORES DE GESTAO
+
+- MRR (receita recorrente mensal)
+- CAC (custo de aquisicao de cliente)
+- LTV (valor do tempo de vida do cliente)
+- Churn mensal
+- Take-rate medio
+- GMV (volume total transacionado)
+
+8) PROXIMOS PASSOS (EXECUCAO)
+
+1. Definir tabela comercial final (3 planos + enterprise)
+2. Criar proposta comercial e contrato padrao
+3. Definir metas de aquisicao trimestrais
+4. Implantar funil comercial com CRM
+5. Ligar indicadores financeiros no painel de gestao
+
+Documento de referencia para estrategia comercial inicial.
