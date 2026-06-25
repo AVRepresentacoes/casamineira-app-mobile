@@ -1,4 +1,5 @@
 import { setActiveRole } from "@/lib/auth";
+import { SaasLoginScreen } from "@/components/saas/SaasLoginScreen";
 import { supabase } from "@/lib/supabase";
 import { useBranding } from "@/hooks/useBranding";
 import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
@@ -67,6 +68,10 @@ export default function Login() {
     }
     void loadFornecedorEmailsCache();
   }, []);
+
+  if (Platform.OS === "web" && !isHospedagensApp) {
+    return <SaasLoginScreen />;
+  }
 
   if (isHospedagensApp) {
     const hospedagensLoading =
