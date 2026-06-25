@@ -58,3 +58,5 @@ daemon/
 native/
 wrapper/dists/
 .idea/
+.vercel
+.env*

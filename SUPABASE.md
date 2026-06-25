@@ -9,6 +9,36 @@ A Casa Mineira SaaS usa Supabase como camada principal de Auth, Postgres, Storag
 - Service Role: proibida no frontend. Use somente em Edge Functions, scripts locais controlados e rotinas administrativas.
 - Multi-tenant: isolamento por `tenant_id`, `current_tenant_id()`, `current_empresa_id()`, `user_belongs_to_tenant()`, `is_empresa_admin()` e `is_super_admin()`.
 
+## Control Plane e Data Planes
+
+A arquitetura profissional da plataforma separa o SaaS dos produtos criados:
+
+- **Control Plane**: projeto Supabase principal do SaaS. Guarda empresas, planos,
+  assinaturas, fábrica de IA, catálogo de produtos, auditoria e status de
+  provisionamento.
+- **Data Plane por produto**: cada app/produto usa um projeto Supabase próprio,
+  com Auth, Storage, tabelas operacionais, Edge Functions e secrets isolados.
+
+Projetos atuais:
+
+| Papel | Projeto | Ref |
+| --- | --- | --- |
+| Control Plane | Casa Mineira SaaS | `tdbpcfwggbguxsmjnrhk` |
+| Produto | Casa Mineira Serviços | `uinrmrclgzztilrtxboq` |
+| Produto | Hospedagens Caminhos da Fé | `uxtqwsckvrsxjvvtdwhg` |
+
+O Control Plane registra produtos nas tabelas:
+
+- `saas_products`
+- `saas_product_databases`
+- `saas_product_provisioning_runs`
+
+Regras:
+
+- Build de app de produto nunca deve apontar para o Control Plane.
+- Cada `clients/<slug>/client.json` deve declarar `backend.requireDedicatedSupabase`.
+- Use variáveis específicas por produto, por exemplo `CASA_MINEIRA_SERVICOS_SUPABASE_URL` e `HOSPEDAGENS_CAMINHOS_SUPABASE_URL`.
+
 ## Variáveis
 
 Frontend público:
@@ -146,6 +176,9 @@ Configure no painel:
 - `OPENAI_API_KEY`
 - `MERCADO_PAGO_ACCESS_TOKEN`
 - `MERCADOPAGO_WEBHOOK_SECRET`
+
+Opcionais se o produto usar Asaas:
+
 - `ASAAS_API_KEY`
 - `ASAAS_WEBHOOK_TOKEN`
 
@@ -192,4 +225,3 @@ Procedimento:
 - Backups/PITR conferidos no painel.
 - Health check verde ou amarelos documentados.
 - Security Center acessível apenas por super admin.
-

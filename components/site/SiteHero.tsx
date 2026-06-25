@@ -20,8 +20,12 @@ export function SiteHero({
 }) {
   return (
     <View style={styles.hero}>
+      <View style={styles.heroAccent} />
       <View style={styles.copy}>
-        <Text style={styles.badge}>{badge}</Text>
+        <View style={styles.badgeRow}>
+          <Text style={styles.badge}>{badge}</Text>
+          <Text style={styles.badgeMeta}>SaaS para servicos, vendas e operacao</Text>
+        </View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
         <View style={styles.actions}>
@@ -41,6 +45,9 @@ export function SiteHero({
       </View>
 
       <View style={styles.visual}>
+        <View style={styles.visualRail}>
+          <Text style={styles.visualRailText}>Painel executivo</Text>
+        </View>
         <View style={styles.visualTop}>
           <View style={styles.visualHeroCard}>
             <Text style={styles.visualHeroLabel}>Operação sob controle</Text>
@@ -59,9 +66,28 @@ export function SiteHero({
           </View>
         </View>
         <View style={styles.visualBottom}>
-          <View style={[styles.visualBar, { width: "80%" }]} />
-          <View style={[styles.visualBar, { width: "58%" }]} />
-          <View style={[styles.visualBar, { width: "92%" }]} />
+          <View style={styles.visualLineHeader}>
+            <Text style={styles.visualLineTitle}>Saúde da operação</Text>
+            <Text style={styles.visualLineMeta}>Hoje</Text>
+          </View>
+          <View style={styles.visualMetricLine}>
+            <Text style={styles.visualMetricLabel}>Atendimento</Text>
+            <View style={styles.visualTrack}>
+              <View style={[styles.visualBar, { width: "80%" }]} />
+            </View>
+          </View>
+          <View style={styles.visualMetricLine}>
+            <Text style={styles.visualMetricLabel}>Financeiro</Text>
+            <View style={styles.visualTrack}>
+              <View style={[styles.visualBarSecondary, { width: "58%" }]} />
+            </View>
+          </View>
+          <View style={styles.visualMetricLine}>
+            <Text style={styles.visualMetricLabel}>Agenda</Text>
+            <View style={styles.visualTrack}>
+              <View style={[styles.visualBar, { width: "92%" }]} />
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -70,38 +96,68 @@ export function SiteHero({
 
 const styles = StyleSheet.create({
   hero: {
+    position: "relative",
+    overflow: "hidden",
     flexDirection: "row",
-    gap: 22,
-    alignItems: "stretch",
+    gap: 26,
+    alignItems: "flex-end",
+    minHeight: 620,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+    backgroundColor: "#0B0F1A",
+    padding: 34,
+  },
+  heroAccent: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 8,
+    backgroundColor: "#FACC15",
   },
   copy: {
-    flex: 1,
-    borderRadius: 38,
-    borderWidth: 1.5,
-    borderColor: "rgba(148, 163, 184, 0.18)",
-    backgroundColor: "rgba(9, 15, 31, 0.82)",
-    padding: 28,
-    gap: 16,
+    flex: 1.05,
+    gap: 18,
+    paddingVertical: 12,
+  },
+  badgeRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 10,
   },
   badge: {
-    color: "#67e8f9",
+    alignSelf: "flex-start",
+    color: "#08101C",
+    backgroundColor: "#FACC15",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     fontSize: 12,
     fontWeight: "900",
     textTransform: "uppercase",
-    letterSpacing: 1.2,
+    letterSpacing: 1,
+  },
+  badgeMeta: {
+    color: "#B6C3D5",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   title: {
     color: "#f8fafc",
-    fontSize: 52,
-    lineHeight: 58,
+    fontSize: 58,
+    lineHeight: 64,
     fontWeight: "900",
-    maxWidth: 700,
+    maxWidth: 780,
   },
   subtitle: {
-    color: "#90a7c4",
+    color: "#B6C3D5",
     fontSize: 17,
     lineHeight: 28,
-    maxWidth: 740,
+    maxWidth: 720,
   },
   actions: {
     flexDirection: "row",
@@ -118,10 +174,10 @@ const styles = StyleSheet.create({
   proofPill: {
     minWidth: 220,
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.14)",
-    backgroundColor: "rgba(15, 23, 42, 0.72)",
+    borderColor: "rgba(226, 232, 240, 0.13)",
+    backgroundColor: "rgba(255, 255, 255, 0.045)",
     padding: 14,
     gap: 4,
   },
@@ -136,14 +192,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   visual: {
-    flex: 1,
+    flex: 0.95,
     minWidth: 380,
-    borderRadius: 38,
+    borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: "rgba(148, 163, 184, 0.18)",
-    backgroundColor: "rgba(9, 15, 31, 0.82)",
+    borderColor: "rgba(226, 232, 240, 0.16)",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
     padding: 22,
     gap: 16,
+    shadowColor: "#000000",
+    shadowOpacity: 0.28,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 18 },
+  },
+  visualRail: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(226, 232, 240, 0.12)",
+    paddingBottom: 12,
+  },
+  visualRailText: {
+    color: "#E2E8F0",
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   visualTop: {
     flexDirection: "row",
@@ -151,10 +223,10 @@ const styles = StyleSheet.create({
   },
   visualHeroCard: {
     flex: 1.2,
-    borderRadius: 28,
-    backgroundColor: "rgba(56, 189, 248, 0.16)",
+    borderRadius: 8,
+    backgroundColor: "rgba(34, 211, 238, 0.14)",
     borderWidth: 1,
-    borderColor: "rgba(56, 189, 248, 0.24)",
+    borderColor: "rgba(34, 211, 238, 0.22)",
     padding: 20,
     gap: 10,
   },
@@ -180,10 +252,10 @@ const styles = StyleSheet.create({
   },
   visualMiniCard: {
     flex: 1,
-    borderRadius: 24,
-    backgroundColor: "rgba(15, 23, 42, 0.86)",
+    borderRadius: 8,
+    backgroundColor: "rgba(7, 10, 18, 0.72)",
     borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.14)",
+    borderColor: "rgba(226, 232, 240, 0.12)",
     padding: 16,
     gap: 8,
   },
@@ -199,16 +271,51 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   visualBottom: {
-    borderRadius: 28,
-    backgroundColor: "rgba(15, 23, 42, 0.86)",
+    borderRadius: 8,
+    backgroundColor: "rgba(7, 10, 18, 0.72)",
     borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.14)",
+    borderColor: "rgba(226, 232, 240, 0.12)",
     padding: 18,
-    gap: 14,
+    gap: 12,
+  },
+  visualLineHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  visualLineTitle: {
+    color: "#F8FAFC",
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  visualLineMeta: {
+    color: "#94A3B8",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  visualMetricLine: {
+    gap: 7,
+  },
+  visualMetricLabel: {
+    color: "#CBD5E1",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  visualTrack: {
+    width: "100%",
+    height: 12,
+    borderRadius: 999,
+    overflow: "hidden",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
   visualBar: {
-    height: 14,
+    height: 12,
     borderRadius: 999,
-    backgroundColor: "rgba(250, 204, 21, 0.88)",
+    backgroundColor: "#FACC15",
+  },
+  visualBarSecondary: {
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: "#22D3EE",
   },
 });

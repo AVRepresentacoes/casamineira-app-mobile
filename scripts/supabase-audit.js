@@ -91,6 +91,8 @@ const report = {
     "OPENAI_API_KEY",
     "MERCADO_PAGO_ACCESS_TOKEN",
     "MERCADOPAGO_WEBHOOK_SECRET",
+  ],
+  optionalSecrets: [
     "ASAAS_API_KEY",
     "ASAAS_WEBHOOK_TOKEN",
   ],

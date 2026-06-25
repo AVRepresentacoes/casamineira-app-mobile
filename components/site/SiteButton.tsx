@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 export function SiteButton({
@@ -11,6 +12,11 @@ export function SiteButton({
 }) {
   return (
     <Pressable style={[styles.button, tone === "primary" ? styles.primary : styles.secondary]} onPress={onPress}>
+      <Ionicons
+        name={tone === "primary" ? "arrow-forward" : "open-outline"}
+        size={16}
+        color={tone === "primary" ? "#08101C" : "#F8FAFC"}
+      />
       <Text style={[styles.text, tone === "primary" ? styles.textPrimary : styles.textSecondary]}>{label}</Text>
     </Pressable>
   );
@@ -18,7 +24,9 @@ export function SiteButton({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 999,
+    flexDirection: "row",
+    gap: 8,
+    borderRadius: 8,
     paddingHorizontal: 22,
     paddingVertical: 15,
     alignItems: "center",
@@ -27,16 +35,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   primary: {
-    backgroundColor: "#facc15",
-    borderColor: "#facc15",
-    shadowColor: "#facc15",
+    backgroundColor: "#FACC15",
+    borderColor: "#FACC15",
+    shadowColor: "#FACC15",
     shadowOpacity: 0.24,
     shadowRadius: 22,
     shadowOffset: { width: 0, height: 14 },
   },
   secondary: {
-    backgroundColor: "rgba(15, 23, 42, 0.76)",
-    borderColor: "rgba(148, 163, 184, 0.26)",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    borderColor: "rgba(226, 232, 240, 0.16)",
   },
   text: {
     fontSize: 14,

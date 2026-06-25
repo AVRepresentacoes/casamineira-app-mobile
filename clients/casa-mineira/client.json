@@ -24,6 +24,15 @@
     "notificationIcon": "./assets/images/icons/icon-safe.png",
     "logoUrl": ""
   },
+  "backend": {
+    "requireDedicatedSupabase": true,
+    "supabaseUrlEnv": "CASA_MINEIRA_SERVICOS_SUPABASE_URL",
+    "supabaseAnonKeyEnv": "CASA_MINEIRA_SERVICOS_SUPABASE_ANON_KEY",
+    "forbiddenSupabaseRefs": [
+      "cgmnchgujdmbfludqunq",
+      "tdbpcfwggbguxsmjnrhk"
+    ]
+  },
   "store": {
     "shortDescription": "Serviços, marketplace local e pedidos rápidos em um só app.",
     "privacyPolicyUrl": ""

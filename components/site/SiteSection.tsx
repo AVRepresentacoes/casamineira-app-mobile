@@ -27,13 +27,14 @@ export function SiteSection({
 const styles = StyleSheet.create({
   section: {
     gap: 24,
+    paddingVertical: 6,
   },
   header: {
     gap: 12,
     maxWidth: 860,
   },
   eyebrow: {
-    color: "#67e8f9",
+    color: "#22D3EE",
     fontSize: 12,
     fontWeight: "900",
     textTransform: "uppercase",
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
     lineHeight: 46,
     fontWeight: "900",
-    letterSpacing: -0.4,
+    letterSpacing: 0,
   },
   description: {
     color: "#90a7c4",

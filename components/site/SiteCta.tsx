@@ -32,11 +32,11 @@ export function SiteCta({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 34,
+    borderRadius: 8,
     padding: 30,
     borderWidth: 1.5,
     borderColor: "rgba(250, 204, 21, 0.38)",
-    backgroundColor: "rgba(250, 204, 21, 0.09)",
+    backgroundColor: "rgba(250, 204, 21, 0.1)",
     gap: 20,
     shadowColor: "#facc15",
     shadowOpacity: 0.12,

@@ -27,9 +27,6 @@ export function SiteShell({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={styles.backdropA} />
-      <View style={styles.backdropB} />
-
       <View style={styles.shell}>
         <View style={styles.topbar}>
           <Pressable style={styles.brand} onPress={() => router.push("/landing")}>
@@ -78,51 +75,33 @@ export function SiteShell({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050914",
+    backgroundColor: "#070A12",
   },
   content: {
-    paddingHorizontal: 26,
-    paddingVertical: 26,
-  },
-  backdropA: {
-    position: "absolute",
-    top: -140,
-    right: -80,
-    width: 420,
-    height: 420,
-    borderRadius: 999,
-    backgroundColor: "rgba(56, 189, 248, 0.12)",
-  },
-  backdropB: {
-    position: "absolute",
-    left: -120,
-    top: 320,
-    width: 360,
-    height: 360,
-    borderRadius: 999,
-    backgroundColor: "rgba(250, 204, 21, 0.08)",
+    paddingHorizontal: 24,
+    paddingVertical: 18,
   },
   shell: {
     width: "100%",
     maxWidth: 1400,
     alignSelf: "center",
-    gap: 34,
+    gap: 30,
   },
   topbar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 18,
-    paddingHorizontal: 22,
-    paddingVertical: 18,
-    borderRadius: 999,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: "rgba(148, 163, 184, 0.22)",
-    backgroundColor: "rgba(5, 9, 20, 0.82)",
+    borderColor: "rgba(226, 232, 240, 0.12)",
+    backgroundColor: "rgba(10, 14, 26, 0.94)",
     shadowColor: "#020617",
-    shadowOpacity: 0.24,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
   },
   brand: {
     flexDirection: "row",
@@ -133,7 +112,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 42,
     height: 42,
-    borderRadius: 12,
+    borderRadius: 8,
     shadowColor: "#67e8f9",
     shadowOpacity: 0.18,
     shadowRadius: 16,
@@ -145,7 +124,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   brandSubtitle: {
-    color: "#88a4c4",
+    color: "#94A3B8",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -159,20 +138,20 @@ const styles = StyleSheet.create({
   navItem: {
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "transparent",
   },
   navItemActive: {
-    backgroundColor: "rgba(15, 23, 42, 0.92)",
-    borderColor: "rgba(148, 163, 184, 0.22)",
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: "rgba(226, 232, 240, 0.14)",
     shadowColor: "#67e8f9",
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
   },
   navText: {
-    color: "#cbd5e1",
+    color: "#CBD5E1",
     fontWeight: "800",
     fontSize: 13,
   },
@@ -184,11 +163,15 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   main: {
-    gap: 42,
+    gap: 44,
   },
   footer: {
-    paddingHorizontal: 18,
-    paddingBottom: 28,
+    padding: 22,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.1)",
+    backgroundColor: "rgba(10, 14, 26, 0.7)",
+    marginBottom: 10,
     gap: 14,
   },
   footerTitle: {
