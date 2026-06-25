@@ -4,12 +4,12 @@ import { ReactNode, useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", caption: "Visão executiva", href: "/admin" },
-  { label: "Empresas", caption: "Empresas e operação", href: "/admin/empresas" },
-  { label: "Oferta", caption: "Gestão de planos", href: "/admin/planos" },
+  { label: "Dashboard", caption: "Criação com IA", href: "/admin" },
+  { label: "Projetos", caption: "Empresas digitais", href: "/admin/empresas" },
+  { label: "Oferta", caption: "Planos SaaS", href: "/admin/planos" },
   { label: "Assinaturas", caption: "Cobrança e status", href: "/admin/assinaturas" },
-  { label: "Usuários", caption: "Acesso e vínculos", href: "/admin/usuarios" },
-  { label: "Métricas", caption: "Receita e crescimento", href: "/admin/metricas" },
+  { label: "Acessos", caption: "Times e vínculos", href: "/admin/usuarios" },
+  { label: "Growth", caption: "Receita e escala", href: "/admin/metricas" },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -45,9 +45,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <Image source={require("../../assets/images/icons/icon.png")} style={styles.brandLogo} resizeMode="contain" />
           </View>
           <View>
-            <Text style={styles.brandEyebrow}>Console do Proprietário</Text>
-            <Text style={styles.brandTitle}>Casa Mineira Admin</Text>
-            <Text style={styles.brandDescription}>Controle completo da plataforma, da aquisição ao faturamento.</Text>
+            <Text style={styles.brandEyebrow}>Plataforma SaaS</Text>
+            <Text style={styles.brandTitle}>Casa Mineira SaaS</Text>
+            <Text style={styles.brandDescription}>Criação, operação e publicação de empresas digitais com IA.</Text>
           </View>
         </View>
 
@@ -70,10 +70,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <View style={styles.sidebarFooter}>
           <View style={styles.liveCard}>
             <Text style={styles.liveLabel}>Ambiente</Text>
-            <Text style={styles.liveValue}>Console seguro exclusivo da web</Text>
+            <Text style={styles.liveValue}>Ambiente web separado do app de serviços</Text>
           </View>
           <Pressable style={styles.logoutButton} onPress={() => void handleLogout()} disabled={loggingOut}>
-            {loggingOut ? <ActivityIndicator color="#f8fafc" /> : <Text style={styles.logoutText}>Sair do admin</Text>}
+            {loggingOut ? <ActivityIndicator color="#f8fafc" /> : <Text style={styles.logoutText}>Sair da plataforma</Text>}
           </Pressable>
         </View>
       </View>
@@ -81,16 +81,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <View style={styles.main}>
         <View style={styles.topbar}>
           <View>
-            <Text style={styles.topbarEyebrow}>Super Admin</Text>
-            <Text style={styles.topbarText}>Painel do proprietário da plataforma</Text>
-            <Text style={styles.topbarSubtext}>Governança, crescimento, receita e operação em um único ambiente.</Text>
+            <Text style={styles.topbarEyebrow}>Casa Mineira SaaS</Text>
+            <Text style={styles.topbarText}>Transformamos ideias em empresas digitais.</Text>
+            <Text style={styles.topbarSubtext}>Templates, IA, publicação e crescimento em um painel web premium.</Text>
           </View>
           <View style={styles.topbarPills}>
             <View style={styles.topbarPill}>
-              <Text style={styles.topbarPillText}>Perfis protegidos</Text>
+              <Text style={styles.topbarPillText}>IA backend-only</Text>
             </View>
             <View style={styles.topbarPill}>
-              <Text style={styles.topbarPillText}>Isolado do mobile</Text>
+              <Text style={styles.topbarPillText}>Separado do app mobile</Text>
             </View>
           </View>
         </View>

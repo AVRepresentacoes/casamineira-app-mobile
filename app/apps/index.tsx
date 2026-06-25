@@ -38,7 +38,7 @@ export default function AppsScreen() {
       <View style={styles.toolbar}>
         <Text style={styles.toolbarText}>{runs.length} projeto(s)</Text>
         <Pressable style={styles.primaryButton} onPress={() => router.push("/apps/new")}>
-          <Text style={styles.primaryButtonText}>Novo app</Text>
+          <Text style={styles.primaryButtonText}>Novo projeto</Text>
         </Pressable>
       </View>
 
@@ -61,7 +61,7 @@ export default function AppsScreen() {
       {!loading && runs.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>Nenhum app criado ainda</Text>
-          <Text style={styles.emptyBody}>Use o Gerador IA para criar seu primeiro projeto de aplicativo.</Text>
+          <Text style={styles.emptyBody}>Use o Business Studio™ para escolher um modelo e iniciar sua empresa digital.</Text>
         </View>
       ) : null}
     </SaasProductShell>

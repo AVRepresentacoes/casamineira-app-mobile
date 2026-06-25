@@ -7,10 +7,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "grid-outline" },
-  { label: "Apps", href: "/apps", icon: "apps-outline" },
-  { label: "Gerador IA", href: "/ai-app-generator", icon: "sparkles-outline" },
-  { label: "Planos", href: "/billing", icon: "card-outline" },
-  { label: "Conta", href: "/settings", icon: "settings-outline" },
+  { label: "Studio", href: "/apps/new", icon: "construct-outline" },
+  { label: "DNA", href: "/business-dna", icon: "git-network-outline" },
+  { label: "Marketplace", href: "/marketplace", icon: "storefront-outline" },
+  { label: "Consultor", href: "/ai-business-consultant", icon: "chatbubbles-outline" },
+  { label: "Projetos", href: "/projects", icon: "folder-open-outline" },
+  { label: "Architect", href: "/ai-solution-architect", icon: "sparkles-outline" },
+  { label: "Review", href: "/project-review", icon: "checkmark-done-outline" },
 ] as const;
 
 export function SaasProductShell({
@@ -133,6 +136,7 @@ const styles = StyleSheet.create({
   },
   topbar: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 16,
@@ -147,6 +151,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     minWidth: 230,
+    flexGrow: 1,
   },
   brandMark: {
     width: 42,

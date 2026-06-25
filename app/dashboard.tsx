@@ -3,7 +3,7 @@ import { listAiFactoryAgentLogs, listAiFactoryRuns, type AiFactoryRun } from "@/
 import { getPublicSaasPlans } from "@/lib/saas-growth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function DashboardScreen() {
@@ -42,48 +42,42 @@ export default function DashboardScreen() {
     }, []),
   );
 
-  const stats = useMemo(() => {
-    const completed = runs.filter((item) => item.status === "completed").length;
-    const pending = runs.filter((item) => item.approval_status === "pending").length;
-    const approved = runs.filter((item) => item.approval_status === "approved").length;
-    return { completed, pending, approved };
-  }, [runs]);
-
   return (
     <SaasProductShell
       title="Dashboard SaaS"
-      subtitle="Área principal da Casa Mineira SaaS para criar aplicativos com IA, acompanhar projetos, créditos, planos, agentes e configurações da conta."
+      subtitle="Área principal da Casa Mineira SaaS para transformar ideias em empresas digitais com Business DNA™, templates, IA assistida, projetos e revisão humana."
     >
       {loading ? <ActivityIndicator color="#facc15" /> : null}
 
       <View style={styles.heroGrid}>
         <View style={styles.primaryPanel}>
           <Text style={styles.panelEyebrow}>Próxima ação</Text>
-          <Text style={styles.panelTitle}>Crie um novo app com agentes IA.</Text>
+          <Text style={styles.panelTitle}>Comece uma empresa digital no Business Studio™.</Text>
           <Text style={styles.panelBody}>
-            Transforme uma ideia em briefing, arquitetura, telas, automações, precificação e artefatos revisáveis antes de publicar.
+            Escolha um modelo, revise o Business DNA™, explore templates premium e avance para consultoria, arquitetura e revisão do projeto.
           </Text>
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/ai-app-generator")}>
+          <Pressable style={styles.primaryButton} onPress={() => router.push("/apps/new")}>
             <Ionicons name="sparkles-outline" size={18} color="#08101c" />
-            <Text style={styles.primaryButtonText}>Criar novo app com IA</Text>
+            <Text style={styles.primaryButtonText}>Criar novo projeto</Text>
           </Pressable>
         </View>
 
         <View style={styles.statsGrid}>
-          <StatCard label="Apps gerados" value={String(runs.length)} icon="apps-outline" />
-          <StatCard label="Gerações concluídas" value={String(stats.completed)} icon="checkmark-done-outline" />
-          <StatCard label="Créditos IA" value="Dry run" icon="flash-outline" />
+          <StatCard label="Projetos IA legados" value={String(runs.length)} icon="apps-outline" />
+          <StatCard label="Blueprints visuais" value="1" icon="map-outline" />
+          <StatCard label="Agentes preparados" value={String(agentsCount || 30)} icon="git-network-outline" />
           <StatCard label="Planos ativos" value={String(plansCount)} icon="card-outline" />
         </View>
       </View>
 
       <View style={styles.sectionGrid}>
-        <ActionCard title="Apps gerados" body="Veja projetos criados, status de aprovação e histórico." icon="folder-open-outline" onPress={() => router.push("/apps")} />
-        <ActionCard title="Templates disponíveis" body="Use estruturas para serviços, marketplace, reservas e portais." icon="albums-outline" onPress={() => router.push("/apps/new")} />
-        <ActionCard title="Histórico de gerações" body="Revise prompts, resultados, aprovações e artefatos." icon="time-outline" onPress={() => router.push("/apps")} />
-        <ActionCard title="Status dos agentes" body={`${agentsCount || 30} agentes registrados para produto, design, backend, marketing e automação.`} icon="git-network-outline" onPress={() => router.push("/ai-app-generator")} />
-        <ActionCard title="Planos e assinatura" body="Acompanhe plano, limites e opções comerciais da plataforma." icon="wallet-outline" onPress={() => router.push("/billing")} />
-        <ActionCard title="Configurações da conta" body="Gerencie sessão, identidade SaaS e preferências da empresa." icon="settings-outline" onPress={() => router.push("/settings")} />
+        <ActionCard title="Business Studio™" body="Inicie a criação visual de uma empresa digital." icon="construct-outline" onPress={() => router.push("/apps/new")} />
+        <ActionCard title="Business DNA™" body="Escolha modelos inteligentes por nicho de negócio." icon="git-network-outline" onPress={() => router.push("/business-dna")} />
+        <ActionCard title="Marketplace" body="Explore templates premium prontos para acelerar o projeto." icon="storefront-outline" onPress={() => router.push("/marketplace")} />
+        <ActionCard title="AI Business Consultant™" body="Simule recomendações de DNA, templates e próximos passos." icon="chatbubbles-outline" onPress={() => router.push("/ai-business-consultant")} />
+        <ActionCard title="Meus Projetos" body="Acesse o Business Project™ e seus módulos principais." icon="folder-open-outline" onPress={() => router.push("/projects")} />
+        <ActionCard title="AI Solution Architect™" body="Monte o Project Blueprint™ visual antes da revisão." icon="map-outline" onPress={() => router.push("/ai-solution-architect")} />
+        <ActionCard title="Project Review Center™" body="Revise arquitetura, checklist, custo, tempo e aprovação." icon="checkmark-done-outline" onPress={() => router.push("/project-review")} />
       </View>
     </SaasProductShell>
   );
