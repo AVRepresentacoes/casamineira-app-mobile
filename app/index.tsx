@@ -75,6 +75,11 @@ export default function Index() {
           return;
         }
 
+        if (Platform.OS === "web") {
+          setRoute("/dashboard");
+          return;
+        }
+
         const { data: fornecedorData, error: fornecedorError } = await supabase
           .from("profissionais")
           .select("fornecedor_ativo")
