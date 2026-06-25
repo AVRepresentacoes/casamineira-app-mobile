@@ -1,11 +1,8 @@
 // @ts-nocheck
+import { corsPreflightResponse, createCorsHeaders } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { resolveProfessionalCommissionProfile } from "../_shared/subscription.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, asaas-access-token",
-};
 
 function mapAsaasStatus(status: string): "pendente" | "aprovada" | "recusada" | "estornada" {
   if (["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(status)) return "aprovada";
@@ -182,8 +179,9 @@ async function creditarCarteiraProfissional(params: {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return corsPreflightResponse(req);
   }
 
   try {

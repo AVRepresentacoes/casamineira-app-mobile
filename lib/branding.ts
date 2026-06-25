@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getConfiguredTenantSlug } from "@/lib/tenant";
 
 export type BrandingConfig = {
   tenantSlug: string;
@@ -20,6 +21,19 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   accentColor: "#1e293b",
   logoUrl: null,
   supportWhatsapp: null,
+};
+
+const LOCAL_BRANDING_BY_TENANT: Record<string, BrandingConfig> = {
+  "hospedagens-caminhos-da-fe": {
+    tenantSlug: "hospedagens-caminhos-da-fe",
+    appName: "Hospedagens Caminhos da Fé",
+    slogan: "Reserve pousadas e quartos no Caminho da Fé.",
+    primaryColor: "#D8A84F",
+    secondaryColor: "#12372A",
+    accentColor: "#4E7C59",
+    logoUrl: null,
+    supportWhatsapp: "+5535999990000",
+  },
 };
 
 function sanitizeHexColor(value: unknown, fallback: string) {
@@ -44,14 +58,17 @@ function normalizeBrandingRow(row: any): BrandingConfig {
 }
 
 function resolveTenantSlug() {
-  const fromEnv = String(process.env.EXPO_PUBLIC_TENANT_SLUG || "")
-    .trim()
-    .toLowerCase();
-  return fromEnv || "default";
+  return getConfiguredTenantSlug();
+}
+
+export function getLocalBrandingConfig(): BrandingConfig {
+  const tenantSlug = resolveTenantSlug();
+  return LOCAL_BRANDING_BY_TENANT[tenantSlug] || DEFAULT_BRANDING;
 }
 
 export async function loadBrandingConfig(): Promise<BrandingConfig> {
   const tenantSlug = resolveTenantSlug();
+  const localBranding = getLocalBrandingConfig();
 
   try {
     const { data, error } = await supabase
@@ -63,15 +80,18 @@ export async function loadBrandingConfig(): Promise<BrandingConfig> {
       .in("tenant_slug", [tenantSlug, "default"]);
 
     if (error || !data || data.length === 0) {
-      return { ...DEFAULT_BRANDING, tenantSlug };
+      return { ...localBranding, tenantSlug };
     }
 
     const exact = data.find((row) => String(row.tenant_slug || "").toLowerCase() === tenantSlug);
     const fallback = data.find((row) => String(row.tenant_slug || "").toLowerCase() === "default");
 
     const picked = exact || fallback || data[0];
-    return normalizeBrandingRow(picked);
+    return {
+      ...localBranding,
+      ...normalizeBrandingRow(picked),
+    };
   } catch {
-    return { ...DEFAULT_BRANDING, tenantSlug };
+    return { ...localBranding, tenantSlug };
   }
 }

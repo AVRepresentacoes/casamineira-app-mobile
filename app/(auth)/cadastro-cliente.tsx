@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { useBranding } from "@/hooks/useBranding";
-import { ensureCurrentUserTenantContext, getCurrentTenantId } from "@/lib/tenant";
+import { ensureCurrentUserTenantContext, getCurrentTenantId, resolvePublicSignupTenantId } from "@/lib/tenant";
 import { AuthMarketingShell } from "@/components/shared/AuthMarketingShell";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -110,6 +110,16 @@ export default function CadastroCliente() {
       if (!data.user) {
         Alert.alert("Erro", "Usuário não criado.");
         return;
+      }
+
+      try {
+        tenantId = (await resolvePublicSignupTenantId()) || (await ensureCurrentUserTenantContext());
+      } catch {
+        try {
+          tenantId = await getCurrentTenantId();
+        } catch {
+          tenantId = null;
+        }
       }
 
       // 👤 Tentar garantir profile já no cadastro.

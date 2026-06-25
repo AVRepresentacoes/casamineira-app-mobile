@@ -9,10 +9,17 @@ const ignoredDirs = [
   "caches",
   "daemon",
   "wrapper",
+  "wrapper/dists",
   ".expo",
+  ".codex",
+  ".agents",
   ".tmp",
+  "reports",
+  "builds",
   "android/.gradle",
   "android/build",
+  "android/app/build",
+  "android/.cxx",
   ".idea/caches"
 ];
 

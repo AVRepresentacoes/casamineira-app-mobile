@@ -1,10 +1,7 @@
 // @ts-nocheck
+import { corsPreflightResponse, createCorsHeaders } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 type Body = {
   motivo?: string;
@@ -12,7 +9,7 @@ type Body = {
   comentario?: string | null;
 };
 
-function jsonResponse(body: Record<string, unknown>, status = 200) {
+function jsonResponse(body: Record<string, unknown>, status = 200, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -20,8 +17,11 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = createCorsHeaders(req);
+  const json = (body: Record<string, unknown>, status = 200) => jsonResponse(body, status, corsHeaders);
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return corsPreflightResponse(req);
   }
 
   try {
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return jsonResponse({ error: "Token ausente." }, 401);
+      return json({ error: "Token ausente." }, 401);
     }
 
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     } = await supabaseAuth.auth.getUser();
 
     if (userError || !user) {
-      return jsonResponse({ error: "Usuário não autenticado." }, 401);
+      return json({ error: "Usuário não autenticado." }, 401);
     }
 
     const body = (await req.json().catch(() => ({}))) as Body;
@@ -60,11 +60,11 @@ Deno.serve(async (req) => {
         : Number(body.nota_experiencia);
 
     if (!motivo) {
-      return jsonResponse({ error: "Motivo é obrigatório." }, 400);
+      return json({ error: "Motivo é obrigatório." }, 400);
     }
 
     if (nota != null && (!Number.isInteger(nota) || nota < 0 || nota > 10)) {
-      return jsonResponse({ error: "A nota deve estar entre 0 e 10." }, 400);
+      return json({ error: "A nota deve estar entre 0 e 10." }, 400);
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
@@ -79,11 +79,11 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingRequest?.status === "completed") {
-      return jsonResponse({ ok: true, alreadyDeleted: true });
+      return json({ ok: true, alreadyDeleted: true });
     }
 
     if (existingRequest?.status === "pending" || existingRequest?.status === "processing") {
-      return jsonResponse({ error: "Já existe uma solicitação de exclusão em andamento." }, 409);
+      return json({ error: "Já existe uma solicitação de exclusão em andamento." }, 409);
     }
 
     const { data: tenantId } = await supabaseAuth.rpc("current_tenant_id");
@@ -140,11 +140,11 @@ Deno.serve(async (req) => {
       throw new Error(finalizeError.message);
     }
 
-    return jsonResponse({ ok: true });
+    return json({ ok: true });
   } catch (error) {
     console.log("[delete-account] erro:", error);
 
-    return jsonResponse(
+    return json(
       {
         error: error instanceof Error ? error.message : "Erro interno.",
       },

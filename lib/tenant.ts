@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase";
+import * as Application from "expo-application";
+import Constants from "expo-constants";
 
 type TenantRow = {
   tenant_id: string;
@@ -55,6 +57,37 @@ export type EmpresaSaasSubscriptionRow = {
   gateway_subscription_id: string | null;
 };
 
+const extra = (Constants.expoConfig?.extra ?? {}) as {
+  tenantSlug?: string;
+  tenantLock?: boolean;
+};
+
+export function getConfiguredTenantSlug() {
+  const configured = String(process.env.EXPO_PUBLIC_TENANT_SLUG || extra.tenantSlug || "")
+    .trim()
+    .toLowerCase();
+
+  if (configured && configured !== "default") {
+    return configured;
+  }
+
+  const nativeApplicationId = String(Application.applicationId || "").trim().toLowerCase();
+  if (nativeApplicationId === "br.app.hospedagenscaminhosdafe") {
+    return "hospedagens-caminhos-da-fe";
+  }
+
+  return configured || "default";
+}
+
+export function isTenantLockEnabled() {
+  const envLock = String(process.env.EXPO_PUBLIC_LOCK_TENANT || "").trim().toLowerCase();
+  if (envLock === "false" || envLock === "0" || envLock === "no") {
+    return false;
+  }
+
+  return Boolean(extra.tenantLock) || getConfiguredTenantSlug() !== "default";
+}
+
 export async function getCurrentTenantId(): Promise<string> {
   const { data, error } = await supabase.rpc("current_tenant_id");
   if (error || !data) {
@@ -100,10 +133,38 @@ export async function setTenantAtivo(tenantSlug: string): Promise<string> {
 }
 
 export async function ensureCurrentUserTenantContext(): Promise<string> {
+  const tenantSlug = getConfiguredTenantSlug();
+
+  if (tenantSlug !== "default" || isTenantLockEnabled()) {
+    const { data, error } = await supabase.rpc("ensure_app_tenant_context", {
+      p_tenant_slug: tenantSlug,
+      p_lock_to_tenant: isTenantLockEnabled(),
+    });
+
+    if (error || !data) {
+      throw new Error(error?.message || "Não foi possível inicializar o tenant deste app.");
+    }
+
+    return String(data);
+  }
+
   const { data, error } = await supabase.rpc("ensure_current_user_tenant_context");
 
   if (error || !data) {
     throw new Error(error?.message || "Não foi possível inicializar o tenant do usuário.");
+  }
+
+  return String(data);
+}
+
+export async function resolvePublicSignupTenantId(): Promise<string | null> {
+  const tenantSlug = getConfiguredTenantSlug();
+  const { data, error } = await supabase.rpc("resolve_public_signup_tenant_id", {
+    p_tenant_slug: tenantSlug,
+  });
+
+  if (error || !data) {
+    return null;
   }
 
   return String(data);

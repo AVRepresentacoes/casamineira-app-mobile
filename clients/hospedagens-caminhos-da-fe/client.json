@@ -1,0 +1,41 @@
+{
+  "appName": "Hospedagens Caminhos da Fé",
+  "appSlug": "hospedagens-caminhos-da-fe",
+  "appScheme": "hospedagenscaminhosdafe",
+  "androidPackage": "br.app.hospedagenscaminhosdafe",
+  "iosBundleId": "br.app.hospedagenscaminhosdafe",
+  "tenantSlug": "hospedagens-caminhos-da-fe",
+  "lockTenant": true,
+  "domain": "hospedagenscaminhosdafe.com.br",
+  "supportWhatsapp": "+5535999990000",
+  "slogan": "Reserve pousadas e quartos no Caminho da Fé.",
+  "colors": {
+      "primary": "#D8A84F",
+      "secondary": "#12372A",
+      "accent": "#4E7C59",
+      "splashBackground": "#12372A",
+      "adaptiveIconBackground": "#F7F0DF",
+      "notification": "#12372A"
+  },
+  "assets": {
+    "icon": "./assets/images/hospedagens-caminhos-da-fe/icon.png",
+    "splash": "./assets/images/hospedagens-caminhos-da-fe/splash-full.png",
+    "splashResizeMode": "cover",
+    "adaptiveIcon": "./assets/images/hospedagens-caminhos-da-fe/adaptive-icon.png",
+    "notificationIcon": "./assets/images/hospedagens-caminhos-da-fe/notification-icon.png",
+    "logoUrl": ""
+  },
+  "backend": {
+    "requireDedicatedSupabase": true,
+    "supabaseUrlEnv": "HOSPEDAGENS_CAMINHOS_SUPABASE_URL",
+    "supabaseAnonKeyEnv": "HOSPEDAGENS_CAMINHOS_SUPABASE_ANON_KEY",
+    "forbiddenSupabaseRefs": [
+      "uinrmrclgzztilrtxboq",
+      "cgmnchgujdmbfludqunq"
+    ]
+  },
+  "store": {
+    "shortDescription": "Reserve pousadas e quartos no Caminho da Fé.",
+    "privacyPolicyUrl": "https://hospedagenscaminhosdafe.com.br/privacidade"
+  }
+}

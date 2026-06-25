@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { ensureCurrentUserTenantContext, getCurrentTenantId } from "@/lib/tenant";
+import { ensureCurrentUserTenantContext, getCurrentTenantId, resolvePublicSignupTenantId } from "@/lib/tenant";
 import { AuthMarketingShell } from "@/components/shared/AuthMarketingShell";
 import { useBranding } from "@/hooks/useBranding";
 import { useRouter } from "expo-router";
@@ -37,7 +37,7 @@ export default function RegisterProfissional() {
         tenantId = await ensureCurrentUserTenantContext();
       } catch {
         try {
-          tenantId = await getCurrentTenantId();
+          tenantId = (await resolvePublicSignupTenantId()) || (await getCurrentTenantId());
         } catch {
           tenantId = null;
         }

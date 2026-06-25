@@ -11,8 +11,10 @@ export async function uploadImageAsync(uri: string) {
     // Converte para Blob
     const file = decode(base64);
 
+    const { data: auth } = await supabase.auth.getUser();
+    const ownerPrefix = auth.user?.id || "anonymous";
     const fileName = `${Date.now()}.jpg`;
-    const path = `uploads/${fileName}`;
+    const path = `${ownerPrefix}/uploads/${fileName}`;
 
     // Upload para Supabase Storage
     const { error } = await supabase.storage

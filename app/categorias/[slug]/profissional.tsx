@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { RemoteImageWithFallback } from "@/components/RemoteImageWithFallback";
 import { shouldSkipLocalStep } from "@/lib/serviceQuestionnaire";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -39,23 +40,26 @@ export default function ProfissionalScreen() {
 
   const profissionaisBySlug: Record<
     string,
-    { titulo: string; descricao: string; icon: string }[]
+    { titulo: string; descricao: string; icon: string; imagem: string }[]
   > = {
     imoveis: [
       {
         titulo: "Corretor",
         descricao: "Ideal para compra, venda e aluguel.",
         icon: "home-outline",
+        imagem: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
       },
       {
         titulo: "Consultor Imobiliário",
         descricao: "Foco em análise de mercado e estratégia de negociação.",
         icon: "bar-chart-outline",
+        imagem: "https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?auto=format&fit=crop&w=800&q=80",
       },
       {
         titulo: "Especialista em Documentação",
         descricao: "Apoio em regularização, contratos e trâmites.",
         icon: "document-text-outline",
+        imagem: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80",
       },
     ],
     negocios: [
@@ -63,16 +67,19 @@ export default function ProfissionalScreen() {
         titulo: "Consultor Generalista",
         descricao: "Visão ampla para organizar seu escopo de negócio.",
         icon: "briefcase-outline",
+        imagem: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
       },
       {
         titulo: "Especialista de Área",
         descricao: "Profissional focado em fiscal, jurídico, marketing ou vendas.",
         icon: "ribbon-outline",
+        imagem: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80",
       },
       {
         titulo: "Mentor Sênior",
         descricao: "Atendimento estratégico para decisões críticas.",
         icon: "star-outline",
+        imagem: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80",
       },
     ],
   };
@@ -82,16 +89,19 @@ export default function ProfissionalScreen() {
       titulo: "Profissional Padrão",
       descricao: "Ideal para serviços simples e rápidos.",
       icon: "person-outline",
+      imagem: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=800&q=80",
     },
     {
       titulo: "Profissional Premium",
       descricao: "Mais avaliações positivas e maior experiência.",
       icon: "star-outline",
+      imagem: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80",
     },
     {
       titulo: "Profissional Especialista",
       descricao: "Altamente qualificado para serviços complexos.",
       icon: "ribbon-outline",
+      imagem: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
@@ -168,12 +178,21 @@ export default function ProfissionalScreen() {
                   setProfissionalSelecionado(item.titulo)
                 }
               >
-                <View style={styles.cardLeft}>
-                  <Ionicons
-                    name={item.icon as any}
-                    size={26}
-                    color={selected ? "#fff" : "#2563eb"}
+                <View style={styles.cardMedia}>
+                  <RemoteImageWithFallback
+                    uri={item.imagem}
+                    fallbackUri="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80"
+                    style={styles.cardImage}
+                    resizeMode="cover"
+                    fadeDuration={0}
                   />
+                  <View style={[styles.cardIconBadge, selected && styles.cardIconBadgeSelected]}>
+                    <Ionicons
+                      name={item.icon as any}
+                      size={18}
+                      color={selected ? "#2563eb" : "#fff"}
+                    />
+                  </View>
                 </View>
 
                 <View style={styles.cardContent}>
@@ -290,7 +309,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     backgroundColor: "#ffffff",
-    padding: 20,
+    padding: 14,
     borderRadius: 22,
     marginBottom: 18,
     alignItems: "center",
@@ -301,8 +320,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#2563eb",
   },
 
-  cardLeft: {
-    marginRight: 15,
+  cardMedia: {
+    width: 74,
+    height: 74,
+    borderRadius: 18,
+    marginRight: 14,
+    overflow: "hidden",
+    backgroundColor: "#e5e7eb",
+  },
+
+  cardImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  cardIconBadge: {
+    position: "absolute",
+    right: 6,
+    bottom: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(37, 99, 235, 0.92)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.82)",
+  },
+
+  cardIconBadgeSelected: {
+    backgroundColor: "#ffffff",
   },
 
   cardContent: {

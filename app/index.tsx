@@ -1,7 +1,8 @@
 import { MarketingLandingContent } from "@/components/site/MarketingLandingContent";
 import { SiteShell } from "@/components/site/SiteShell";
-import { getActiveRole } from "@/lib/auth";
+import { getActiveRole, setActiveRole } from "@/lib/auth";
 import { getPublicSaasPlans } from "@/lib/saas-growth";
+import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
 import type { SaasPlanoComercial } from "@/lib/saas-commercial";
 import { supabase } from "@/lib/supabase";
 import { Redirect } from "expo-router";
@@ -15,6 +16,52 @@ export default function Index() {
   useEffect(() => {
     const resolverRota = async () => {
       try {
+        if (getConfiguredTenantSlug() === "hospedagens-caminhos-da-fe") {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (!session?.user) {
+            setRoute("/hospedagens");
+            return;
+          }
+
+          let tenantId: string | null = null;
+          try {
+            tenantId = await ensureCurrentUserTenantContext();
+          } catch {
+            try {
+              tenantId = await getCurrentTenantId();
+            } catch {
+              tenantId = null;
+            }
+          }
+
+          let fornecedorQuery = supabase
+            .from("profissionais")
+            .select("fornecedor_ativo")
+            .eq("user_id", session.user.id);
+
+          if (tenantId) {
+            fornecedorQuery = fornecedorQuery.eq("tenant_id", tenantId);
+          }
+
+          const { data: fornecedorData, error: fornecedorError } = await fornecedorQuery.maybeSingle();
+          if (fornecedorError) {
+            console.log("HOSPEDAGENS FORNECEDOR ROUTING ERROR:", fornecedorError.message);
+          }
+
+          if (Boolean((fornecedorData as { fornecedor_ativo?: boolean } | null)?.fornecedor_ativo)) {
+            await setActiveRole("fornecedor");
+            setRoute("/hospedagens/pousada");
+            return;
+          }
+
+          await setActiveRole("cliente");
+          setRoute("/hospedagens");
+          return;
+        }
+
         const {
           data: { session },
         } = await supabase.auth.getSession();

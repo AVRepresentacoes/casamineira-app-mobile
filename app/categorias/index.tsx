@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { RemoteImageWithFallback } from "@/components/RemoteImageWithFallback";
 import { contarPropostasNaoLidasCliente } from "@/lib/propostas-notificacoes";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,7 +8,6 @@ import {
     Animated,
     Dimensions,
     FlatList,
-    Image,
     ImageBackground,
     StyleSheet,
     Text,
@@ -298,7 +298,7 @@ export default function HomeCliente() {
                 style={style.imageCard}
                 onPress={() => iniciarPedidoPorServico(categoria.slug, categoria.titulo, item)}
               >
-                <Image source={{ uri: item.imagem }} style={style.image} />
+                <RemoteImageWithFallback uri={item.imagem} fallbackUri={categoria.banner} style={style.image} />
                 <View style={style.imageContent}>
                   <Text style={style.imageTitle}>{item.titulo}</Text>
                 </View>

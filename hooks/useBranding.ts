@@ -1,10 +1,10 @@
 import { useEmpresa } from "@/contexts/EmpresaContext";
 import { useEffect, useState } from "react";
-import { DEFAULT_BRANDING, loadBrandingConfig, type BrandingConfig } from "@/lib/branding";
+import { getLocalBrandingConfig, loadBrandingConfig, type BrandingConfig } from "@/lib/branding";
 
 export function useBranding() {
   const { empresa } = useEmpresa();
-  const [branding, setBranding] = useState<BrandingConfig>(DEFAULT_BRANDING);
+  const [branding, setBranding] = useState<BrandingConfig>(getLocalBrandingConfig());
   const [loadingBranding, setLoadingBranding] = useState(true);
 
   useEffect(() => {

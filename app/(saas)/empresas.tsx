@@ -99,6 +99,14 @@ export default function SaasEmpresasScreen() {
           <Text style={styles.header}>Admin SaaS</Text>
           <Text style={styles.subheader}>Gestão de empresas, branding, modo operacional e assinatura da plataforma.</Text>
 
+          <TouchableOpacity style={styles.aiFactoryButton} onPress={() => router.push("/(saas)/fabrica-ia" as never)}>
+            <Text style={styles.aiFactoryButtonText}>Abrir fábrica de IA</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.infraButton} onPress={() => router.push("/(saas)/seguranca-supabase" as never)}>
+            <Text style={styles.infraButtonText}>Infraestrutura · Segurança Supabase</Text>
+          </TouchableOpacity>
+
           {metrics ? (
             <View style={styles.metricsGrid}>
               <MetricCard label="Trials" value={String(metrics.empresas_trial || 0)} />
@@ -199,6 +207,32 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     marginTop: 6,
     marginBottom: 16,
+  },
+  aiFactoryButton: {
+    backgroundColor: "#172554",
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#1d4ed8",
+    marginBottom: 16,
+  },
+  aiFactoryButtonText: {
+    color: "#bfdbfe",
+    fontWeight: "900",
+  },
+  infraButton: {
+    backgroundColor: "#064e3b",
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#10b981",
+    marginBottom: 16,
+  },
+  infraButtonText: {
+    color: "#bbf7d0",
+    fontWeight: "900",
   },
   formCard: {
     backgroundColor: "#0b1220",

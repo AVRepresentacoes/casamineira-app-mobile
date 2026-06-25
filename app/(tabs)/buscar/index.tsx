@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RemoteImageWithFallback } from "@/components/RemoteImageWithFallback";
 import { categoriasGrandes } from "@/constants/categorias";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
-  Image,
+  ImageSourcePropType,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,7 +20,7 @@ import {
 type ResultadoServico = {
   id: string;
   titulo: string;
-  imagem?: string;
+  imagem?: ImageSourcePropType | string;
   categoriaSlug: string;
   categoriaTitulo: string;
 };
@@ -309,12 +310,9 @@ export default function BuscarScreen() {
               style={styles.resultCard}
               onPress={() => iniciarPedidoDireto(item)}
             >
-              <Image
-                source={{
-                  uri:
-                    item.imagem ||
-                    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
-                }}
+              <RemoteImageWithFallback
+                uri={item.imagem}
+                fallbackUri="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80"
                 style={styles.resultImage}
               />
               <View style={styles.resultBody}>
@@ -335,7 +333,11 @@ export default function BuscarScreen() {
         contentContainerStyle={styles.recommendedList}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.recommendedCard} onPress={() => iniciarPedidoDireto(item)}>
-            <Image source={{ uri: item.imagem }} style={styles.recommendedImage} />
+            <RemoteImageWithFallback
+              uri={item.imagem}
+              fallbackUri="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80"
+              style={styles.recommendedImage}
+            />
             <Text style={styles.recommendedTitle} numberOfLines={1}>{item.titulo}</Text>
             <Text style={styles.recommendedMeta} numberOfLines={1}>{item.categoriaTitulo}</Text>
           </TouchableOpacity>

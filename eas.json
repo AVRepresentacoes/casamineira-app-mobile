@@ -12,10 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_ANDROID_PACKAGE": "br.app.casamineiraservicos"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {

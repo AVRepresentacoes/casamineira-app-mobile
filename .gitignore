@@ -44,9 +44,11 @@ node_modules
 .expo-shared
 .env
 .env.*
+.hospedagens-backend.local
 dist
 build
 builds/
+reports/
 android
 ios
 

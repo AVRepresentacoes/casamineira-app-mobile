@@ -1,7 +1,9 @@
+import type { ImageSourcePropType } from "react-native";
+
 export interface Servico {
   id: string;
   titulo: string;
-  imagem?: string;
+  imagem?: ImageSourcePropType | string;
 }
 
 export interface Categoria {
@@ -35,10 +37,10 @@ export const categoriasGrandes: Categoria[] = [
     titulo: "Reformas e Reparos",
     banner: "https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1400",
     servicos: [
-      { id: "reformas-1", titulo: "Eletricista", imagem: "https://blog.tul.io/wp-content/uploads/2023/10/engenheiro-eletricista-873x585-1.jpeg" },
+      { id: "reformas-1", titulo: "Eletricista", imagem: require("../assets/images/servicos/eletricista.jpg") },
       { id: "reformas-2", titulo: "Encanador", imagem: "https://img.freepik.com/fotos-premium/encanador-usando-uma-chave-para-reparar-o-cano-de-agua-sob-a-pia_101448-3422.jpg" },
       { id: "reformas-3", titulo: "Pintor", imagem: "https://media5.quimica.com.br/wp-content/uploads/2018/03/tintas-14.jpg" },
-      { id: "reformas-4", titulo: "Pedreiro", imagem: "https://mapa-da-obra-producao.s3.amazonaws.com/wp-content/uploads/2021/09/shutterstock_1820935472-scaled.jpg" },
+      { id: "reformas-4", titulo: "Pedreiro", imagem: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80" },
       { id: "reformas-5", titulo: "Gesseiro", imagem: "https://gessomarilia.com.br/wp-content/uploads/2023/05/gesso_ou_reboco_Gesso_Marilia.jpg" },
       { id: "reformas-6", titulo: "Instalação de Piso", imagem: "https://www.embramaco.com.br/blog/wp-content/uploads/2022/05/emb_blog_post_04_junho_18_sem_04-650x340-1.png" },
       { id: "reformas-7", titulo: "Reforma de Banheiro", imagem: "https://blog.archtrends.com/wp-content/uploads/2024/04/reformadebanheiro.jpeg" },
@@ -47,8 +49,8 @@ export const categoriasGrandes: Categoria[] = [
       { id: "reformas-10", titulo: "Instalação de Portas e Janelas", imagem: "https://instaladordeportassp.com.br/wp-content/uploads/2019/01/instalacao-portas.jpg" },
       { id: "reformas-11", titulo: "Serviços em Drywall", imagem: "https://cdn.shop10mt.com.br/app/uploads/2017/11/11004753/Forro-Drywall.jpg.webp" },
       { id: "reformas-12", titulo: "Restauração de Piso (Madeira)", imagem: "https://i0.wp.com/omegasinteco.com.br/wp-content/uploads/2024/01/lempeza-de-sinteco.jpg?resize=1080%2C675&ssl=1" },
-      { id: "reformas-13", titulo: "Roçador", imagem: "https://agazetaempregosul.com.br/images/Ro%C3%A7ador.jpeg" },
-      { id: "reformas-14", titulo: "Jardinagem", imagem: "https://www.tgservices.com.br/wp-content/uploads/2022/06/13-06-22.jpg" },
+      { id: "reformas-13", titulo: "Roçador", imagem: "https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=1200&q=80" },
+      { id: "reformas-14", titulo: "Jardinagem", imagem: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1200&q=80" },
     ],
   },
   {
@@ -80,7 +82,7 @@ export const categoriasGrandes: Categoria[] = [
       { id: "domesticos-4", titulo: "Babá", imagem: "https://soubh.uai.com.br/wp-content/uploads/2019/04/main_baba_foto_Africa_Studio_shutterstock.jpg" },
       { id: "domesticos-5", titulo: "Cozinheira", imagem: "https://plenaeventos.com.br/galeria/1719861521-cozinheira.jpg" },
       { id: "domesticos-6", titulo: "Cuidador de Idosos", imagem: "https://medicinasa.com.br/wp-content/uploads/2022/06/idoso-old-cuidador-home-domiciliar.jpg" },
-      { id: "domesticos-7", titulo: "Limpeza Pós-Obra", imagem: "https://www.splimpezaposobra.com.br/img/limpeza-pos-obra-em-empresa.webp" },
+      { id: "domesticos-7", titulo: "Limpeza Pós-Obra", imagem: require("../assets/images/servicos/limpeza-pos-obra.jpg") },
       { id: "domesticos-8", titulo: "Lavagem de Sofá", imagem: "https://www.drlimpatudorj.com.br/wp-content/uploads/2021/07/2021-07-15-como-funciona-a-lavagem-a-seco.jpg" },
       { id: "domesticos-9", titulo: "Lavagem de Tapete", imagem: "https://www.sulprolimpeza.com.br/img/portfolio/limpeza-de-tapete-porto-alegre-limpeza-de-tapete-canoas-02.jpg?20250511" },
       { id: "domesticos-10", titulo: "Organização Residencial", imagem: "https://s35901.pcdn.co/wp-content/uploads/2018/12/ideias-de-organizacao-para-apartamentos-compactos.jpg" },
@@ -99,7 +101,7 @@ export const categoriasGrandes: Categoria[] = [
       { id: "aulas-6", titulo: "Aula de Informática", imagem: "https://cursosabeline.com.br/webroot/cur_cache/curso-com-certificado-de-informatica-basica-1567603559-870-810b01c8.jpg" },
       { id: "aulas-7", titulo: "Personal Trainer", imagem: "https://tm.ibxk.com.br/2023/10/11/11105957211075.jpeg?ims=1000x400/filters:quality(80)" },
       { id: "aulas-8", titulo: "Aula de Natação", imagem: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1200&q=80" },
-      { id: "aulas-9", titulo: "Aula de Espanhol", imagem: "https://linguae.com.br/imagens/informacoes/aulas-espanhol-basico-01.jpg" },
+      { id: "aulas-9", titulo: "Aula de Espanhol", imagem: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" },
       { id: "aulas-10", titulo: "Aula de Redação", imagem: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80" },
     ],
   },
@@ -114,7 +116,7 @@ export const categoriasGrandes: Categoria[] = [
       { id: "beleza-4", titulo: "Designer de Sobrancelha", imagem: "https://jobestetica.com/wp-content/uploads/2020/06/designsobrancelhas.jpeg" },
       { id: "beleza-5", titulo: "Depilação", imagem: "https://rioskinlab.com/cdn/shop/articles/e735c857-185f-4860-b7c0-fa99dd749f84.jpg?v=1622059568" },
       { id: "beleza-6", titulo: "Massagem", imagem: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80" },
-      { id: "beleza-7", titulo: "Barbeiro", imagem: "https://spafullvitality.com/wp-content/uploads/2024/06/Picsart_24-06-06_10-03-38-354-scaled.jpg" },
+      { id: "beleza-7", titulo: "Barbeiro", imagem: require("../assets/images/servicos/barbeiro.jpg") },
       { id: "beleza-8", titulo: "Estética Facial", imagem: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80" },
       { id: "beleza-9", titulo: "Alongamento de Unhas", imagem: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxXWVg61sLdBCv6hW7HxNujAYfzRKbGL_SfA&s" },
       { id: "beleza-10", titulo: "Extensão de Cílios", imagem: "https://www.institutodavisao.com/wp-content/uploads/2025/04/01_Extensao-de-Cilios-fio-a-fio.png" },
@@ -125,7 +127,7 @@ export const categoriasGrandes: Categoria[] = [
     titulo: "Tecnologia",
     banner: "https://images.pexels.com/photos/777001/pexels-photo-777001.jpeg?auto=compress&cs=tinysrgb&w=1400",
     servicos: [
-      { id: "tecnologia-1", titulo: "Suporte Técnico", imagem: "https://www.findup.com.br/wp-content/uploads/2025/04/man-with-headset-monitor-with-blue-light-screen-915x610.webp" },
+      { id: "tecnologia-1", titulo: "Suporte Técnico", imagem: require("../assets/images/servicos/suporte-tecnico.jpg") },
       { id: "tecnologia-2", titulo: "Instalação de Wi-Fi", imagem: "https://bizzinternet.com.br/wp-content/uploads/2025/12/thumbnail-7.jpeg" },
       { id: "tecnologia-3", titulo: "Montagem de PC Gamer", imagem: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmPWGpwz16CjlgbJGDbuy_0MErmZKx6N281g&s" },
       { id: "tecnologia-4", titulo: "Criação de Sites", imagem: "https://meetdigital.com.br/uploads/images/2021/11/criacao-de-sites-profissionais.jpg" },
@@ -146,7 +148,7 @@ export const categoriasGrandes: Categoria[] = [
       { id: "consultoria-2", titulo: "Consultoria Jurídica", imagem: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80" },
       { id: "consultoria-3", titulo: "Consultoria Empresarial", imagem: "https://www.idebrasil.com.br/blog/wp-content/uploads/2020/01/blog-conheca-4-tipos-de-consultoria-para-empresas-850x441.jpg" },
       { id: "consultoria-4", titulo: "Consultoria de Marketing", imagem: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDPXKdD85kCFaNc3X1-HtG1g-B9pRggF858w&s" },
-      { id: "consultoria-5", titulo: "Consultoria de RH", imagem: "https://talentosconsultoria.com.br/wp-content/uploads/2025/05/pessoas-usando-dispositivo-digital-durante-uma-reuniao-scaled.jpg" },
+      { id: "consultoria-5", titulo: "Consultoria de RH", imagem: require("../assets/images/servicos/consultoria-rh.jpg") },
       { id: "consultoria-6", titulo: "Consultoria Contábil", imagem: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80" },
       { id: "consultoria-7", titulo: "Consultoria em Vendas", imagem: "https://ggvinteligencia.com.br/wp-content/uploads/2025/04/consultor-de-vendas-implementando-rituais.jpg" },
       { id: "consultoria-8", titulo: "Consultoria de Processos", imagem: "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=1200&q=80" },

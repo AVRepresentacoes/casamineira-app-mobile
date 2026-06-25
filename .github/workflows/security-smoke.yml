@@ -1,0 +1,38 @@
+name: Security Smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  smoke:
+    name: Secret and policy smoke checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check hardcoded Supabase JWTs outside examples
+        run: |
+          if grep -R --include='*.ts' --include='*.tsx' --include='*.js' --include='*.json' -n 'eyJhbGciOi' . \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            --exclude-dir=android \
+            --exclude-dir=ios \
+            --exclude-dir=dist \
+            --exclude='.env*'; then
+            echo "Hardcoded JWT-like secret found."
+            exit 1
+          fi
+
+      - name: Check legacy wildcard CORS literals
+        run: |
+          if grep -R --include='index.ts' -n '"Access-Control-Allow-Origin": "*"' supabase/functions; then
+            echo "Use supabase/functions/_shared/cors.ts instead of wildcard CORS literals."
+            exit 1
+          fi

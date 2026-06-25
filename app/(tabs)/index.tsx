@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { RemoteImageWithFallback } from "@/components/RemoteImageWithFallback";
 import { supabase } from "@/lib/supabase";
 import { useBranding } from "@/hooks/useBranding";
 import { resolveCurrentTenantId } from "@/lib/tenant";
@@ -9,7 +10,6 @@ import * as Location from "expo-location";
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   ImageBackground,
   ScrollView,
   StyleSheet,
@@ -546,8 +546,9 @@ export default function HomeCliente() {
                 })
               }
             >
-              <Image
-                source={{ uri: item.banner || FORNECEDOR_FALLBACK_BANNER }}
+              <RemoteImageWithFallback
+                uri={item.banner}
+                fallbackUri={FORNECEDOR_FALLBACK_BANNER}
                 style={style.fornecedorBanner}
                 resizeMode="cover"
                 fadeDuration={0}
@@ -606,7 +607,7 @@ export default function HomeCliente() {
                 style={style.imageCard}
                 onPress={() => iniciarPedidoPorServico(categoria.slug, categoria.titulo, item)}
               >
-                <Image source={{ uri: item.imagem }} style={style.image} fadeDuration={0} />
+                <RemoteImageWithFallback uri={item.imagem} fallbackUri={categoria.banner} style={style.image} fadeDuration={0} />
                 <View style={style.imageContent}>
                   <Text style={style.imageTitle}>{item.titulo}</Text>
                 </View>

@@ -1,0 +1,31 @@
+{
+  "appName": "Casa Mineira Serviços",
+  "appSlug": "casa-mineira",
+  "appScheme": "casamineira",
+  "androidPackage": "br.app.casamineiraservicos",
+  "iosBundleId": "com.casamineira.app",
+  "tenantSlug": "default",
+  "lockTenant": false,
+  "domain": "",
+  "supportWhatsapp": "",
+  "slogan": "Conectando profissionais e clientes",
+  "colors": {
+    "primary": "#facc15",
+    "secondary": "#020617",
+    "accent": "#1e293b",
+    "splashBackground": "#0B0F1A",
+    "adaptiveIconBackground": "#FFFFFF",
+    "notification": "#0B0F1A"
+  },
+  "assets": {
+    "icon": "./assets/images/icons/icon.png",
+    "splash": "./assets/images/icons/icon.png",
+    "adaptiveIcon": "./assets/images/icons/icon.png",
+    "notificationIcon": "./assets/images/icons/icon-safe.png",
+    "logoUrl": ""
+  },
+  "store": {
+    "shortDescription": "Serviços, marketplace local e pedidos rápidos em um só app.",
+    "privacyPolicyUrl": ""
+  }
+}
