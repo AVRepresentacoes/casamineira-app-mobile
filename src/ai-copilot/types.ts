@@ -27,9 +27,17 @@ export interface AiConversation {
   timestampLabel: string;
 }
 
+export interface AiCopilotRouteContext {
+  route: string;
+  area: "dashboard" | "studio" | "catalog" | "marketplace" | "projects" | "ai" | "review" | "generic";
+  title: string;
+  primaryMessage: string;
+}
+
 export interface AiCopilotContextValue {
   state: AiCopilotState;
   isOpen: boolean;
+  routeContext: AiCopilotRouteContext;
   recommendations: AiRecommendation[];
   insights: AiInsight[];
   actions: AiAction[];
@@ -37,6 +45,7 @@ export interface AiCopilotContextValue {
   open: () => void;
   close: () => void;
   toggle: () => void;
+  setRouteContext: (pathname: string) => void;
   setState: (state: AiCopilotState) => void;
   runMockAnalysis: () => void;
 }
