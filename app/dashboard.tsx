@@ -54,13 +54,13 @@ export default function DashboardScreen() {
         <View style={styles.primaryPanel}>
           <BrandLogo size="small" showText={false} />
           <Text style={styles.panelEyebrow}>Próxima ação</Text>
-          <Text style={styles.panelTitle}>Comece uma empresa digital no Business Studio™.</Text>
+          <Text style={styles.panelTitle}>Comece um Projeto Empresarial no Business Studio™.</Text>
           <Text style={styles.panelBody}>
             Escolha um modelo, revise o Business DNA™, explore templates premium e avance para consultoria, arquitetura e revisão do projeto.
           </Text>
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/apps/new")}>
+          <Pressable style={styles.primaryButton} onPress={() => router.push("/business-studio")}>
             <Ionicons name="sparkles-outline" size={18} color="#08101c" />
-            <Text style={styles.primaryButtonText}>Criar novo projeto</Text>
+            <Text style={styles.primaryButtonText}>Criar Projeto Empresarial</Text>
           </Pressable>
         </View>
 
@@ -73,7 +73,7 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.sectionGrid}>
-        <ActionCard title="Business Studio™" body="Inicie a criação visual de uma empresa digital." icon="construct-outline" onPress={() => router.push("/apps/new")} />
+        <ActionCard title="Business Studio™" body="Inicie a criação visual de um Projeto Empresarial." icon="construct-outline" onPress={() => router.push("/business-studio")} />
         <ActionCard title="Business DNA™" body="Escolha modelos inteligentes por nicho de negócio." icon="git-network-outline" onPress={() => router.push("/business-dna")} />
         <ActionCard title="Marketplace" body="Explore templates premium prontos para acelerar o projeto." icon="storefront-outline" onPress={() => router.push("/marketplace")} />
         <ActionCard title="AI Business Consultant™" body="Simule recomendações de DNA, templates e próximos passos." icon="chatbubbles-outline" onPress={() => router.push("/ai-business-consultant")} />
