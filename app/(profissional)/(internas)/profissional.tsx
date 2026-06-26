@@ -48,7 +48,7 @@ export default function WelcomeProfissional() {
       </Animated.View>
 
       <Animated.View style={[styles.buttons, { opacity: buttonAnim }]}>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/register?role=profissional")}>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/register")}>
           <Text style={styles.primaryText}>Quero trabalhar pela Casa Mineira</Text>
         </TouchableOpacity>
 
