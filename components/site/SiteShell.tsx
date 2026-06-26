@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 
 const NAV_ITEMS = [
-  { label: "Produto", href: "/landing" },
+  { label: "Produto", href: "/" },
   { label: "Planos", href: "/pricing" },
   { label: "Demo", href: "/demo" },
   { label: "FAQ", href: "/faq" },
@@ -29,7 +29,7 @@ export function SiteShell({
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.shell}>
         <View style={styles.topbar}>
-          <Pressable style={styles.brand} onPress={() => router.push("/landing")}>
+          <Pressable style={styles.brand} onPress={() => router.push("/")}>
             <BrandLogo size="small" showText />
           </Pressable>
 
@@ -45,7 +45,7 @@ export function SiteShell({
           </View>
 
           <View style={styles.topActions}>
-            <SiteButton label="Entrar" tone="secondary" onPress={() => router.push("/(auth)/login")} />
+            <SiteButton label="Entrar" tone="secondary" onPress={() => router.push("/login")} />
             <SiteButton label="Teste grátis" onPress={() => router.push("/teste-gratis")} />
           </View>
         </View>
