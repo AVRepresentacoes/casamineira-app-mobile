@@ -2,6 +2,7 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
 import { listAiFactoryAgentLogs, listAiFactoryRuns, type AiFactoryRun } from "@/lib/ai-factory";
 import { getPublicSaasPlans } from "@/lib/saas-growth";
+import { ensureSaasOnboarding } from "@/services/onboarding";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -21,6 +22,9 @@ export default function DashboardScreen() {
       async function load() {
         try {
           setLoading(true);
+          await ensureSaasOnboarding().catch((error) => {
+            console.log("DASHBOARD ONBOARDING WARNING:", error);
+          });
           const [runsData, plansData] = await Promise.all([
             listAiFactoryRuns().catch(() => []),
             getPublicSaasPlans().catch(() => []),

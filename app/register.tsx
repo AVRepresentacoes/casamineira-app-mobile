@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { supabase } from "@/lib/supabase";
+import { ensureSaasOnboarding } from "@/services/onboarding";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -48,7 +49,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: senha,
         options: {
@@ -62,7 +63,19 @@ export default function Register() {
       });
       if (error) throw error;
 
-      Alert.alert("Conta criada", "Agora faça login.");
+      if (data.session?.user) {
+        await ensureSaasOnboarding({
+          name: nome.trim(),
+          company: empresa.trim(),
+          phone: telefone.trim(),
+          email: email.trim(),
+        });
+        Alert.alert("Conta criada", "Sua empresa digital foi preparada. Você será direcionado para o dashboard.");
+        router.replace("/dashboard");
+        return;
+      }
+
+      Alert.alert("Conta criada", "Confira seu e-mail se a confirmação estiver habilitada. Depois faça login para concluir o onboarding.");
       router.replace("/login");
     } catch (e: any) {
       Alert.alert("Erro ao criar conta", e?.message || "Falha no cadastro");

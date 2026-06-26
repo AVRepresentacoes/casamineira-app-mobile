@@ -1,9 +1,10 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { supabase } from "@/lib/supabase";
+import { ensureSaasOnboarding } from "@/services/onboarding";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 
 const TRUSTED_BRANDS = ["ACME", "NEXUS", "INOVA", "VISION", "PRIME"] as const;
@@ -29,6 +30,11 @@ export function SaasLoginScreen() {
     };
   }, [width]);
 
+  const enterDashboardWithOnboarding = useCallback(async (input?: { email?: string | null }) => {
+    await ensureSaasOnboarding({ email: input?.email || null });
+    router.replace("/dashboard");
+  }, [router]);
+
   useEffect(() => {
     let active = true;
     const fallback = setTimeout(() => {
@@ -43,7 +49,7 @@ export function SaasLoginScreen() {
 
         if (!active) return;
         if (session?.user) {
-          router.replace("/dashboard");
+          await enterDashboardWithOnboarding({ email: session.user.email });
           return;
         }
         setChecking(false);
@@ -58,7 +64,7 @@ export function SaasLoginScreen() {
       active = false;
       clearTimeout(fallback);
     };
-  }, [router]);
+  }, [enterDashboardWithOnboarding]);
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -78,10 +84,10 @@ export function SaasLoginScreen() {
         return;
       }
 
-      router.replace("/dashboard");
+      await enterDashboardWithOnboarding({ email: email.trim() });
     } catch (error) {
       console.log("SAAS LOGIN ERROR:", error);
-      Alert.alert("Erro", "Não foi possível entrar agora.");
+      Alert.alert("Erro", "Não foi possível entrar ou concluir o onboarding agora.");
     } finally {
       setLoading(false);
     }
