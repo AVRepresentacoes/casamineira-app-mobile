@@ -1,10 +1,9 @@
-export const publicRoutes = ["/", "/login", "/register", "/forgot-password"] as const;
+export const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/marketplace", "/business-dna"] as const;
 
 export const authenticatedRoutes = [
   "/dashboard",
+  "/business-studio",
   "/apps/new",
-  "/business-dna",
-  "/marketplace",
   "/projects",
   "/ai-business-consultant",
   "/ai-workforce",
@@ -23,7 +22,7 @@ export function normalizeRoute(pathname: string) {
 
 export function isPublicRoute(pathname: string) {
   const route = normalizeRoute(pathname);
-  return publicRoutes.some((publicRoute) => route === publicRoute);
+  return publicRoutes.some((publicRoute) => route === publicRoute || route.startsWith(`${publicRoute}/`));
 }
 
 export function isAuthenticatedSaasRoute(pathname: string) {
