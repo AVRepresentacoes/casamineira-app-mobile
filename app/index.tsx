@@ -1,14 +1,69 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { getActiveRole, setActiveRole } from "@/lib/auth";
-import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
 import { supabase } from "@/lib/supabase";
-import { Redirect } from "expo-router";
-import { useEffect, useState } from "react";
-import { Platform, View } from "react-native";
+import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Redirect, useRouter } from "expo-router";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import type { DimensionValue } from "react-native";
+
+const VALUE_PROPS = [
+  {
+    title: "Business DNA™",
+    description: "Modelos inteligentes por nicho com fluxos, módulos e operação prontos para acelerar o projeto.",
+    icon: "git-branch-outline",
+  },
+  {
+    title: "AI Builder™",
+    description: "Personalização assistida por IA para adaptar templates sem começar tudo do zero.",
+    icon: "sparkles-outline",
+  },
+  {
+    title: "Business Studio™",
+    description: "Ambiente guiado para transformar uma ideia em aplicativo, site, sistema ou marketplace.",
+    icon: "grid-outline",
+  },
+  {
+    title: "Publishing Center™",
+    description: "Preparação organizada para publicação Web, Android e iOS com revisão humana.",
+    icon: "rocket-outline",
+  },
+  {
+    title: "Growth Center™",
+    description: "Marketing, landing pages, SEO e campanhas para levar a empresa digital ao mercado.",
+    icon: "trending-up-outline",
+  },
+];
+
+const CREATION_TYPES = [
+  { title: "Aplicativos", icon: "phone-portrait-outline" },
+  { title: "Sites", icon: "globe-outline" },
+  { title: "Sistemas Web", icon: "desktop-outline" },
+  { title: "Marketplaces", icon: "storefront-outline" },
+  { title: "Empresas Digitais Completas", icon: "business-outline" },
+];
+
+const NICHES = ["Clínica", "Restaurante", "Hotel", "Barbearia", "Imobiliária", "Academia", "Delivery", "Serviços Locais"];
+
+const STEPS = [
+  "Escolha um Business DNA™",
+  "Personalize com IA",
+  "Aprove o Blueprint™",
+  "Publique sua empresa digital",
+];
 
 export default function Index() {
   const [route, setRoute] = useState<string | null>(null);
+  const isWeb = Platform.OS === "web";
 
   useEffect(() => {
+    if (isWeb) {
+      return;
+    }
+
     const resolverRota = async () => {
       try {
         if (getConfiguredTenantSlug() === "hospedagens-caminhos-da-fe") {
@@ -57,11 +112,6 @@ export default function Index() {
           return;
         }
 
-        if (Platform.OS === "web") {
-          setRoute("/login");
-          return;
-        }
-
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -107,7 +157,11 @@ export default function Index() {
     };
 
     void resolverRota();
-  }, []);
+  }, [isWeb]);
+
+  if (isWeb) {
+    return <SaasLandingPage />;
+  }
 
   if (!route) {
     return <View style={{ flex: 1, backgroundColor: "#020617" }} />;
@@ -115,3 +169,539 @@ export default function Index() {
 
   return <Redirect href={route} />;
 }
+
+function SaasLandingPage() {
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isCompact = width < 760;
+  const isTablet = width >= 760 && width < 1080;
+  const cardWidth = useMemo<DimensionValue>(() => {
+    if (isCompact) {
+      return "100%";
+    }
+    if (isTablet) {
+      return "48%";
+    }
+    return "31.5%";
+  }, [isCompact, isTablet]);
+
+  const navigate = (href: string) => {
+    router.push(href as never);
+  };
+
+  return (
+    <ScrollView style={styles.page} contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
+      <LinearGradient colors={["#07111f", "#0f172a", "#111827"]} style={styles.gradientLayer}>
+        <View style={styles.shell}>
+          <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
+            <Pressable onPress={() => navigate("/")} style={styles.brandButton}>
+              <BrandLogo size={isCompact ? "small" : "medium"} showText={!isCompact} />
+            </Pressable>
+            <View style={[styles.headerActions, isCompact ? styles.headerActionsCompact : null]}>
+              <LandingButton label="Ver Marketplace" icon="storefront-outline" tone="ghost" onPress={() => navigate("/marketplace")} compact={isCompact} />
+              <LandingButton label="Fazer login" icon="log-in-outline" tone="secondary" onPress={() => navigate("/login")} compact={isCompact} />
+            </View>
+          </View>
+
+          <View style={[styles.hero, isCompact ? styles.heroCompact : null]}>
+            <View style={styles.heroCopy}>
+              <View style={styles.eyebrowPill}>
+                <Ionicons name="sparkles-outline" size={16} color="#facc15" />
+                <Text style={styles.eyebrowText}>Fábrica de Empresas Digitais com IA</Text>
+              </View>
+              <Text style={[styles.heroTitle, isCompact ? styles.heroTitleCompact : null]}>
+                Transforme ideias em empresas digitais com IA
+              </Text>
+              <Text style={styles.heroSubtitle}>
+                Crie aplicativos, sites, sistemas web, marketplaces e painéis administrativos a partir de modelos inteligentes e automação com inteligência artificial.
+              </Text>
+              <View style={[styles.heroActions, isCompact ? styles.stack : null]}>
+                <LandingButton label="Começar agora" icon="arrow-forward" onPress={() => navigate("/register")} full={isCompact} />
+                <LandingButton label="Ver Marketplace" icon="storefront-outline" tone="secondary" onPress={() => navigate("/marketplace")} full={isCompact} />
+              </View>
+            </View>
+
+            <View style={styles.heroPanel}>
+              <View style={styles.panelHeader}>
+                <Text style={styles.panelTitle}>Blueprint™ Preview</Text>
+                <Text style={styles.panelStatus}>Pronto para personalizar</Text>
+              </View>
+              <View style={styles.panelRows}>
+                {["Business DNA selecionado", "Template Premium", "IA assistida", "Publicação Web + Mobile"].map((item) => (
+                  <View key={item} style={styles.panelRow}>
+                    <Ionicons name="checkmark-circle" size={18} color="#22c55e" />
+                    <Text style={styles.panelRowText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          <Section title="Plataforma para criar, operar e publicar" subtitle="Cinco centros de produto conectam estratégia, IA, templates, publicação e crescimento.">
+            <View style={styles.grid}>
+              {VALUE_PROPS.map((item) => (
+                <FeatureCard key={item.title} item={item} width={cardWidth} />
+              ))}
+            </View>
+          </Section>
+
+          <Section title="O que você pode criar" subtitle="Da primeira página de venda ao ecossistema completo de uma empresa digital.">
+            <View style={styles.grid}>
+              {CREATION_TYPES.map((item) => (
+                <View key={item.title} style={[styles.creationCard, { width: cardWidth }]}>
+                  <Ionicons name={item.icon as never} size={26} color="#67e8f9" />
+                  <Text style={styles.creationTitle}>{item.title}</Text>
+                </View>
+              ))}
+            </View>
+          </Section>
+
+          <Section title="Modelos prontos por nicho" subtitle="Comece com um Business DNA™ especializado e evolua com personalização assistida.">
+            <View style={styles.nicheGrid}>
+              {NICHES.map((niche) => (
+                <View key={niche} style={styles.nichePill}>
+                  <Text style={styles.nicheText}>{niche}</Text>
+                </View>
+              ))}
+            </View>
+          </Section>
+
+          <Section title="Como funciona" subtitle="Um fluxo guiado para transformar intenção em produto digital revisável e publicável.">
+            <View style={styles.stepsGrid}>
+              {STEPS.map((step, index) => (
+                <View key={step} style={styles.stepCard}>
+                  <Text style={styles.stepNumber}>{String(index + 1).padStart(2, "0")}</Text>
+                  <Text style={styles.stepTitle}>{step}</Text>
+                </View>
+              ))}
+            </View>
+          </Section>
+
+          <View style={styles.trustBand}>
+            <Text style={styles.trustText}>
+              Uma plataforma criada para empreendedores, agências e empresas que querem lançar produtos digitais com velocidade, qualidade e baixo custo.
+            </Text>
+          </View>
+
+          <LinearGradient colors={["rgba(250, 204, 21, 0.18)", "rgba(103, 232, 249, 0.14)"]} style={styles.finalCta}>
+            <Text style={styles.finalTitle}>Pronto para criar sua próxima empresa digital?</Text>
+            <View style={[styles.heroActions, isCompact ? styles.stack : null]}>
+              <LandingButton label="Criar conta" icon="person-add-outline" onPress={() => navigate("/register")} full={isCompact} />
+              <LandingButton label="Fazer login" icon="log-in-outline" tone="secondary" onPress={() => navigate("/login")} full={isCompact} />
+            </View>
+          </LinearGradient>
+        </View>
+      </LinearGradient>
+    </ScrollView>
+  );
+}
+
+function LandingButton({
+  label,
+  icon,
+  onPress,
+  tone = "primary",
+  compact = false,
+  full = false,
+}: {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+  tone?: "primary" | "secondary" | "ghost";
+  compact?: boolean;
+  full?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.button,
+        tone === "primary" ? styles.buttonPrimary : null,
+        tone === "secondary" ? styles.buttonSecondary : null,
+        tone === "ghost" ? styles.buttonGhost : null,
+        compact ? styles.buttonCompact : null,
+        full ? styles.buttonFull : null,
+      ]}
+    >
+      <Ionicons name={icon} size={compact ? 15 : 17} color={tone === "primary" ? "#08101c" : "#f8fafc"} />
+      <Text style={[styles.buttonText, tone === "primary" ? styles.buttonTextPrimary : null]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function FeatureCard({
+  item,
+  width,
+}: {
+  item: {
+    title: string;
+    description: string;
+    icon: string;
+  };
+  width: DimensionValue;
+}) {
+  return (
+    <View style={[styles.featureCard, { width }]}>
+      <View style={styles.featureIcon}>
+        <Ionicons name={item.icon as never} size={24} color="#facc15" />
+      </View>
+      <Text style={styles.featureTitle}>{item.title}</Text>
+      <Text style={styles.featureDescription}>{item.description}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    backgroundColor: "#07111f",
+  },
+  pageContent: {
+    minHeight: "100%",
+  },
+  gradientLayer: {
+    minHeight: "100%",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+  },
+  shell: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    gap: 26,
+  },
+  header: {
+    minHeight: 72,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.14)",
+    backgroundColor: "rgba(8, 13, 25, 0.78)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 18,
+  },
+  headerCompact: {
+    alignItems: "stretch",
+    flexDirection: "column",
+  },
+  brandButton: {
+    alignSelf: "flex-start",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerActionsCompact: {
+    width: "100%",
+    flexWrap: "wrap",
+  },
+  hero: {
+    minHeight: 560,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+    backgroundColor: "rgba(2, 6, 23, 0.42)",
+    padding: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 28,
+    overflow: "hidden",
+  },
+  heroCompact: {
+    minHeight: 0,
+    padding: 22,
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  heroCopy: {
+    flex: 1,
+    maxWidth: 720,
+    gap: 22,
+  },
+  eyebrowPill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "rgba(250, 204, 21, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(250, 204, 21, 0.24)",
+  },
+  eyebrowText: {
+    color: "#fde68a",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  heroTitle: {
+    color: "#f8fafc",
+    fontSize: 58,
+    lineHeight: 64,
+    fontWeight: "900",
+    maxWidth: 760,
+  },
+  heroTitleCompact: {
+    fontSize: 36,
+    lineHeight: 42,
+  },
+  heroSubtitle: {
+    color: "#cbd5e1",
+    fontSize: 18,
+    lineHeight: 29,
+    maxWidth: 760,
+  },
+  heroActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  stack: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  heroPanel: {
+    width: 360,
+    maxWidth: "100%",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(103, 232, 249, 0.24)",
+    backgroundColor: "rgba(15, 23, 42, 0.84)",
+    padding: 20,
+    gap: 18,
+  },
+  panelHeader: {
+    gap: 6,
+  },
+  panelTitle: {
+    color: "#f8fafc",
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  panelStatus: {
+    color: "#67e8f9",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  panelRows: {
+    gap: 12,
+  },
+  panelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  panelRowText: {
+    color: "#e2e8f0",
+    fontWeight: "800",
+  },
+  button: {
+    minHeight: 48,
+    minWidth: 160,
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+  },
+  buttonCompact: {
+    minWidth: 0,
+    flex: 1,
+  },
+  buttonFull: {
+    width: "100%",
+  },
+  buttonPrimary: {
+    backgroundColor: "#facc15",
+    borderColor: "#facc15",
+  },
+  buttonSecondary: {
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
+    borderColor: "rgba(226, 232, 240, 0.18)",
+  },
+  buttonGhost: {
+    backgroundColor: "transparent",
+    borderColor: "rgba(226, 232, 240, 0.14)",
+  },
+  buttonText: {
+    color: "#f8fafc",
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  buttonTextPrimary: {
+    color: "#08101c",
+  },
+  section: {
+    paddingVertical: 18,
+    gap: 18,
+  },
+  sectionHeader: {
+    gap: 8,
+    maxWidth: 760,
+  },
+  sectionTitle: {
+    color: "#f8fafc",
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: "900",
+  },
+  sectionSubtitle: {
+    color: "#94a3b8",
+    fontSize: 16,
+    lineHeight: 25,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+  },
+  featureCard: {
+    minHeight: 214,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+    backgroundColor: "rgba(15, 23, 42, 0.72)",
+    padding: 20,
+    gap: 14,
+  },
+  featureIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(250, 204, 21, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(250, 204, 21, 0.18)",
+  },
+  featureTitle: {
+    color: "#f8fafc",
+    fontSize: 19,
+    fontWeight: "900",
+  },
+  featureDescription: {
+    color: "#a8b4c7",
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  creationCard: {
+    minHeight: 118,
+    borderRadius: 8,
+    padding: 18,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(103, 232, 249, 0.16)",
+    backgroundColor: "rgba(8, 47, 73, 0.28)",
+  },
+  creationTitle: {
+    color: "#f8fafc",
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  nicheGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  nichePill: {
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.14)",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+  },
+  nicheText: {
+    color: "#e2e8f0",
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  stepsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 14,
+  },
+  stepCard: {
+    flex: 1,
+    minWidth: 220,
+    borderRadius: 8,
+    padding: 18,
+    gap: 14,
+    backgroundColor: "rgba(15, 23, 42, 0.78)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+  },
+  stepNumber: {
+    color: "#67e8f9",
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  stepTitle: {
+    color: "#f8fafc",
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: "900",
+  },
+  trustBand: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.12)",
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    padding: 24,
+  },
+  trustText: {
+    color: "#e2e8f0",
+    fontSize: 20,
+    lineHeight: 30,
+    fontWeight: "800",
+    maxWidth: 940,
+  },
+  finalCta: {
+    borderRadius: 8,
+    padding: 28,
+    marginBottom: 20,
+    gap: 20,
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.14)",
+  },
+  finalTitle: {
+    color: "#f8fafc",
+    fontSize: 32,
+    lineHeight: 39,
+    fontWeight: "900",
+    maxWidth: 760,
+  },
+});
