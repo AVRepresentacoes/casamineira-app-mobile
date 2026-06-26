@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
 import { listAiFactoryAgentLogs, listAiFactoryRuns, type AiFactoryRun } from "@/lib/ai-factory";
 import { getPublicSaasPlans } from "@/lib/saas-growth";
@@ -51,6 +52,7 @@ export default function DashboardScreen() {
 
       <View style={styles.heroGrid}>
         <View style={styles.primaryPanel}>
+          <BrandLogo size="small" showText={false} />
           <Text style={styles.panelEyebrow}>Próxima ação</Text>
           <Text style={styles.panelTitle}>Comece uma empresa digital no Business Studio™.</Text>
           <Text style={styles.panelBody}>
