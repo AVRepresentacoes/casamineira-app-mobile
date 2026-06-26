@@ -141,18 +141,18 @@ function HeroPanel({ compact }: { compact: boolean }) {
       <View style={styles.heroCopy}>
         <View style={styles.kicker}>
           <Ionicons name="sparkles" size={13} color="#9b7cff" />
-          <Text style={styles.kickerText}>PLATAFORMA DE CRIAÇÃO DE APPS COM IA</Text>
+          <Text style={styles.kickerText}>FÁBRICA DE EMPRESAS DIGITAIS COM IA</Text>
         </View>
         <Text style={[styles.heroTitle, compact ? styles.heroTitleCompact : null]}>
-          Crie aplicativos incríveis <Text style={styles.heroTitleAccent}>com IA</Text>
+          Crie empresas digitais completas <Text style={styles.heroTitleAccent}>com IA</Text>
         </Text>
         <Text style={styles.heroBody}>
-          A plataforma completa que usa Inteligência Artificial para transformar ideias em aplicativos reais de forma rápida, fácil e profissional.
+          A plataforma completa para transformar ideias em projetos empresariais, templates, Business DNA™, Blueprint e publicação assistida.
         </Text>
         <View style={styles.benefits}>
-          <Benefit label="Gere apps completos com IA" />
-          <Benefit label="Templates profissionais" />
-          <Benefit label="Publicação automática" />
+          <Benefit label="Comece por um Business DNA™" />
+          <Benefit label="Escolha templates profissionais" />
+          <Benefit label="Aprove Blueprint antes de publicar" />
           <Benefit label="White-label para sua marca" />
         </View>
       </View>
@@ -352,9 +352,9 @@ function AiArtwork({ compact }: { compact: boolean }) {
 function FeatureStrip({ compact }: { compact: boolean }) {
   return (
     <View style={[styles.featureStrip, compact ? styles.featureStripCompact : null]}>
-      <Feature icon="hardware-chip-outline" title="IA Poderosa" body="Gere aplicativos completos utilizando inteligência artificial de última geração." />
-      <Feature icon="git-network-outline" title="Sem Código" body="Crie apps profissionais sem precisar programar. Tudo visual e intuitivo." />
-      <Feature icon="briefcase-outline" title="Publique Fácil" body="Publique seu app nas lojas com um clique e tenha seu app no ar." />
+      <Feature icon="hardware-chip-outline" title="IA Assistida" body="Personalize projetos empresariais a partir de modelos validados." />
+      <Feature icon="git-network-outline" title="Business DNA™" body="Comece com uma estrutura comercial por nicho antes de gerar qualquer coisa." />
+      <Feature icon="briefcase-outline" title="Publicação guiada" body="Prepare Web, Android e iOS com revisão humana e etapas organizadas." />
       <Feature icon="id-card-outline" title="White-label" body="Plataforma 100% personalizável com sua identidade visual e domínio próprio." />
     </View>
   );
