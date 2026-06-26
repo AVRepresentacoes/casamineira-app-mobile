@@ -3,8 +3,9 @@ import {
   aiCopilotHistory,
   aiCopilotInsights,
   aiCopilotRecommendations,
+  getAiCopilotRouteContext,
 } from "@/src/ai-copilot/mock";
-import type { AiCopilotContextValue, AiCopilotState } from "@/src/ai-copilot/types";
+import type { AiCopilotContextValue, AiCopilotRouteContext, AiCopilotState } from "@/src/ai-copilot/types";
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 
 const AiCopilotContext = createContext<AiCopilotContextValue | null>(null);
@@ -12,10 +13,14 @@ const AiCopilotContext = createContext<AiCopilotContextValue | null>(null);
 export function AiCopilotProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AiCopilotState>("idle");
   const [isOpen, setIsOpen] = useState(false);
+  const [routeContext, setCurrentRouteContext] = useState<AiCopilotRouteContext>(() => getAiCopilotRouteContext("/dashboard"));
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen((current) => !current), []);
+  const setRouteContext = useCallback((pathname: string) => {
+    setCurrentRouteContext(getAiCopilotRouteContext(pathname));
+  }, []);
 
   const runMockAnalysis = useCallback(() => {
     setIsOpen(true);
@@ -28,6 +33,7 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
     () => ({
       state,
       isOpen,
+      routeContext,
       recommendations: aiCopilotRecommendations,
       insights: aiCopilotInsights,
       actions: aiCopilotActions,
@@ -35,10 +41,11 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
       open,
       close,
       toggle,
+      setRouteContext,
       setState,
       runMockAnalysis,
     }),
-    [close, isOpen, open, runMockAnalysis, state, toggle],
+    [close, isOpen, open, routeContext, runMockAnalysis, setRouteContext, state, toggle],
   );
 
   return <AiCopilotContext.Provider value={value}>{children}</AiCopilotContext.Provider>;
