@@ -1,14 +1,22 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SiteButton } from "@/components/site/SiteButton";
 import { supabase } from "@/lib/supabase";
+import { isPublicRoute } from "@/src/saas/routes";
 import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
 import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+const PUBLIC_NAV_ITEMS = [
+  { label: "Home", href: "/", icon: "home-outline" },
+  { label: "Business DNA", href: "/business-dna", icon: "git-network-outline" },
+  { label: "Marketplace", href: "/marketplace", icon: "storefront-outline" },
+  { label: "Login", href: "/login", icon: "log-in-outline" },
+] as const;
+
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "grid-outline" },
-  { label: "Studio", href: "/apps/new", icon: "construct-outline" },
+  { label: "Studio", href: "/business-studio", icon: "construct-outline" },
   { label: "DNA", href: "/business-dna", icon: "git-network-outline" },
   { label: "Marketplace", href: "/marketplace", icon: "storefront-outline" },
   { label: "Consultor", href: "/ai-business-consultant", icon: "chatbubbles-outline" },
@@ -29,6 +37,7 @@ export function SaasProductShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const publicPage = isPublicRoute(pathname);
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
@@ -61,17 +70,17 @@ export function SaasProductShell({
   }, []);
 
   useEffect(() => {
-    if (!checking && !authenticated) {
+    if (!publicPage && !checking && !authenticated) {
       router.replace("/login");
     }
-  }, [authenticated, checking, router]);
+  }, [authenticated, checking, publicPage, router]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/login");
   }
 
-  if (checking || !authenticated) {
+  if (!publicPage && (checking || !authenticated)) {
     return (
       <View style={styles.loading}>
         <BrandLogo size="medium" showText={false} />
@@ -83,12 +92,12 @@ export function SaasProductShell({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.topbar}>
-        <Pressable style={styles.brand} onPress={() => router.push("/dashboard")}>
+        <Pressable style={styles.brand} onPress={() => router.push((publicPage ? "/" : "/dashboard") as never)}>
           <BrandLogo size="small" showText />
         </Pressable>
 
         <View style={styles.nav}>
-          {NAV_ITEMS.map((item) => {
+          {(publicPage ? PUBLIC_NAV_ITEMS : NAV_ITEMS).map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Pressable key={item.href} style={[styles.navItem, active ? styles.navItemActive : null]} onPress={() => router.push(item.href as never)}>
@@ -99,7 +108,11 @@ export function SaasProductShell({
           })}
         </View>
 
-        <SiteButton label="Sair" tone="secondary" onPress={() => void handleLogout()} />
+        {publicPage && !authenticated ? (
+          <SiteButton label="Criar conta" onPress={() => router.push("/register" as never)} />
+        ) : (
+          <SiteButton label="Sair" tone="secondary" onPress={() => void handleLogout()} />
+        )}
       </View>
 
       <View style={styles.header}>
