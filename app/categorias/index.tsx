@@ -114,7 +114,7 @@ export default function HomeCliente() {
 
   function onPressBanner(item: (typeof banners)[number]) {
     if (item.acao === "cadastro_profissional") {
-      router.push("/(auth)/cadastro-profissional");
+      router.push("/register");
       return;
     }
 
@@ -320,7 +320,7 @@ export default function HomeCliente() {
         <TouchableOpacity
           activeOpacity={0.9}
           style={style.ctaButton}
-          onPress={() => router.push("/(auth)/cadastro-profissional")}
+          onPress={() => router.push("/register")}
         >
           <Ionicons name="star" size={18} color="#000" style={{ marginRight: 8 }} />
           <Text style={style.ctaButtonText}>
