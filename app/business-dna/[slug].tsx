@@ -102,7 +102,7 @@ export default function BusinessDnaDetailScreen() {
             <Text style={styles.aiText}>Outputs: {dna.aiPreparationContract.suggestedOutputs.join(", ")}</Text>
           </View>
 
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/marketplace" as never)}>
+          <Pressable style={styles.primaryButton} onPress={() => router.push("/register" as never)}>
             <Text style={styles.primaryButtonText}>Usar este Business DNA</Text>
           </Pressable>
           <Pressable style={styles.secondaryButton} onPress={() => router.push("/business-dna" as never)}>
