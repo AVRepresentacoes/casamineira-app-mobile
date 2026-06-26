@@ -1,9 +1,5 @@
-import { MarketingLandingContent } from "@/components/site/MarketingLandingContent";
-import { SiteShell } from "@/components/site/SiteShell";
 import { getActiveRole, setActiveRole } from "@/lib/auth";
-import { getPublicSaasPlans } from "@/lib/saas-growth";
 import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
-import type { SaasPlanoComercial } from "@/lib/saas-commercial";
 import { supabase } from "@/lib/supabase";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,7 +7,6 @@ import { Platform, View } from "react-native";
 
 export default function Index() {
   const [route, setRoute] = useState<string | null>(null);
-  const [plans, setPlans] = useState<SaasPlanoComercial[]>([]);
 
   useEffect(() => {
     const resolverRota = async () => {
@@ -62,21 +57,17 @@ export default function Index() {
           return;
         }
 
+        if (Platform.OS === "web") {
+          setRoute("/login");
+          return;
+        }
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
         if (!session?.user) {
-          if (Platform.OS !== "web") {
-            setRoute("/(auth)/login");
-            return;
-          }
-          setRoute("site");
-          return;
-        }
-
-        if (Platform.OS === "web") {
-          setRoute("/dashboard");
+          setRoute("/(auth)/login");
           return;
         }
 
@@ -118,23 +109,8 @@ export default function Index() {
     void resolverRota();
   }, []);
 
-  useEffect(() => {
-    if (route !== "site") return;
-    getPublicSaasPlans()
-      .then(setPlans)
-      .catch(() => setPlans([]));
-  }, [route]);
-
   if (!route) {
     return <View style={{ flex: 1, backgroundColor: "#020617" }} />;
-  }
-
-  if (route === "site") {
-    return (
-      <SiteShell>
-        <MarketingLandingContent plans={plans} />
-      </SiteShell>
-    );
   }
 
   return <Redirect href={route} />;
