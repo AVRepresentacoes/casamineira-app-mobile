@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "DNA", href: "/business-dna", icon: "git-network-outline" },
   { label: "Marketplace", href: "/marketplace", icon: "storefront-outline" },
   { label: "Consultor", href: "/ai-business-consultant", icon: "chatbubbles-outline" },
+  { label: "Workforce", href: "/ai-workforce", icon: "people-outline" },
   { label: "Projetos", href: "/projects", icon: "folder-open-outline" },
   { label: "Architect", href: "/ai-solution-architect", icon: "sparkles-outline" },
   { label: "Review", href: "/project-review", icon: "checkmark-done-outline" },

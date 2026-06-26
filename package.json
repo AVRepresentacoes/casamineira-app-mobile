@@ -8,6 +8,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
+    "serve:web": "python3 -m http.server 8082 --directory dist",
+    "local:web": "npm run build:web && npm run serve:web",
     "client:list": "node scripts/saas-client.js list",
     "client:create": "node scripts/saas-client.js create",
     "client:validate": "node scripts/saas-client.js validate",
