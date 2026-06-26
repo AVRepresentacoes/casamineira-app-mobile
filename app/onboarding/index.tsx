@@ -16,7 +16,7 @@ export default function OnboardingIndex() {
 
       <TouchableOpacity
         style={[styles.primary, { backgroundColor: branding.primaryColor }]}
-        onPress={() => router.push("/(auth)/cadastro-opcao")}
+        onPress={() => router.push("/register")}
       >
         <Text style={styles.primaryText}>Continuar</Text>
       </TouchableOpacity>
