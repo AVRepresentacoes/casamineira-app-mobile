@@ -221,7 +221,7 @@ export default function HomeFornecedor() {
       const data = perfilRes.data as FornecedorPerfil | null;
       if (!data || !data.fornecedor_ativo) {
         Alert.alert("Cadastro incompleto", "Ative seu cadastro de fornecedor para continuar.");
-        router.replace("/(auth)/cadastro-fornecedor");
+        router.replace("/register");
         return;
       }
 
@@ -690,7 +690,7 @@ export default function HomeFornecedor() {
           <QuickAction
             label="Cadastro"
             icon="id-card-outline"
-            onPress={() => router.push("/(auth)/cadastro-fornecedor")}
+            onPress={() => router.push("/register")}
           />
         </View>
       </View>
@@ -757,7 +757,7 @@ function MetricCard({
         <Ionicons name={icon} size={14} color="#94a3b8" />
         <Text style={styles.metricLabel}>{label}</Text>
       </View>
-      <Text numberOfLines={1} style={[styles.metricValue, { color }]}>
+      <Text numberOfLines={1} style={[styles.metricValue, { color }]}> 
         {value}
       </Text>
     </View>
@@ -835,7 +835,7 @@ function AlertItem({ prioridade, text }: { prioridade: "alta" | "media" | "baixa
   const label = prioridade === "alta" ? "Alta" : prioridade === "media" ? "Média" : "Baixa";
 
   return (
-    <View style={[styles.alertRow, { borderColor: color }]}>
+    <View style={[styles.alertRow, { borderColor: color }]}> 
       <Ionicons name={icon} size={16} color={color} />
       <View style={{ flex: 1 }}>
         <Text style={[styles.alertPriority, { color }]}>{label}</Text>
