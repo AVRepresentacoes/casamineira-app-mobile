@@ -75,7 +75,7 @@ export default function PortalShell({ title, subtitle, children, headerRight }: 
           .maybeSingle();
 
         if (error || !data || !Boolean((data as any).fornecedor_ativo)) {
-          router.replace("/(auth)/cadastro-fornecedor");
+          router.replace("/register");
           return;
         }
 
