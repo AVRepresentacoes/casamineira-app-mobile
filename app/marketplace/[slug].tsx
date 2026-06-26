@@ -4,7 +4,7 @@ import { findPremiumTemplateBySlug, getPremiumTemplatesBySlugs, premiumTemplates
 import type { PremiumTemplate } from "@/src/template-marketplace/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
@@ -157,10 +157,13 @@ export default function TemplateDetailScreen() {
             <Text style={styles.aiText}>Limites: {template.aiIntegrationContract.generationBoundaries.join(", ")}</Text>
           </View>
 
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/ai-business-consultant" as never)}>
+          <Pressable style={styles.primaryButton} onPress={() => router.push("/register" as never)}>
             <Text style={styles.primaryButtonText}>Usar Template</Text>
           </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={() => router.push("/projects" as never)}>
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() => Alert.alert("Demonstração", "A visualização pública deste template será conectada em uma próxima etapa.")}
+          >
             <Text style={styles.secondaryButtonText}>Visualizar Demonstração</Text>
           </Pressable>
           <Pressable style={styles.ghostButton} onPress={() => router.push("/marketplace" as never)}>
