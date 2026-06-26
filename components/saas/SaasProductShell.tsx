@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SiteButton } from "@/components/site/SiteButton";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -73,6 +74,7 @@ export function SaasProductShell({
   if (checking || !authenticated) {
     return (
       <View style={styles.loading}>
+        <BrandLogo size="medium" showText={false} />
         <ActivityIndicator size="large" color="#facc15" />
       </View>
     );
@@ -82,13 +84,7 @@ export function SaasProductShell({
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.topbar}>
         <Pressable style={styles.brand} onPress={() => router.push("/dashboard")}>
-          <View style={styles.brandMark}>
-            <Ionicons name="sparkles" size={20} color="#08101c" />
-          </View>
-          <View>
-            <Text style={styles.brandTitle}>Casa Mineira SaaS</Text>
-            <Text style={styles.brandSubtitle}>Plataforma de apps com IA</Text>
-          </View>
+          <BrandLogo size="small" showText />
         </Pressable>
 
         <View style={styles.nav}>
@@ -134,6 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#070A12",
     alignItems: "center",
     justifyContent: "center",
+    gap: 16,
   },
   topbar: {
     flexDirection: "row",
@@ -153,24 +150,6 @@ const styles = StyleSheet.create({
     gap: 12,
     minWidth: 230,
     flexGrow: 1,
-  },
-  brandMark: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
-    backgroundColor: "#facc15",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  brandTitle: {
-    color: "#f8fafc",
-    fontSize: 16,
-    fontWeight: "900",
-  },
-  brandSubtitle: {
-    color: "#94a3b8",
-    fontSize: 12,
-    fontWeight: "700",
   },
   nav: {
     flex: 1,
