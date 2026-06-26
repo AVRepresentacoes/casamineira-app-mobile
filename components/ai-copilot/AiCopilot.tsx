@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { aiCopilotQuickSuggestions } from "@/src/ai-copilot/mock";
 import { useAiCopilot } from "@/src/ai-copilot/AiCopilotContext";
 import type { AiCopilotState } from "@/src/ai-copilot/types";
@@ -71,11 +72,14 @@ export function AiCopilot() {
 
       <Animated.View style={[styles.panel, webPanelStyle, compact ? styles.panelCompact : null, { opacity, transform: [{ translateX }] }]}>
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>🤖 AI Copilot™</Text>
-            <View style={styles.statusRow}>
-              <Animated.View style={[styles.statusDot, { backgroundColor: stateColor[state], transform: [{ scale: pulseScale }] }]} />
-              <Text style={styles.statusText}>{stateLabel[state]}</Text>
+          <View style={styles.headerBrand}>
+            <BrandLogo size="small" showText={false} />
+            <View>
+              <Text style={styles.title}>AI Copilot™</Text>
+              <View style={styles.statusRow}>
+                <Animated.View style={[styles.statusDot, { backgroundColor: stateColor[state], transform: [{ scale: pulseScale }] }]} />
+                <Text style={styles.statusText}>{stateLabel[state]}</Text>
+              </View>
             </View>
           </View>
           <Pressable style={styles.iconButton} onPress={close}>
@@ -193,6 +197,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 12,
+  },
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   title: {
     color: "#f8fafc",
