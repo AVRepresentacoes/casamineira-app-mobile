@@ -2,7 +2,70 @@ import {
   orchestrationCopilotInsights,
   orchestrationCopilotRecommendations,
 } from "@/src/ai-orchestration/mocks";
-import type { AiAction, AiConversation, AiInsight, AiRecommendation } from "./types";
+import type { AiAction, AiConversation, AiCopilotRouteContext, AiInsight, AiRecommendation } from "./types";
+
+const routeContexts: Record<string, Omit<AiCopilotRouteContext, "route">> = {
+  "/dashboard": {
+    area: "dashboard",
+    title: "Visão executiva",
+    primaryMessage: "Estou acompanhando a visão geral da plataforma. Priorize o próximo projeto, revise módulos ativos e mantenha a publicação sob aprovação humana.",
+  },
+  "/apps/new": {
+    area: "studio",
+    title: "Business Studio",
+    primaryMessage: "Este fluxo deve partir de um Business DNA™ e de um template validado antes de qualquer geração assistida.",
+  },
+  "/business-dna": {
+    area: "catalog",
+    title: "Business DNA",
+    primaryMessage: "Use o catálogo de DNA para reduzir escopo aberto, custo de IA e risco de personalizações sem base operacional.",
+  },
+  "/marketplace": {
+    area: "marketplace",
+    title: "Marketplace",
+    primaryMessage: "Templates premium devem acelerar implantação e preservar a revisão humana antes de qualquer publicação.",
+  },
+  "/projects": {
+    area: "projects",
+    title: "Business Projects",
+    primaryMessage: "Projetos devem centralizar módulos, equipe, ambiente, plano e próximos passos antes de avançar para build.",
+  },
+  "/ai-business-consultant": {
+    area: "ai",
+    title: "AI Business Consultant",
+    primaryMessage: "A consultoria visual deve recomendar estrutura e próximos passos sem chamar modelos reais nesta camada de frontend.",
+  },
+  "/ai-workforce": {
+    area: "ai",
+    title: "AI Workforce",
+    primaryMessage: "A força de trabalho IA está em modo simulado; mantenha tarefas, estados e aprovações separados da execução real.",
+  },
+  "/ai-solution-architect": {
+    area: "ai",
+    title: "AI Solution Architect",
+    primaryMessage: "O blueprint deve organizar requisitos, módulos e integrações antes de qualquer materialização técnica.",
+  },
+  "/project-review": {
+    area: "review",
+    title: "Project Review",
+    primaryMessage: "Antes de publicar, valide arquitetura, checklist, riscos, custo estimado e aprovação humana.",
+  },
+};
+
+const genericRouteContext: Omit<AiCopilotRouteContext, "route"> = {
+  area: "generic",
+  title: "Contexto SaaS",
+  primaryMessage: "Estou pronto para apoiar decisões da plataforma usando apenas dados mockados e contexto visual da rota atual.",
+};
+
+export function getAiCopilotRouteContext(pathname: string): AiCopilotRouteContext {
+  const cleanPath = pathname.split("?")[0]?.replace(/\/+$/, "") || "/";
+  const match = Object.entries(routeContexts).find(([route]) => cleanPath === route || cleanPath.startsWith(`${route}/`));
+  return {
+    route: cleanPath,
+    ...(match ? match[1] : genericRouteContext),
+  };
+}
 
 export const aiCopilotRecommendations: AiRecommendation[] = [
   {
