@@ -6,7 +6,9 @@ import {
   getAiCopilotRouteContext,
 } from "@/src/ai-copilot/mock";
 import type { AiCopilotContextValue, AiCopilotRouteContext, AiCopilotState } from "@/src/ai-copilot/types";
-import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { BusinessProjectService } from "@/services/business-project";
+import type { BusinessProject } from "@/src/business-project/types";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 const AiCopilotContext = createContext<AiCopilotContextValue | null>(null);
 
@@ -14,6 +16,7 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AiCopilotState>("idle");
   const [isOpen, setIsOpen] = useState(false);
   const [routeContext, setCurrentRouteContext] = useState<AiCopilotRouteContext>(() => getAiCopilotRouteContext("/dashboard"));
+  const [currentProject, setCurrentProject] = useState<BusinessProject | null>(null);
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -29,11 +32,26 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
     globalThis.setTimeout(() => setState("completed"), 1400);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    BusinessProjectService.getCurrent()
+      .then((project) => {
+        if (active) setCurrentProject(project);
+      })
+      .catch(() => {
+        if (active) setCurrentProject(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const value = useMemo<AiCopilotContextValue>(
     () => ({
       state,
       isOpen,
       routeContext,
+      currentProject,
       recommendations: aiCopilotRecommendations,
       insights: aiCopilotInsights,
       actions: aiCopilotActions,
@@ -45,7 +63,7 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
       setState,
       runMockAnalysis,
     }),
-    [close, isOpen, open, routeContext, runMockAnalysis, setRouteContext, state, toggle],
+    [close, currentProject, isOpen, open, routeContext, runMockAnalysis, setRouteContext, state, toggle],
   );
 
   return <AiCopilotContext.Provider value={value}>{children}</AiCopilotContext.Provider>;

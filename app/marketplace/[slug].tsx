@@ -1,4 +1,5 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { BusinessProjectService } from "@/services/business-project";
 import { findBusinessDnaBySlug } from "@/src/business-dna/catalog";
 import { findPremiumTemplateBySlug, getPremiumTemplatesBySlugs, premiumTemplates } from "@/src/template-marketplace/catalog";
 import type { PremiumTemplate } from "@/src/template-marketplace/types";
@@ -61,6 +62,20 @@ export default function TemplateDetailScreen() {
   const recommended = getPremiumTemplatesBySlugs(template.recommendedTemplateSlugs);
   const related = getPremiumTemplatesBySlugs(template.relatedTemplateSlugs);
   const fallbackRelated = related.length ? related : premiumTemplates.filter((item) => item.slug !== template.slug).slice(0, 3);
+
+  async function handleUseTemplate() {
+    try {
+      await BusinessProjectService.associateTemplate(template.slug);
+      router.push("/projects" as never);
+    } catch (error: any) {
+      const message = String(error?.message || "");
+      if (message.toLowerCase().includes("autenticado") || message.toLowerCase().includes("session")) {
+        router.push("/register" as never);
+        return;
+      }
+      Alert.alert("Business Project", message || "Não foi possível associar este template agora.");
+    }
+  }
 
   return (
     <SaasProductShell title={template.name} subtitle={template.longDescription}>
@@ -157,7 +172,7 @@ export default function TemplateDetailScreen() {
             <Text style={styles.aiText}>Limites: {template.aiIntegrationContract.generationBoundaries.join(", ")}</Text>
           </View>
 
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/register" as never)}>
+          <Pressable style={styles.primaryButton} onPress={() => void handleUseTemplate()}>
             <Text style={styles.primaryButtonText}>Usar Template</Text>
           </Pressable>
           <Pressable

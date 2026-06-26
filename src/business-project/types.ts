@@ -64,6 +64,15 @@ export interface BusinessProjectModule {
 
 export interface BusinessProject {
   id: string;
+  tenant_id: string;
+  owner_id: string;
+  nome: string;
+  description: string;
+  segmento: string;
+  business_dna_id: string;
+  template_id: string;
+  created_at: string;
+  updated_at: string;
   name: string;
   slug: string;
   businessDnaSlug: BusinessDna["slug"];

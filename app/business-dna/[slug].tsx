@@ -1,8 +1,9 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { BusinessProjectService } from "@/services/business-project";
 import { findBusinessDnaBySlug } from "@/src/business-dna/catalog";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 function InfoList({ title, items }: { title: string; items: string[] }) {
   return (
@@ -25,6 +26,21 @@ export default function BusinessDnaDetailScreen() {
   const params = useLocalSearchParams<{ slug?: string }>();
   const slug = String(params.slug || "");
   const dna = findBusinessDnaBySlug(slug);
+
+  async function handleUseBusinessDna() {
+    if (!dna) return;
+    try {
+      await BusinessProjectService.associateBusinessDna(dna.slug);
+      router.push("/projects" as never);
+    } catch (error: any) {
+      const message = String(error?.message || "");
+      if (message.toLowerCase().includes("autenticado") || message.toLowerCase().includes("session")) {
+        router.push("/register" as never);
+        return;
+      }
+      Alert.alert("Business Project", message || "Não foi possível associar este Business DNA agora.");
+    }
+  }
 
   if (!dna) {
     return (
@@ -102,7 +118,7 @@ export default function BusinessDnaDetailScreen() {
             <Text style={styles.aiText}>Outputs: {dna.aiPreparationContract.suggestedOutputs.join(", ")}</Text>
           </View>
 
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/register" as never)}>
+          <Pressable style={styles.primaryButton} onPress={() => void handleUseBusinessDna()}>
             <Text style={styles.primaryButtonText}>Usar este Business DNA</Text>
           </Pressable>
           <Pressable style={styles.secondaryButton} onPress={() => router.push("/business-dna" as never)}>

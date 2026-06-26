@@ -1,6 +1,6 @@
 import { onboardMySaasEmpresa } from "@/lib/saas-commercial";
-import { supabase } from "@/lib/supabase";
 import { getMeusTenants, getMyEmpresaContext, getMyEmpresaSaasSubscription } from "@/lib/tenant";
+import { BusinessProjectService } from "@/services/business-project";
 
 type EnsureSaasOnboardingInput = {
   name?: string | null;
@@ -19,16 +19,6 @@ export type EnsureSaasOnboardingResult = {
   planoSlug: string | null;
   initialProjectStatus: InitialProjectStatus;
 };
-
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-}
 
 function resolveCompanyName(input: EnsureSaasOnboardingInput, userEmail?: string | null) {
   const company = String(input.company || "").trim();
@@ -54,37 +44,6 @@ async function getExistingSaasTenant() {
   return tenants.find((tenant) => tenant.slug !== "default" && isAdminTenant(tenant.role)) ?? null;
 }
 
-async function ensureInitialProject(tenantSlug: string | null, companyName: string): Promise<InitialProjectStatus> {
-  if (!tenantSlug || tenantSlug === "default") return "skipped";
-
-  const { data: existing, error: existingError } = await supabase
-    .from("saas_products")
-    .select("id")
-    .eq("tenant_slug", tenantSlug)
-    .limit(1);
-
-  if (!existingError && Array.isArray(existing) && existing.length > 0) {
-    return "already_exists";
-  }
-
-  const projectSlug = `${slugify(companyName) || tenantSlug}-projeto-inicial`;
-  const { error } = await supabase.from("saas_products").insert({
-    name: `${companyName} - Projeto Inicial`,
-    slug: projectSlug,
-    product_type: "business_project",
-    status: "draft",
-    tenant_slug: tenantSlug,
-    requires_dedicated_supabase: false,
-  });
-
-  if (error) {
-    console.log("INITIAL PROJECT REAL INSERT SKIPPED:", error.message);
-    return "not_allowed";
-  }
-
-  return "created";
-}
-
 export async function ensureSaasOnboarding(input: EnsureSaasOnboardingInput = {}): Promise<EnsureSaasOnboardingResult> {
   const {
     data: { user },
@@ -104,14 +63,14 @@ export async function ensureSaasOnboarding(input: EnsureSaasOnboardingInput = {}
 
   const existingTenant = await getExistingSaasTenant();
   if (existingTenant) {
-    const initialProjectStatus = await ensureInitialProject(existingTenant.slug, companyName);
+    const project = await BusinessProjectService.ensureCurrent().catch(() => null);
     return {
       onboarded: false,
       empresaId: existingTenant.tenant_id,
       tenantSlug: existingTenant.slug,
       assinaturaId: null,
       planoSlug: existingTenant.plan_code || null,
-      initialProjectStatus,
+      initialProjectStatus: project ? "created" : "not_allowed",
     };
   }
 
@@ -125,7 +84,7 @@ export async function ensureSaasOnboarding(input: EnsureSaasOnboardingInput = {}
     trialDias: 14,
   });
 
-  const initialProjectStatus = await ensureInitialProject(result.tenant_slug, companyName);
+  const project = await BusinessProjectService.ensureCurrent().catch(() => null);
 
   await Promise.all([
     getMyEmpresaContext().catch(() => null),
@@ -138,7 +97,6 @@ export async function ensureSaasOnboarding(input: EnsureSaasOnboardingInput = {}
     tenantSlug: result.tenant_slug,
     assinaturaId: result.assinatura_id,
     planoSlug: result.plano_slug,
-    initialProjectStatus,
+    initialProjectStatus: project ? "created" : "not_allowed",
   };
 }
-
