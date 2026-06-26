@@ -162,13 +162,7 @@ export default function Login() {
 
               <TouchableOpacity
                 style={styles.hospedagensSignupButton}
-                onPress={() =>
-                  router.push(
-                    hospedagensLoginMode === "cliente"
-                      ? "/hospedagens/cadastro-cliente"
-                      : "/hospedagens/cadastro-pousada",
-                  )
-                }
+                onPress={() => router.push("/register")}
               >
                 <Text style={styles.hospedagensSignupText}>
                   {hospedagensLoginMode === "cliente"
@@ -267,7 +261,7 @@ export default function Login() {
             : "Finalize seu cadastro com CNPJ para entrar como fornecedor."
         );
         if (!isHospedagensApp) {
-          router.replace("/(auth)/cadastro-fornecedor");
+          router.replace("/register");
         }
         return;
       }
@@ -444,7 +438,7 @@ export default function Login() {
 
       <TouchableOpacity
         style={styles.linkButton}
-        onPress={() => router.push(Platform.OS === "web" ? "/(auth)/cadastro-opcao" : "/(auth)/escolher-cadastro")}
+        onPress={() => router.push("/register")}
       >
         <Text style={[styles.linkText, { color: branding.primaryColor }]}>Ainda não tenho conta</Text>
       </TouchableOpacity>
