@@ -208,6 +208,7 @@ function SaasLandingPage() {
               <BrandLogo size={isCompact ? "small" : "medium"} showText={!isCompact} />
             </Pressable>
             <View style={[styles.headerActions, isCompact ? styles.headerActionsCompact : null]}>
+              <LandingButton label="Explorar Business DNA" icon="git-branch-outline" tone="ghost" onPress={() => navigate("/business-dna")} compact={isCompact} />
               <LandingButton label="Ver Marketplace" icon="storefront-outline" tone="ghost" onPress={() => navigate("/marketplace")} compact={isCompact} />
               <LandingButton label="Fazer login" icon="log-in-outline" tone="secondary" onPress={() => navigate("/login")} compact={isCompact} />
             </View>
@@ -228,6 +229,7 @@ function SaasLandingPage() {
               <View style={[styles.heroActions, isCompact ? styles.stack : null]}>
                 <LandingButton label="Começar agora" icon="arrow-forward" onPress={() => navigate("/register")} full={isCompact} />
                 <LandingButton label="Ver Marketplace" icon="storefront-outline" tone="secondary" onPress={() => navigate("/marketplace")} full={isCompact} />
+                <LandingButton label="Explorar Business DNA" icon="git-branch-outline" tone="ghost" onPress={() => navigate("/business-dna")} full={isCompact} />
               </View>
             </View>
 
@@ -260,6 +262,9 @@ function SaasLandingPage() {
                   <Text style={styles.nicheText}>{niche}</Text>
                 </View>
               ))}
+            </View>
+            <View style={styles.sectionActions}>
+              <LandingButton label="Explorar Business DNA" icon="git-branch-outline" tone="secondary" onPress={() => navigate("/business-dna")} full={isCompact} />
             </View>
           </Section>
 
@@ -681,6 +686,10 @@ const styles = StyleSheet.create({
   sectionHeader: {
     gap: 8,
     maxWidth: 760,
+  },
+  sectionActions: {
+    alignSelf: "flex-start",
+    marginTop: 2,
   },
   sectionTitle: {
     color: "#f8fafc",
