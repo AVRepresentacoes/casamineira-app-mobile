@@ -1,7 +1,7 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SiteButton } from "@/components/site/SiteButton";
 import { usePathname, useRouter } from "expo-router";
 import { ReactNode } from "react";
-import { Image } from "expo-image";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 
 const NAV_ITEMS = [
@@ -30,11 +30,7 @@ export function SiteShell({
       <View style={styles.shell}>
         <View style={styles.topbar}>
           <Pressable style={styles.brand} onPress={() => router.push("/landing")}>
-            <Image source={require("@/assets/images/icons/icon.png")} style={styles.logo} contentFit="contain" />
-            <View>
-              <Text style={styles.brandTitle}>Casa Mineira SaaS</Text>
-              <Text style={styles.brandSubtitle}>Site comercial</Text>
-            </View>
+            <BrandLogo size="small" showText />
           </Pressable>
 
           <View style={styles.nav}>
@@ -108,25 +104,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     minWidth: 240,
-  },
-  logo: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
-    shadowColor: "#67e8f9",
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 10 },
-  },
-  brandTitle: {
-    color: "#f8fafc",
-    fontSize: 16,
-    fontWeight: "900",
-  },
-  brandSubtitle: {
-    color: "#94A3B8",
-    fontSize: 12,
-    fontWeight: "700",
   },
   nav: {
     flexDirection: "row",
