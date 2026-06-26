@@ -55,6 +55,16 @@ const STEPS = [
   "Publique sua empresa digital",
 ];
 
+const PIPELINE_STEPS = [
+  { title: "Ideia", icon: "bulb-outline" },
+  { title: "Business DNA™", icon: "git-branch-outline" },
+  { title: "Template", icon: "albums-outline" },
+  { title: "IA", icon: "sparkles-outline" },
+  { title: "Blueprint", icon: "document-text-outline" },
+  { title: "Deploy", icon: "rocket-outline" },
+  { title: "Empresa pronta", icon: "business-outline" },
+];
+
 export default function Index() {
   const [route, setRoute] = useState<string | null>(null);
   const isWeb = Platform.OS === "web";
@@ -210,10 +220,10 @@ function SaasLandingPage() {
                 <Text style={styles.eyebrowText}>Fábrica de Empresas Digitais com IA</Text>
               </View>
               <Text style={[styles.heroTitle, isCompact ? styles.heroTitleCompact : null]}>
-                Transforme ideias em empresas digitais com IA
+                Transforme qualquer ideia{"\n"}em uma empresa digital completa.
               </Text>
               <Text style={styles.heroSubtitle}>
-                Crie aplicativos, sites, sistemas web, marketplaces e painéis administrativos a partir de modelos inteligentes e automação com inteligência artificial.
+                Crie aplicativos, sistemas web, marketplaces e painéis administrativos utilizando Business DNA™, IA e publicação automatizada.
               </Text>
               <View style={[styles.heroActions, isCompact ? styles.stack : null]}>
                 <LandingButton label="Começar agora" icon="arrow-forward" onPress={() => navigate("/register")} full={isCompact} />
@@ -221,20 +231,7 @@ function SaasLandingPage() {
               </View>
             </View>
 
-            <View style={styles.heroPanel}>
-              <View style={styles.panelHeader}>
-                <Text style={styles.panelTitle}>Blueprint™ Preview</Text>
-                <Text style={styles.panelStatus}>Pronto para personalizar</Text>
-              </View>
-              <View style={styles.panelRows}>
-                {["Business DNA selecionado", "Template Premium", "IA assistida", "Publicação Web + Mobile"].map((item) => (
-                  <View key={item} style={styles.panelRow}>
-                    <Ionicons name="checkmark-circle" size={18} color="#22c55e" />
-                    <Text style={styles.panelRowText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <PipelinePanel compact={isCompact} />
           </View>
 
           <Section title="Plataforma para criar, operar e publicar" subtitle="Cinco centros de produto conectam estratégia, IA, templates, publicação e crescimento.">
@@ -314,18 +311,58 @@ function LandingButton({
   return (
     <Pressable
       onPress={onPress}
-      style={[
-        styles.button,
-        tone === "primary" ? styles.buttonPrimary : null,
-        tone === "secondary" ? styles.buttonSecondary : null,
-        tone === "ghost" ? styles.buttonGhost : null,
-        compact ? styles.buttonCompact : null,
-        full ? styles.buttonFull : null,
-      ]}
+      style={(state) => {
+        const hovered = Boolean((state as any).hovered);
+        return [
+          styles.button,
+          tone === "primary" ? styles.buttonPrimary : null,
+          tone === "secondary" ? styles.buttonSecondary : null,
+          tone === "ghost" ? styles.buttonGhost : null,
+          hovered ? styles.buttonHover : null,
+          state.pressed ? styles.buttonPressed : null,
+          compact ? styles.buttonCompact : null,
+          full ? styles.buttonFull : null,
+        ];
+      }}
     >
       <Ionicons name={icon} size={compact ? 15 : 17} color={tone === "primary" ? "#08101c" : "#f8fafc"} />
       <Text style={[styles.buttonText, tone === "primary" ? styles.buttonTextPrimary : null]}>{label}</Text>
     </Pressable>
+  );
+}
+
+function PipelinePanel({ compact }: { compact: boolean }) {
+  return (
+    <View style={[styles.pipelinePanel, compact ? styles.pipelinePanelCompact : null]}>
+      <View style={styles.glowOne} />
+      <View style={styles.glowTwo} />
+      <View style={styles.panelHeader}>
+        <Text style={styles.panelTitle}>AI Company Pipeline</Text>
+        <Text style={styles.panelStatus}>Da ideia ao negócio publicado</Text>
+      </View>
+      <View style={styles.pipelineRows}>
+        {PIPELINE_STEPS.map((item, index) => (
+          <View key={item.title} style={styles.pipelineItemWrap}>
+            <Pressable
+              style={(state) => [
+                styles.pipelineItem,
+                Boolean((state as any).hovered) ? styles.pipelineItemHover : null,
+              ]}
+            >
+              <View style={styles.pipelineIcon}>
+                <Ionicons name={item.icon as never} size={18} color={index === PIPELINE_STEPS.length - 1 ? "#08101c" : "#67e8f9"} />
+              </View>
+              <Text style={styles.pipelineText}>{item.title}</Text>
+            </Pressable>
+            {index < PIPELINE_STEPS.length - 1 ? (
+              <View style={styles.pipelineArrow}>
+                <Ionicons name="arrow-down" size={16} color="#64748b" />
+              </View>
+            ) : null}
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -361,15 +398,27 @@ function FeatureCard({
   width: DimensionValue;
 }) {
   return (
-    <View style={[styles.featureCard, { width }]}>
+    <Pressable
+      style={(state) => [
+        styles.featureCard,
+        { width },
+        Boolean((state as any).hovered) ? styles.elevatedCard : null,
+      ]}
+    >
       <View style={styles.featureIcon}>
         <Ionicons name={item.icon as never} size={24} color="#facc15" />
       </View>
       <Text style={styles.featureTitle}>{item.title}</Text>
       <Text style={styles.featureDescription}>{item.description}</Text>
-    </View>
+    </Pressable>
   );
 }
+
+const webMotion = {
+  transitionProperty: "transform, box-shadow, background-color, border-color, opacity",
+  transitionDuration: "180ms",
+  transitionTimingFunction: "ease",
+} as any;
 
 const styles = StyleSheet.create({
   page: {
@@ -381,14 +430,14 @@ const styles = StyleSheet.create({
   },
   gradientLayer: {
     minHeight: "100%",
-    paddingHorizontal: 20,
-    paddingVertical: 18,
+    paddingHorizontal: 24,
+    paddingVertical: 22,
   },
   shell: {
     width: "100%",
     maxWidth: 1180,
     alignSelf: "center",
-    gap: 26,
+    gap: 34,
   },
   header: {
     minHeight: 72,
@@ -420,12 +469,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   hero: {
-    minHeight: 560,
+    minHeight: 700,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(226, 232, 240, 0.12)",
     backgroundColor: "rgba(2, 6, 23, 0.42)",
-    padding: 34,
+    padding: 46,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -434,14 +483,14 @@ const styles = StyleSheet.create({
   },
   heroCompact: {
     minHeight: 0,
-    padding: 22,
+    padding: 24,
     flexDirection: "column",
     alignItems: "stretch",
   },
   heroCopy: {
     flex: 1,
     maxWidth: 720,
-    gap: 22,
+    gap: 24,
   },
   eyebrowPill: {
     alignSelf: "flex-start",
@@ -462,19 +511,19 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: "#f8fafc",
-    fontSize: 58,
-    lineHeight: 64,
+    fontSize: 64,
+    lineHeight: 70,
     fontWeight: "900",
-    maxWidth: 760,
+    maxWidth: 820,
   },
   heroTitleCompact: {
-    fontSize: 36,
-    lineHeight: 42,
+    fontSize: 38,
+    lineHeight: 45,
   },
   heroSubtitle: {
     color: "#cbd5e1",
-    fontSize: 18,
-    lineHeight: 29,
+    fontSize: 19,
+    lineHeight: 31,
     maxWidth: 760,
   },
   heroActions: {
@@ -487,15 +536,41 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "stretch",
   },
-  heroPanel: {
-    width: 360,
+  pipelinePanel: {
+    width: 390,
     maxWidth: "100%",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(103, 232, 249, 0.24)",
     backgroundColor: "rgba(15, 23, 42, 0.84)",
-    padding: 20,
+    padding: 22,
     gap: 18,
+    overflow: "hidden",
+    shadowColor: "#38bdf8",
+    shadowOpacity: 0.22,
+    shadowRadius: 34,
+    shadowOffset: { width: 0, height: 18 },
+  },
+  pipelinePanelCompact: {
+    width: "100%",
+  },
+  glowOne: {
+    position: "absolute",
+    top: -70,
+    right: -50,
+    width: 170,
+    height: 170,
+    borderRadius: 999,
+    backgroundColor: "rgba(103, 232, 249, 0.13)",
+  },
+  glowTwo: {
+    position: "absolute",
+    bottom: -80,
+    left: -50,
+    width: 190,
+    height: 190,
+    borderRadius: 999,
+    backgroundColor: "rgba(250, 204, 21, 0.1)",
   },
   panelHeader: {
     gap: 6,
@@ -510,20 +585,44 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
   },
-  panelRows: {
-    gap: 12,
+  pipelineRows: {
+    gap: 5,
   },
-  panelRow: {
+  pipelineItemWrap: {
+    gap: 4,
+  },
+  pipelineItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 232, 240, 0.08)",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    ...webMotion,
   },
-  panelRowText: {
+  pipelineItemHover: {
+    transform: [{ translateX: 4 }],
+    borderColor: "rgba(103, 232, 249, 0.32)",
+    backgroundColor: "rgba(103, 232, 249, 0.1)",
+  },
+  pipelineIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(103, 232, 249, 0.12)",
+  },
+  pipelineText: {
     color: "#e2e8f0",
-    fontWeight: "800",
+    fontWeight: "900",
+  },
+  pipelineArrow: {
+    alignItems: "center",
+    marginVertical: -2,
   },
   button: {
     minHeight: 48,
@@ -536,6 +635,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     borderWidth: 1,
+    ...webMotion,
+  },
+  buttonHover: {
+    transform: [{ translateY: -2 }, { scale: 1.01 }],
+    shadowColor: "#67e8f9",
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+  },
+  buttonPressed: {
+    transform: [{ translateY: 0 }, { scale: 0.99 }],
   },
   buttonCompact: {
     minWidth: 0,
@@ -565,8 +675,8 @@ const styles = StyleSheet.create({
     color: "#08101c",
   },
   section: {
-    paddingVertical: 18,
-    gap: 18,
+    paddingVertical: 28,
+    gap: 22,
   },
   sectionHeader: {
     gap: 8,
@@ -596,6 +706,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(15, 23, 42, 0.72)",
     padding: 20,
     gap: 14,
+    ...webMotion,
+  },
+  elevatedCard: {
+    transform: [{ translateY: -5 }],
+    borderColor: "rgba(103, 232, 249, 0.28)",
+    backgroundColor: "rgba(15, 23, 42, 0.9)",
+    shadowColor: "#38bdf8",
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 14 },
   },
   featureIcon: {
     width: 46,
