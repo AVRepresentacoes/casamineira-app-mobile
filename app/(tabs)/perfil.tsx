@@ -289,7 +289,7 @@ export default function Perfil() {
         "Cadastro profissional pendente",
         "Seu perfil ainda não está habilitado como profissional. Complete o cadastro para acessar essa área."
       );
-      router.push("/(auth)/cadastro-profissional");
+      router.push("/register");
       return;
     }
 
