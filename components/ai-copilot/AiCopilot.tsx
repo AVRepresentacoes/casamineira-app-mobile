@@ -2,7 +2,9 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { aiCopilotQuickSuggestions } from "@/src/ai-copilot/mock";
 import { useAiCopilot } from "@/src/ai-copilot/AiCopilotContext";
 import type { AiCopilotState } from "@/src/ai-copilot/types";
+import { isPublicRoute } from "@/src/saas/routes";
 import { Ionicons } from "@expo/vector-icons";
+import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
@@ -24,10 +26,15 @@ const stateColor: Record<AiCopilotState, string> = {
 
 export function AiCopilot() {
   const { width } = useWindowDimensions();
+  const pathname = usePathname();
   const compact = width < 860;
-  const { state, isOpen, toggle, close, runMockAnalysis, recommendations, insights, actions, history } = useAiCopilot();
+  const { state, isOpen, toggle, close, runMockAnalysis, recommendations, insights, actions, history, routeContext, setRouteContext } = useAiCopilot();
   const slide = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    setRouteContext(pathname);
+  }, [pathname, setRouteContext]);
 
   useEffect(() => {
     Animated.timing(slide, {
@@ -53,7 +60,7 @@ export function AiCopilot() {
     return () => loop.stop();
   }, [pulse, state]);
 
-  if (Platform.OS !== "web") {
+  if (Platform.OS !== "web" || isPublicRoute(pathname)) {
     return null;
   }
 
@@ -88,9 +95,7 @@ export function AiCopilot() {
         </View>
 
         <View style={styles.messageBox}>
-          <Text style={styles.messageText}>
-            Analisei seu projeto. Percebi que o Business DNA selecionado possui integração nativa com Marketplace. Recomendo manter essa configuração.
-          </Text>
+          <Text style={styles.messageText}>{routeContext.primaryMessage}</Text>
           <Pressable style={styles.analysisButton} onPress={runMockAnalysis}>
             <Ionicons name="flash-outline" size={16} color="#07111f" />
             <Text style={styles.analysisButtonText}>Analisar visualmente</Text>
