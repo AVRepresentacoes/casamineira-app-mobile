@@ -41,13 +41,13 @@ export default function BusinessStudioScreen() {
   return (
     <SaasProductShell
       title="Business Studio™"
-      subtitle="Monte a primeira versão da sua empresa digital a partir de um Business DNA™ e avance para personalização assistida."
+      subtitle="Inicie um Projeto Empresarial com Business DNA™, template e estrutura preparada para Blueprint."
     >
       <View style={styles.studioHero}>
         <View style={styles.heroGlow} />
-        <Text style={styles.kicker}>Novo projeto</Text>
+        <Text style={styles.kicker}>Novo Projeto Empresarial</Text>
         <Text style={styles.heroTitle}>O que você deseja construir?</Text>
-        <Text style={styles.heroSubtitle}>Escolha um modelo de negócio e deixe a IA cuidar da personalização.</Text>
+        <Text style={styles.heroSubtitle}>Escolha um modelo de negócio e prepare a base para personalização assistida.</Text>
         <View style={styles.heroActions}>
           <Pressable style={styles.marketplaceButton} onPress={() => router.push("/marketplace" as never)}>
             <MaterialCommunityIcons name="shopping-search-outline" size={20} color="#08101c" />
@@ -61,7 +61,7 @@ export default function BusinessStudioScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionEyebrow}>Tipo de produto</Text>
-              <Text style={styles.sectionTitle}>Escolha o formato da empresa digital</Text>
+              <Text style={styles.sectionTitle}>Escolha o formato do Projeto Empresarial</Text>
             </View>
 
             <View style={styles.typeGrid}>
@@ -147,7 +147,7 @@ export default function BusinessStudioScreen() {
 
         <View style={styles.sidePanel}>
           <Text style={styles.sideEyebrow}>Resumo do Projeto</Text>
-          <Text style={styles.sideTitle}>Empresa digital em construção</Text>
+          <Text style={styles.sideTitle}>Projeto Empresarial em construção</Text>
 
           <View style={styles.summaryList}>
             <View style={styles.summaryItem}>
@@ -188,7 +188,7 @@ export default function BusinessStudioScreen() {
       <View style={styles.footerBar}>
         <View>
           <Text style={styles.footerTitle}>Pronto para avançar?</Text>
-          <Text style={styles.footerText}>Esta versão salva apenas a experiência visual do Business Studio™.</Text>
+          <Text style={styles.footerText}>Esta etapa organiza a intenção comercial antes do Blueprint™.</Text>
         </View>
         <View style={styles.footerActions}>
           <Pressable style={styles.secondaryButton} onPress={() => router.push("/projects" as never)}>
