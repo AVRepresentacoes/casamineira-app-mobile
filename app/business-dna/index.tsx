@@ -1,4 +1,5 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { colors, componentSizes, radii, shadows, spacing, webMotion } from "@/src/design-system/tokens";
 import { businessDnaCatalog, businessDnaCategories, businessDnaSegments } from "@/src/business-dna/catalog";
 import type { BusinessDna } from "@/src/business-dna/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -159,13 +160,14 @@ const styles = StyleSheet.create({
   hero: {
     position: "relative",
     overflow: "hidden",
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(125, 211, 252, 0.18)",
-    backgroundColor: "rgba(12, 17, 31, 0.94)",
-    padding: 28,
-    minHeight: 220,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    padding: 42,
+    minHeight: 300,
     justifyContent: "center",
+    ...shadows.card,
   },
   heroGlow: {
     position: "absolute",
@@ -185,8 +187,8 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: "#f8fafc",
-    fontSize: 40,
-    lineHeight: 46,
+    fontSize: 46,
+    lineHeight: 52,
     fontWeight: "900",
     marginTop: 12,
     maxWidth: 820,
@@ -199,18 +201,18 @@ const styles = StyleSheet.create({
     maxWidth: 860,
   },
   filtersPanel: {
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.12)",
-    backgroundColor: "rgba(12, 17, 31, 0.86)",
-    padding: 18,
-    gap: 18,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    padding: componentSizes.cardPadding,
+    gap: spacing.lg,
   },
   searchBox: {
-    minHeight: 52,
-    borderRadius: 8,
+    minHeight: componentSizes.inputHeight,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.12)",
+    borderColor: colors.border,
     backgroundColor: "rgba(2, 6, 23, 0.30)",
     flexDirection: "row",
     alignItems: "center",
@@ -238,10 +240,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filterChip: {
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.12)",
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderColor: colors.borderSoft,
+    backgroundColor: colors.surfaceSoft,
     paddingHorizontal: 12,
     paddingVertical: 9,
   },
@@ -282,15 +284,17 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 300,
     maxWidth: 430,
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.12)",
-    backgroundColor: "rgba(12, 17, 31, 0.88)",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
     overflow: "hidden",
+    ...shadows.card,
+    ...webMotion,
   },
   cardImage: {
     minHeight: 138,
-    padding: 18,
+    padding: spacing.lg,
     overflow: "hidden",
   },
   cardGlow: {
@@ -304,7 +308,7 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 58,
     height: 58,
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -319,8 +323,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   cardBody: {
-    padding: 18,
-    gap: 12,
+    padding: componentSizes.cardPadding,
+    gap: spacing.sm,
   },
   cardTopline: {
     flexDirection: "row",
@@ -353,7 +357,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     color: "#e2e8f0",
-    borderRadius: 8,
+    borderRadius: radii.sm,
     backgroundColor: "rgba(255, 255, 255, 0.06)",
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -373,10 +377,10 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   emptyState: {
-    borderRadius: 8,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.12)",
-    backgroundColor: "rgba(12, 17, 31, 0.86)",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
     padding: 22,
     gap: 8,
   },

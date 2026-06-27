@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import type { AiExecutionResult, AiWorkflow } from "../ai-orchestration/types";
+import type { BusinessProject } from "@/src/business-project/types";
 
 export type WorkerIconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -60,6 +61,7 @@ export interface AiWorkforceContextValue {
   workers: AiWorker[];
   tasks: WorkerTask[];
   analytics: AiWorkforceAnalytics;
+  currentProject: BusinessProject | null;
   orchestrationWorkflow: AiWorkflow;
   orchestrationResults: AiExecutionResult[];
   selectedWorkerId: string;

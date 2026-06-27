@@ -1,9 +1,10 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -11,17 +12,33 @@ export default function ForgotPasswordScreen() {
   const isMobile = width < 768;
   const isCompact = width < 1120;
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!email.trim()) {
       Alert.alert("Atenção", "Informe seu e-mail para receber o link de recuperação.");
       return;
     }
 
-    Alert.alert(
-      "Recuperação de senha",
-      "Fluxo visual preparado. A integração real com recuperação de senha será conectada em uma etapa futura.",
-    );
+    setLoading(true);
+    try {
+      const appUrl =
+        process.env.EXPO_PUBLIC_APP_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (typeof window !== "undefined" ? window.location.origin : undefined);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: appUrl ? `${appUrl}/login` : undefined,
+      });
+
+      if (error) throw error;
+
+      Alert.alert("Recuperação de senha", "Enviamos as instruções para o e-mail informado.");
+    } catch (error: any) {
+      Alert.alert("Erro ao recuperar senha", error?.message || "Não foi possível enviar o link agora.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -97,10 +114,17 @@ export default function ForgotPasswordScreen() {
                     Boolean((state as any).hovered) ? styles.primaryButtonHover : null,
                     state.pressed ? styles.primaryButtonPressed : null,
                   ]}
-                  onPress={handleSubmit}
+                  onPress={() => void handleSubmit()}
+                  disabled={loading}
                 >
-                  <Text style={styles.primaryText}>Enviar link de recuperação</Text>
-                  <Ionicons name="arrow-forward" size={17} color="#ffffff" />
+                  {loading ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <>
+                      <Text style={styles.primaryText}>Enviar link de recuperação</Text>
+                      <Ionicons name="arrow-forward" size={17} color="#ffffff" />
+                    </>
+                  )}
                 </Pressable>
               </View>
             </LinearGradient>

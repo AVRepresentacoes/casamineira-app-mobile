@@ -1,9 +1,11 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { supabase } from "@/lib/supabase";
+import { ensureSaasOnboarding } from "@/services/onboarding";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 
 const TRUSTED_BRANDS = ["ACME", "NEXUS", "INOVA", "VISION", "PRIME"] as const;
@@ -29,6 +31,11 @@ export function SaasLoginScreen() {
     };
   }, [width]);
 
+  const enterDashboardWithOnboarding = useCallback(async (input?: { email?: string | null }) => {
+    await ensureSaasOnboarding({ email: input?.email || null });
+    router.replace("/dashboard");
+  }, [router]);
+
   useEffect(() => {
     let active = true;
     const fallback = setTimeout(() => {
@@ -43,7 +50,7 @@ export function SaasLoginScreen() {
 
         if (!active) return;
         if (session?.user) {
-          router.replace("/dashboard");
+          await enterDashboardWithOnboarding({ email: session.user.email });
           return;
         }
         setChecking(false);
@@ -58,7 +65,7 @@ export function SaasLoginScreen() {
       active = false;
       clearTimeout(fallback);
     };
-  }, [router]);
+  }, [enterDashboardWithOnboarding]);
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -78,10 +85,10 @@ export function SaasLoginScreen() {
         return;
       }
 
-      router.replace("/dashboard");
+      await enterDashboardWithOnboarding({ email: email.trim() });
     } catch (error) {
       console.log("SAAS LOGIN ERROR:", error);
-      Alert.alert("Erro", "Não foi possível entrar agora.");
+      Alert.alert("Erro", "Não foi possível entrar ou concluir o onboarding agora.");
     } finally {
       setLoading(false);
     }
@@ -98,6 +105,9 @@ export function SaasLoginScreen() {
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.pageContent, layout.mobile ? styles.pageContentMobile : null]} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={["#08101f", "#050914", "#0b1221"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.shell}>
+        <View style={styles.headerWrap}>
+          <PublicHeader />
+        </View>
         <View style={[styles.mainPanel, layout.mobile ? styles.mainPanelMobile : null]}>
           {!layout.mobile ? <HeroPanel compact={layout.compact} /> : null}
           <LoginPanel
@@ -376,6 +386,7 @@ const styles = StyleSheet.create({
   pageContentMobile: { padding: 10 },
   loading: { flex: 1, backgroundColor: "#020611", alignItems: "center", justifyContent: "center" },
   shell: { width: "100%", maxWidth: 1440, alignSelf: "center", borderRadius: 16, borderWidth: 1, borderColor: "rgba(128, 151, 190, 0.22)", overflow: "hidden", shadowColor: "#1c2d66", shadowOpacity: 0.26, shadowRadius: 38, shadowOffset: { width: 0, height: 18 } },
+  headerWrap: { padding: 18, paddingBottom: 0 },
   mainPanel: { minHeight: 860, flexDirection: "row" },
   mainPanelMobile: { minHeight: 0, flexDirection: "column" },
   hero: { flex: 1.15, padding: 48, justifyContent: "space-between", gap: 24 },

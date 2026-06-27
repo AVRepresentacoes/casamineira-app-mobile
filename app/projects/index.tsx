@@ -1,9 +1,11 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
-import { businessProjects, businessProjectStatusLabels, getProjectProgress } from "@/src/business-project/mock";
+import { BusinessProjectService } from "@/services/business-project";
+import { businessProjectStatusLabels, getProjectProgress } from "@/src/business-project/mock";
 import type { BusinessProject } from "@/src/business-project/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 function ProjectCard({ project }: { project: BusinessProject }) {
   const router = useRouter();
@@ -61,6 +63,30 @@ export default function BusinessProjectsScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const compact = width < 860;
+  const [projects, setProjects] = useState<BusinessProject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProjects() {
+      try {
+        setLoading(true);
+        const data = await BusinessProjectService.listCurrent();
+        if (active) setProjects(data);
+      } catch (error) {
+        console.log("BUSINESS PROJECTS LOAD ERROR:", error);
+        if (active) setProjects([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadProjects();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <SaasProductShell
@@ -88,7 +114,7 @@ export default function BusinessProjectsScreen() {
       </View>
 
       <View style={styles.summaryGrid}>
-        <SummaryCard label="Projetos" value={`${businessProjects.length}`} icon="folder-multiple-outline" />
+        <SummaryCard label="Projetos" value={`${projects.length}`} icon="folder-multiple-outline" />
         <SummaryCard label="Ambientes" value="3" icon="server-outline" />
         <SummaryCard label="Módulos" value="12" icon="view-grid-outline" />
         <SummaryCard label="Modelo" value="Multiempresa" icon="account-supervisor-outline" />
@@ -99,11 +125,13 @@ export default function BusinessProjectsScreen() {
           <Text style={styles.sectionEyebrow}>Portfólio</Text>
           <Text style={styles.sectionTitle}>Projetos ativos</Text>
         </View>
-        <Text style={styles.sectionMeta}>Dados mockados</Text>
+        <Text style={styles.sectionMeta}>Business Project atual</Text>
       </View>
 
+      {loading ? <ActivityIndicator color="#67e8f9" /> : null}
+
       <View style={styles.grid}>
-        {businessProjects.map((project) => (
+        {projects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </View>

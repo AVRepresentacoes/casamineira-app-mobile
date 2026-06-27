@@ -1,4 +1,4 @@
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { getActiveRole, setActiveRole } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
@@ -203,16 +203,7 @@ function SaasLandingPage() {
     <ScrollView style={styles.page} contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={["#07111f", "#0f172a", "#111827"]} style={styles.gradientLayer}>
         <View style={styles.shell}>
-          <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
-            <Pressable onPress={() => navigate("/")} style={styles.brandButton}>
-              <BrandLogo size={isCompact ? "small" : "medium"} showText={!isCompact} />
-            </Pressable>
-            <View style={[styles.headerActions, isCompact ? styles.headerActionsCompact : null]}>
-              <LandingButton label="Explorar Business DNA" icon="git-branch-outline" tone="ghost" onPress={() => navigate("/business-dna")} compact={isCompact} />
-              <LandingButton label="Ver Marketplace" icon="storefront-outline" tone="ghost" onPress={() => navigate("/marketplace")} compact={isCompact} />
-              <LandingButton label="Fazer login" icon="log-in-outline" tone="secondary" onPress={() => navigate("/login")} compact={isCompact} />
-            </View>
-          </View>
+          <PublicHeader />
 
           <View style={[styles.hero, isCompact ? styles.heroCompact : null]}>
             <View style={styles.heroCopy}>
@@ -443,35 +434,6 @@ const styles = StyleSheet.create({
     maxWidth: 1180,
     alignSelf: "center",
     gap: 34,
-  },
-  header: {
-    minHeight: 72,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.14)",
-    backgroundColor: "rgba(8, 13, 25, 0.78)",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 18,
-  },
-  headerCompact: {
-    alignItems: "stretch",
-    flexDirection: "column",
-  },
-  brandButton: {
-    alignSelf: "flex-start",
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  headerActionsCompact: {
-    width: "100%",
-    flexWrap: "wrap",
   },
   hero: {
     minHeight: 700,

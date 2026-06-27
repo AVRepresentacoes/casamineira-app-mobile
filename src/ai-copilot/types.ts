@@ -1,3 +1,5 @@
+import type { BusinessProject } from "@/src/business-project/types";
+
 export type AiCopilotState = "idle" | "thinking" | "typing" | "completed" | "warning";
 
 export interface AiRecommendation {
@@ -38,6 +40,7 @@ export interface AiCopilotContextValue {
   state: AiCopilotState;
   isOpen: boolean;
   routeContext: AiCopilotRouteContext;
+  currentProject: BusinessProject | null;
   recommendations: AiRecommendation[];
   insights: AiInsight[];
   actions: AiAction[];

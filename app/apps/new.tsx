@@ -1,10 +1,11 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { BusinessProjectService } from "@/services/business-project";
 import { businessDnaCatalog } from "@/src/business-dna/catalog";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -37,6 +38,24 @@ export default function BusinessStudioScreen() {
     if (selectedPlan === "Personalizar modelo existente") return "Primeira versão em 2-5 dias";
     return "Base premium pronta para configurar";
   }, [selectedPlan]);
+
+  async function saveDraft() {
+    try {
+      await BusinessProjectService.ensureCurrent();
+      router.push("/projects" as never);
+    } catch (error: any) {
+      Alert.alert("Business Project", error?.message || "Não foi possível salvar o projeto agora.");
+    }
+  }
+
+  async function continueProject() {
+    try {
+      await BusinessProjectService.associateBusinessDna(selectedDna.slug);
+      router.push("/business-dna" as never);
+    } catch (error: any) {
+      Alert.alert("Business Project", error?.message || "Não foi possível associar o Business DNA agora.");
+    }
+  }
 
   return (
     <SaasProductShell
@@ -191,10 +210,10 @@ export default function BusinessStudioScreen() {
           <Text style={styles.footerText}>Esta etapa organiza a intenção comercial antes do Blueprint™.</Text>
         </View>
         <View style={styles.footerActions}>
-          <Pressable style={styles.secondaryButton} onPress={() => router.push("/projects" as never)}>
+          <Pressable style={styles.secondaryButton} onPress={() => void saveDraft()}>
             <Text style={styles.secondaryButtonText}>Salvar rascunho</Text>
           </Pressable>
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/business-dna" as never)}>
+          <Pressable style={styles.primaryButton} onPress={() => void continueProject()}>
             <Text style={styles.primaryButtonText}>Continuar</Text>
           </Pressable>
         </View>
