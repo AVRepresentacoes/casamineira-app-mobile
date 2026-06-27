@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 type BrandLogoSize = "small" | "medium" | "large";
 
 const LOGO_SIZE: Record<BrandLogoSize, number> = {
-  small: 34,
+  small: 38,
   medium: 46,
   large: 64,
 };
@@ -38,17 +38,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
   },
   logoFrame: {
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.16)",
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
-    padding: 4,
+    borderWidth: 0,
+    backgroundColor: "transparent",
+    padding: 0,
     shadowColor: "#67e8f9",
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
   },
   logo: {
     width: "100%",

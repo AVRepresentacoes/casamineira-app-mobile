@@ -96,23 +96,27 @@ export function SaasProductShell({
           <BrandLogo size="small" showText />
         </Pressable>
 
-        <View style={styles.nav}>
-          {(publicPage ? PUBLIC_NAV_ITEMS : NAV_ITEMS).map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Pressable key={item.href} style={[styles.navItem, active ? styles.navItemActive : null]} onPress={() => router.push(item.href as never)}>
-                <Ionicons name={item.icon} size={16} color={active ? "#08101c" : "#cbd5e1"} />
-                <Text style={[styles.navText, active ? styles.navTextActive : null]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navRail} style={styles.navScroller}>
+          <View style={styles.nav}>
+            {(publicPage ? PUBLIC_NAV_ITEMS : NAV_ITEMS).map((item) => {
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Pressable key={item.href} style={[styles.navItem, active ? styles.navItemActive : null]} onPress={() => router.push(item.href as never)}>
+                  <Ionicons name={item.icon} size={16} color={active ? "#08101c" : "#cbd5e1"} />
+                  <Text style={[styles.navText, active ? styles.navTextActive : null]}>{item.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-        {publicPage && !authenticated ? (
-          <SiteButton label="Criar conta" onPress={() => router.push("/register" as never)} />
-        ) : (
-          <SiteButton label="Sair" tone="secondary" onPress={() => void handleLogout()} />
-        )}
+          <View style={styles.actionSlot}>
+            {publicPage && !authenticated ? (
+              <SiteButton label="Criar conta" onPress={() => router.push("/register" as never)} />
+            ) : (
+              <SiteButton label="Sair" tone="secondary" onPress={() => void handleLogout()} />
+            )}
+          </View>
+        </ScrollView>
       </View>
 
       <View style={styles.header}>
@@ -147,33 +151,44 @@ const styles = StyleSheet.create({
   },
   topbar: {
     flexDirection: "row",
-    flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 16,
+    gap: 18,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(226, 232, 240, 0.12)",
     backgroundColor: "rgba(10, 14, 26, 0.94)",
-    padding: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
   },
   brand: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    minWidth: 230,
+    minWidth: 260,
+    flexShrink: 0,
+  },
+  navScroller: {
+    flex: 1,
+    minWidth: 0,
+  },
+  navRail: {
     flexGrow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 12,
   },
   nav: {
-    flex: 1,
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "flex-end",
     gap: 8,
   },
   navItem: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 7,
     borderRadius: 8,
     borderWidth: 1,
@@ -181,6 +196,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.04)",
     paddingHorizontal: 12,
     paddingVertical: 10,
+    minHeight: 40,
+    flexShrink: 0,
   },
   navItemActive: {
     backgroundColor: "#facc15",
@@ -190,9 +207,15 @@ const styles = StyleSheet.create({
     color: "#cbd5e1",
     fontSize: 12,
     fontWeight: "900",
+    whiteSpace: "nowrap",
   },
   navTextActive: {
     color: "#08101c",
+  },
+  actionSlot: {
+    flexShrink: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
   header: {
     borderRadius: 8,
