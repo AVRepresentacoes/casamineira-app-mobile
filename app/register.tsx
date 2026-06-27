@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { supabase } from "@/lib/supabase";
 import { ensureSaasOnboarding } from "@/services/onboarding";
 import { Ionicons } from "@expo/vector-icons";
@@ -87,6 +88,9 @@ export default function Register() {
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.pageContent, layout.mobile ? styles.pageContentMobile : null]} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={["#08101f", "#050914", "#0b1221"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.shell}>
+        <View style={styles.headerWrap}>
+          <PublicHeader />
+        </View>
         <View style={[styles.mainPanel, layout.mobile ? styles.mainPanelMobile : null]}>
           {!layout.mobile ? <RegisterHero compact={layout.compact} /> : null}
 
@@ -287,6 +291,7 @@ const styles = StyleSheet.create({
   pageContent: { minHeight: "100%", padding: 18 },
   pageContentMobile: { padding: 10 },
   shell: { width: "100%", maxWidth: 1440, alignSelf: "center", borderRadius: 16, borderWidth: 1, borderColor: "rgba(128, 151, 190, 0.22)", overflow: "hidden", shadowColor: "#1c2d66", shadowOpacity: 0.26, shadowRadius: 38, shadowOffset: { width: 0, height: 18 } },
+  headerWrap: { padding: 18, paddingBottom: 0 },
   mainPanel: { minHeight: 900, flexDirection: "row" },
   mainPanelMobile: { minHeight: 0, flexDirection: "column" },
   hero: { flex: 1.08, padding: 48, justifyContent: "space-between", gap: 24 },

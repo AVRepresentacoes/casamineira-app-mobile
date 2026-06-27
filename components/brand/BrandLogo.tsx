@@ -1,5 +1,4 @@
-import { Image } from "expo-image";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 type BrandLogoSize = "small" | "medium" | "large";
 

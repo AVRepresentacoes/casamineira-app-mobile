@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { SiteButton } from "@/components/site/SiteButton";
 import { supabase } from "@/lib/supabase";
 import { isPublicRoute } from "@/src/saas/routes";
@@ -6,13 +7,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
 import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-
-const PUBLIC_NAV_ITEMS = [
-  { label: "Home", href: "/", icon: "home-outline" },
-  { label: "Business DNA", href: "/business-dna", icon: "git-network-outline" },
-  { label: "Marketplace", href: "/marketplace", icon: "storefront-outline" },
-  { label: "Login", href: "/login", icon: "log-in-outline" },
-] as const;
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "grid-outline" },
@@ -91,33 +85,33 @@ export function SaasProductShell({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={styles.topbar}>
-        <Pressable style={styles.brand} onPress={() => router.push((publicPage ? "/" : "/dashboard") as never)}>
-          <BrandLogo size="small" showText />
-        </Pressable>
+      {publicPage ? (
+        <PublicHeader />
+      ) : (
+        <View style={styles.topbar}>
+          <Pressable style={styles.brand} onPress={() => router.push("/dashboard" as never)}>
+            <BrandLogo size="small" showText />
+          </Pressable>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navRail} style={styles.navScroller}>
-          <View style={styles.nav}>
-            {(publicPage ? PUBLIC_NAV_ITEMS : NAV_ITEMS).map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Pressable key={item.href} style={[styles.navItem, active ? styles.navItemActive : null]} onPress={() => router.push(item.href as never)}>
-                  <Ionicons name={item.icon} size={16} color={active ? "#08101c" : "#cbd5e1"} />
-                  <Text style={[styles.navText, active ? styles.navTextActive : null]}>{item.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navRail} style={styles.navScroller}>
+            <View style={styles.nav}>
+              {NAV_ITEMS.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Pressable key={item.href} style={[styles.navItem, active ? styles.navItemActive : null]} onPress={() => router.push(item.href as never)}>
+                    <Ionicons name={item.icon} size={16} color={active ? "#08101c" : "#cbd5e1"} />
+                    <Text style={[styles.navText, active ? styles.navTextActive : null]}>{item.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <View style={styles.actionSlot}>
-            {publicPage && !authenticated ? (
-              <SiteButton label="Criar conta" onPress={() => router.push("/register" as never)} />
-            ) : (
+            <View style={styles.actionSlot}>
               <SiteButton label="Sair" tone="secondary" onPress={() => void handleLogout()} />
-            )}
-          </View>
-        </ScrollView>
-      </View>
+            </View>
+          </ScrollView>
+        </View>
+      )}
 
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Casa Mineira SaaS</Text>
