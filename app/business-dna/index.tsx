@@ -1,14 +1,12 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { BusinessDnaService } from "@/services/business-dna";
 import { colors, componentSizes, radii, shadows, spacing, webMotion } from "@/src/design-system/tokens";
-import { businessDnaCatalog, businessDnaCategories, businessDnaSegments } from "@/src/business-dna/catalog";
+import { businessDnaCatalog } from "@/src/business-dna/catalog";
 import type { BusinessDna } from "@/src/business-dna/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
-const allCategories = ["Todas", ...businessDnaCategories];
-const allSegments = ["Todos", ...businessDnaSegments];
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 function maturityLabel(value: BusinessDna["maturity"]) {
   const labels = {
@@ -63,11 +61,42 @@ export default function BusinessDnaCatalogScreen() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
   const [segment, setSegment] = useState("Todos");
+  const [catalog, setCatalog] = useState<BusinessDna[]>(businessDnaCatalog);
+  const [loading, setLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCatalog() {
+      try {
+        setLoading(true);
+        const data = await BusinessDnaService.list();
+        if (!active) return;
+        setCatalog(data);
+        setUsingFallback(data === businessDnaCatalog);
+      } catch {
+        if (!active) return;
+        setCatalog(businessDnaCatalog);
+        setUsingFallback(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadCatalog();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const allCategories = useMemo(() => ["Todas", ...Array.from(new Set(catalog.map((item) => item.category))).sort()], [catalog]);
+  const allSegments = useMemo(() => ["Todos", ...Array.from(new Set(catalog.map((item) => item.segment))).sort()], [catalog]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return businessDnaCatalog.filter((dna) => {
+    return catalog.filter((dna) => {
       const matchesSearch =
         !query ||
         [dna.name, dna.description, dna.commercialDescription, dna.category, dna.segment]
@@ -78,7 +107,7 @@ export default function BusinessDnaCatalogScreen() {
       const matchesSegment = segment === "Todos" || dna.segment === segment;
       return matchesSearch && matchesCategory && matchesSegment;
     });
-  }, [category, search, segment]);
+  }, [catalog, category, search, segment]);
 
   return (
     <SaasProductShell
@@ -137,8 +166,12 @@ export default function BusinessDnaCatalogScreen() {
 
       <View style={styles.catalogHeader}>
         <Text style={styles.catalogTitle}>{filtered.length} Business DNA™ encontrados</Text>
-        <Text style={styles.catalogHint}>Dados mockados e prontos para futura integração com IA e banco.</Text>
+        <Text style={styles.catalogHint}>
+          {loading ? "Carregando catálogo persistido no Supabase..." : usingFallback ? "Fallback local ativo: Supabase indisponível." : "Catálogo persistido no Supabase."}
+        </Text>
       </View>
+
+      {loading ? <ActivityIndicator color="#67e8f9" /> : null}
 
       <View style={styles.grid}>
         {filtered.map((dna) => (

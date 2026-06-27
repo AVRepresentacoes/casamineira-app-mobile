@@ -1,9 +1,11 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
 import { BusinessProjectService } from "@/services/business-project";
-import { findBusinessDnaBySlug } from "@/src/business-dna/catalog";
+import { BusinessDnaService } from "@/services/business-dna";
+import type { BusinessDna } from "@/src/business-dna/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 function InfoList({ title, items }: { title: string; items: string[] }) {
   return (
@@ -25,7 +27,27 @@ export default function BusinessDnaDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ slug?: string }>();
   const slug = String(params.slug || "");
-  const dna = findBusinessDnaBySlug(slug);
+  const [dna, setDna] = useState<BusinessDna | undefined>();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadDna() {
+      try {
+        setLoading(true);
+        const data = await BusinessDnaService.findBySlug(slug);
+        if (active) setDna(data);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadDna();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
 
   async function handleUseBusinessDna() {
     if (!dna) return;
@@ -42,12 +64,23 @@ export default function BusinessDnaDetailScreen() {
     }
   }
 
+  if (loading) {
+    return (
+      <SaasProductShell title="Carregando Business DNA™" subtitle="Buscando modelo persistido no Supabase.">
+        <View style={styles.notFound}>
+          <ActivityIndicator color="#67e8f9" />
+          <Text style={styles.notFoundText}>Preparando catálogo...</Text>
+        </View>
+      </SaasProductShell>
+    );
+  }
+
   if (!dna) {
     return (
       <SaasProductShell title="Business DNA™ não encontrado" subtitle="Volte ao catálogo para escolher outro modelo.">
         <View style={styles.notFound}>
           <Text style={styles.notFoundTitle}>Modelo indisponível</Text>
-          <Text style={styles.notFoundText}>O Business DNA solicitado não existe no catálogo mockado atual.</Text>
+          <Text style={styles.notFoundText}>O Business DNA solicitado não existe no catálogo atual.</Text>
           <Pressable style={styles.primaryButton} onPress={() => router.push("/business-dna" as never)}>
             <Text style={styles.primaryButtonText}>Voltar ao catálogo</Text>
           </Pressable>

@@ -1,14 +1,13 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
+import { PremiumTemplateService } from "@/services/premium-template";
 import { colors, componentSizes, radii, shadows, spacing, webMotion } from "@/src/design-system/tokens";
-import { marketplaceCategories, marketplaceSegments, premiumTemplates } from "@/src/template-marketplace/catalog";
+import { premiumTemplates } from "@/src/template-marketplace/catalog";
 import type { PremiumTemplate, TemplateBadge } from "@/src/template-marketplace/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-const segmentOptions = ["Todos", ...marketplaceSegments];
-const categoryOptions = ["Todas", ...marketplaceCategories];
 const popularityOptions = ["Todos", "Popular", "Premium", "Enterprise", "Novo"];
 const salesOptions = ["Todos", "Mais vendidos"];
 const noveltyOptions = ["Todos", "Novidades"];
@@ -96,11 +95,42 @@ export default function TemplateMarketplaceScreen() {
   const [sales, setSales] = useState("Todos");
   const [novelty, setNovelty] = useState("Todos");
   const [price, setPrice] = useState("Todos");
+  const [templates, setTemplates] = useState<PremiumTemplate[]>(premiumTemplates);
+  const [loading, setLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadTemplates() {
+      try {
+        setLoading(true);
+        const data = await PremiumTemplateService.list();
+        if (!active) return;
+        setTemplates(data);
+        setUsingFallback(data === premiumTemplates);
+      } catch {
+        if (!active) return;
+        setTemplates(premiumTemplates);
+        setUsingFallback(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadTemplates();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const segmentOptions = useMemo(() => ["Todos", ...Array.from(new Set(templates.map((template) => template.segment))).sort()], [templates]);
+  const categoryOptions = useMemo(() => ["Todas", ...Array.from(new Set(templates.map((template) => template.category))).sort()], [templates]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return premiumTemplates
+    return templates
       .filter((template) => {
         const matchesSearch =
           !query ||
@@ -117,9 +147,9 @@ export default function TemplateMarketplaceScreen() {
         return matchesSearch && matchesSegment && matchesCategory && matchesPopularity && matchesSales && matchesNovelty && matchesPrice;
       })
       .sort((left, right) => right.popularityScore - left.popularityScore);
-  }, [category, novelty, popularity, price, sales, search, segment]);
+  }, [category, novelty, popularity, price, sales, search, segment, templates]);
 
-  const recommended = premiumTemplates.filter((template) => template.isBestSeller).slice(0, 3);
+  const recommended = templates.filter((template) => template.isBestSeller).slice(0, 3);
 
   return (
     <SaasProductShell
@@ -160,8 +190,11 @@ export default function TemplateMarketplaceScreen() {
           <Text style={styles.sectionEyebrow}>Curadoria</Text>
           <Text style={styles.sectionTitle}>Templates Recomendados</Text>
         </View>
-        <Text style={styles.sectionMeta}>{recommended.length} destaques</Text>
+        <Text style={styles.sectionMeta}>
+          {loading ? "Carregando..." : usingFallback ? "Fallback local" : `${recommended.length} destaques`}
+        </Text>
       </View>
+      {loading ? <ActivityIndicator color="#facc15" /> : null}
       <View style={styles.grid}>
         {recommended.map((template) => (
           <TemplateCard key={template.id} template={template} />

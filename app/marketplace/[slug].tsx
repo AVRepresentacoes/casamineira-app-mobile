@@ -1,11 +1,14 @@
 import { SaasProductShell } from "@/components/saas/SaasProductShell";
 import { BusinessProjectService } from "@/services/business-project";
-import { findBusinessDnaBySlug } from "@/src/business-dna/catalog";
-import { findPremiumTemplateBySlug, getPremiumTemplatesBySlugs, premiumTemplates } from "@/src/template-marketplace/catalog";
+import { BusinessDnaService } from "@/services/business-dna";
+import { PremiumTemplateService } from "@/services/premium-template";
+import { premiumTemplates } from "@/src/template-marketplace/catalog";
+import type { BusinessDna } from "@/src/business-dna/types";
 import type { PremiumTemplate } from "@/src/template-marketplace/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
@@ -42,7 +45,54 @@ export default function TemplateDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ slug?: string }>();
   const slug = String(params.slug || "");
-  const template = findPremiumTemplateBySlug(slug);
+  const [template, setTemplate] = useState<PremiumTemplate | undefined>();
+  const [dna, setDna] = useState<BusinessDna | undefined>();
+  const [recommended, setRecommended] = useState<PremiumTemplate[]>([]);
+  const [related, setRelated] = useState<PremiumTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadTemplate() {
+      try {
+        setLoading(true);
+        const templateData = await PremiumTemplateService.findBySlug(slug);
+        if (!active) return;
+        setTemplate(templateData);
+
+        if (templateData) {
+          const [dnaData, recommendedData, relatedData] = await Promise.all([
+            BusinessDnaService.findBySlug(templateData.businessDnaSlug).catch(() => undefined),
+            PremiumTemplateService.getBySlugs(templateData.recommendedTemplateSlugs).catch(() => []),
+            PremiumTemplateService.getBySlugs(templateData.relatedTemplateSlugs).catch(() => []),
+          ]);
+          if (!active) return;
+          setDna(dnaData);
+          setRecommended(recommendedData);
+          setRelated(relatedData);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadTemplate();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <SaasProductShell title="Carregando Template" subtitle="Buscando template persistido no Supabase.">
+        <View style={styles.notFound}>
+          <ActivityIndicator color="#facc15" />
+          <Text style={styles.notFoundText}>Preparando Marketplace...</Text>
+        </View>
+      </SaasProductShell>
+    );
+  }
 
   if (!template) {
     return (
@@ -58,9 +108,6 @@ export default function TemplateDetailScreen() {
     );
   }
 
-  const dna = findBusinessDnaBySlug(template.businessDnaSlug);
-  const recommended = getPremiumTemplatesBySlugs(template.recommendedTemplateSlugs);
-  const related = getPremiumTemplatesBySlugs(template.relatedTemplateSlugs);
   const fallbackRelated = related.length ? related : premiumTemplates.filter((item) => item.slug !== template.slug).slice(0, 3);
 
   async function handleUseTemplate() {
