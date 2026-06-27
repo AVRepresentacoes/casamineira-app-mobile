@@ -1,4 +1,5 @@
 import { onboardMySaasEmpresa } from "@/lib/saas-commercial";
+import { supabase } from "@/lib/supabase";
 import { getMeusTenants, getMyEmpresaContext, getMyEmpresaSaasSubscription } from "@/lib/tenant";
 import { BusinessProjectService } from "@/services/business-project";
 
