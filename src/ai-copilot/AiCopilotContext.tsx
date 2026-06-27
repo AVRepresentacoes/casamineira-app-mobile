@@ -34,6 +34,7 @@ export function AiCopilotProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    // TODO(Enterprise 008): preferir DigitalCompanyContext quando o provider estiver no layout autenticado.
     BusinessProjectService.getCurrent()
       .then((project) => {
         if (active) setCurrentProject(project);

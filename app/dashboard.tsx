@@ -15,6 +15,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 
 export default function DashboardScreen() {
   const router = useRouter();
+  // TODO(Enterprise 008): consumir useDigitalCompany() quando o provider for registrado no layout autenticado.
   const { empresa, assinaturaSaas, loadingEmpresa } = useEmpresa();
   const [runs, setRuns] = useState<AiFactoryRun[]>([]);
   const [plansCount, setPlansCount] = useState(0);
