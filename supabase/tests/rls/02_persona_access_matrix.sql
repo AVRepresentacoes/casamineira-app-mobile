@@ -178,6 +178,7 @@ select set_config(
   true
 );
 
+select pg_temp.record_eq('cliente_hospedagens dados proprios', 'cliente_hospedagens', 'total de reservas visiveis', 'P0', 1, pg_temp.visible_count('select count(*) from public.caminho_hospedagem_reservas'));
 select pg_temp.record_eq('cliente_hospedagens dados proprios', 'cliente_hospedagens', 'reservas proprias visiveis', 'P0', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_reservas where cliente_id = auth.uid()$$));
 select pg_temp.record_eq('cliente_hospedagens dados proprios', 'cliente_hospedagens', 'reservas de outros clientes visiveis', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_reservas where cliente_id <> auth.uid()$$));
 select pg_temp.record_eq('cliente_hospedagens dados proprios', 'cliente_hospedagens', 'movimentos financeiros visiveis', 'P0', 0, pg_temp.visible_count('select count(*) from public.caminho_hospedagem_movimentos'));
