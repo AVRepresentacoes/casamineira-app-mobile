@@ -112,6 +112,55 @@ begin
 end;
 $$;
 
+create or replace function pg_temp.can_insert(p_sql text)
+returns boolean
+language plpgsql
+as $$
+begin
+  execute p_sql;
+  return true;
+exception
+  when insufficient_privilege or check_violation or foreign_key_violation or not_null_violation then
+    return false;
+end;
+$$;
+
+create or replace function pg_temp.record_bool(
+  p_scenario text,
+  p_persona text,
+  p_table_name text,
+  p_check_name text,
+  p_severity text,
+  p_expected boolean,
+  p_actual boolean
+)
+returns void
+language plpgsql
+as $$
+begin
+  insert into rls_hospedagens_extended_results (
+    scenario,
+    persona,
+    table_name,
+    check_name,
+    severity,
+    expected,
+    actual,
+    passed
+  )
+  values (
+    p_scenario,
+    p_persona,
+    p_table_name,
+    p_check_name,
+    p_severity,
+    p_expected::text,
+    p_actual::text,
+    p_actual = p_expected
+  );
+end;
+$$;
+
 begin;
 
 -- Fixtures transitorias de Hospedagens.
@@ -425,6 +474,9 @@ select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_h
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_favoritos', 'favoritos de outro cliente', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_favoritos where user_id <> auth.uid() and hospedagem_slug like 'pousada-rls-018%'$$));
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_notificacoes', 'notificacoes proprias', 'P0', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where user_id = auth.uid() and metadata->>'scope' = 'own'$$));
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_notificacoes', 'notificacoes de outro cliente', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where user_id <> auth.uid() and metadata->>'scope' = 'other'$$));
+select pg_temp.record_bool('notificacoes insert tenant explicito', 'cliente_hospedagens', 'caminho_hospedagem_notificacoes', 'cliente insere notificacao propria no tenant correto', 'P1', true, pg_temp.can_insert($$insert into public.caminho_hospedagem_notificacoes (id, tenant_id, user_id, papel, titulo, mensagem, tipo, metadata) values ('78000000-0000-4000-8000-000000000101','20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000005','cliente','Insert proprio tenant correto RLS 021','Mensagem RLS 021','sistema','{"scope":"insert-own-current-tenant"}'::jsonb)$$));
+select pg_temp.record_bool('notificacoes insert tenant explicito', 'cliente_hospedagens', 'caminho_hospedagem_notificacoes', 'cliente nao insere notificacao propria em outro tenant', 'P1', false, pg_temp.can_insert($$insert into public.caminho_hospedagem_notificacoes (id, tenant_id, user_id, papel, titulo, mensagem, tipo, metadata) values ('78000000-0000-4000-8000-000000000102','20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000005','cliente','Insert proprio tenant errado RLS 021','Mensagem RLS 021','sistema','{"scope":"insert-own-wrong-tenant"}'::jsonb)$$));
+select pg_temp.record_bool('notificacoes insert tenant explicito', 'cliente_hospedagens', 'caminho_hospedagem_notificacoes', 'cliente nao insere notificacao para outro usuario', 'P1', false, pg_temp.can_insert($$insert into public.caminho_hospedagem_notificacoes (id, tenant_id, user_id, papel, titulo, mensagem, tipo, metadata) values ('78000000-0000-4000-8000-000000000103','20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000006','cliente','Insert outro usuario RLS 021','Mensagem RLS 021','sistema','{"scope":"insert-other-user"}'::jsonb)$$));
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_chamados', 'chamados proprios', 'P0', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where cliente_id = auth.uid() and titulo like '%RLS 018%'$$));
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_chamados', 'chamados de outro cliente', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where cliente_id <> auth.uid() and titulo like '%RLS 018%'$$));
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_avaliacoes', 'avaliacoes privadas proprias', 'P0', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_avaliacoes where cliente_id = auth.uid() and publicada = false and comentario like '%RLS 018%'$$));
@@ -454,6 +506,7 @@ select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'camin
 select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'caminho_hospedagem_disponibilidade', 'disponibilidades rls018', 'P1', 2, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where detalhe like '%RLS 018%'$$));
 select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'caminho_hospedagem_chamados', 'chamados rls018', 'P1', 2, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where titulo like '%RLS 018%'$$));
 select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'caminho_hospedagem_notificacoes', 'notificacoes rls018', 'P1', 2, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where titulo like '%RLS 018%'$$));
+select pg_temp.record_bool('notificacoes insert tenant explicito', 'hospedagens_owner', 'caminho_hospedagem_notificacoes', 'owner insere notificacao no tenant correto', 'P1', true, pg_temp.can_insert($$insert into public.caminho_hospedagem_notificacoes (id, tenant_id, user_id, papel, titulo, mensagem, tipo, metadata) values ('78000000-0000-4000-8000-000000000104','20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000005','admin','Insert owner tenant correto RLS 021','Mensagem RLS 021','admin','{"scope":"insert-owner-current-tenant"}'::jsonb)$$));
 select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'caminho_hospedagem_pousada_saldos', 'saldos rls018', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousada_saldos where hospedagem_slug = 'pousada-rls-018-publica'$$));
 select pg_temp.record_eq('owner ve dados do tenant', 'hospedagens_owner', 'caminho_hospedagem_movimentos', 'movimentos rls018', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_movimentos where descricao like '%RLS 018%'$$));
 
@@ -485,6 +538,7 @@ select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_movimentos', 'movimentos privados', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_movimentos where descricao like '%RLS 018%'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_chamados', 'chamados privados', 'P0', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where titulo like '%RLS 018%'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_notificacoes', 'notificacoes privadas', 'P0', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where titulo like '%RLS 018%'$$));
+select pg_temp.record_bool('notificacoes insert tenant explicito', 'anon', 'caminho_hospedagem_notificacoes', 'anon nao insere notificacao', 'P1', false, pg_temp.can_insert($$insert into public.caminho_hospedagem_notificacoes (id, tenant_id, user_id, papel, titulo, mensagem, tipo, metadata) values ('78000000-0000-4000-8000-000000000105','20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000005','cliente','Insert anon RLS 021','Mensagem RLS 021','sistema','{"scope":"insert-anon"}'::jsonb)$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_pousadas', 'pousadas privadas operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-privada'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_quartos', 'quartos privados operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-privado'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_servicos', 'servicos privados operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-privado'$$));
