@@ -7,8 +7,6 @@ import {
   atualizarPainelPousadaQuarto,
   atualizarPainelPousadaServico,
   atualizarPainelPousadaVisibilidade,
-  buildPainelPousadaDisponibilidadeDemo,
-  buildPainelPousadaReservasDemo,
   carregarPainelPousadaHospedagens,
   formatMoney,
   salvarPainelPousadaDisponibilidade,
@@ -77,7 +75,6 @@ export default function PainelPousadaHospedagensScreen() {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<PanelTab>("dashboard");
   const [loading, setLoading] = useState(true);
-  const [source, setSource] = useState<"supabase" | "demo">("demo");
   const [pousadaDbId, setPousadaDbId] = useState<string | null>(null);
   const [pousada, setPousada] = useState<CaminhoHospedagem | null>(null);
   const [reservas, setReservas] = useState<PainelPousadaReserva[]>([]);
@@ -87,7 +84,7 @@ export default function PainelPousadaHospedagensScreen() {
   const [autoConfirmar, setAutoConfirmar] = useState(false);
   const [respostaRapida, setRespostaRapida] = useState("Olá! Sua reserva foi recebida. Vamos confirmar os detalhes da chegada e serviços adicionais.");
   const [gatewayStatus, setGatewayStatus] = useState("pendente");
-  const [bloqueios, setBloqueios] = useState<PainelPousadaDisponibilidade[]>(buildPainelPousadaDisponibilidadeDemo());
+  const [bloqueios, setBloqueios] = useState<PainelPousadaDisponibilidade[]>([]);
   const [propertyForm, setPropertyForm] = useState({
     nome: "",
     cidade: "",
@@ -131,7 +128,6 @@ export default function PainelPousadaHospedagensScreen() {
     carregarPainelPousadaHospedagens()
       .then((data) => {
         if (!mounted) return;
-        setSource(data.source);
         setPousadaDbId(data.pousadaDbId);
         setPousada(data.pousada);
         setPropertyForm({
@@ -372,9 +368,9 @@ export default function PainelPousadaHospedagensScreen() {
       </View>
 
       <View style={styles.sourceNotice}>
-        <Ionicons name={source === "supabase" ? "cloud-done-outline" : "flask-outline"} size={17} color="#12372A" />
+        <Ionicons name="cloud-done-outline" size={17} color="#12372A" />
         <Text style={styles.sourceNoticeText}>
-          {source === "supabase" ? "Painel conectado ao Supabase." : "Modo demonstração ativo até aplicar as migrations do painel."}
+          Painel conectado ao Supabase.
         </Text>
       </View>
 

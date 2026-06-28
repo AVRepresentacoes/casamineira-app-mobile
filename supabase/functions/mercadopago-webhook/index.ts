@@ -53,6 +53,38 @@ async function syncGasPedidoStatus(params: {
     .eq("pedido_id", pedidoId);
 }
 
+async function syncHospedagemReservaStatus(params: {
+  supabaseAdmin: any;
+  reservaId: string;
+  paymentId?: string | null;
+  statusPagamento: "pendente" | "aprovada" | "recusada" | "estornada";
+}) {
+  const { supabaseAdmin, reservaId, paymentId, statusPagamento } = params;
+  const statusReserva =
+    statusPagamento === "aprovada"
+      ? "confirmada"
+      : statusPagamento === "recusada"
+      ? "aguardando_pagamento"
+      : statusPagamento === "estornada"
+      ? "cancelada_cliente"
+      : "aguardando_pagamento";
+
+  const { error } = await supabaseAdmin
+    .from("caminho_hospedagem_reservas")
+    .update({
+      provider: "mercadopago",
+      provider_payment_id: paymentId || null,
+      status_pagamento: statusPagamento,
+      status: statusReserva,
+      ...(statusPagamento === "estornada" ? { cancelado_por: "sistema" } : {}),
+    })
+    .eq("id", reservaId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 async function baixarEstoquePedido(params: { supabaseAdmin: any; pedidoId: string; tenantId: string | null }) {
   const { supabaseAdmin, pedidoId, tenantId } = params;
   const { data: itens, error: itensError } = await supabaseAdmin
@@ -333,6 +365,25 @@ Deno.serve(async (req) => {
 
     if (!pedidoId) {
       throw new Error("Pagamento sem external_reference/pedido_id.");
+    }
+
+    if (pedidoId.startsWith("caminho_hospedagem:")) {
+      const reservaId = pedidoId.replace("caminho_hospedagem:", "").trim();
+      if (!reservaId) {
+        throw new Error("Reserva de hospedagem ausente no external_reference.");
+      }
+
+      await syncHospedagemReservaStatus({
+        supabaseAdmin,
+        reservaId,
+        paymentId,
+        statusPagamento,
+      });
+
+      return new Response(JSON.stringify({ ok: true, produto: "hospedagens_caminhos_da_fe" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const { data: pedido, error: pedidoError } = await supabaseAdmin

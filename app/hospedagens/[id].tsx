@@ -2,9 +2,10 @@ import {
   alternarFavoritoHospedagem,
   calcularReserva,
   formatMoney,
-  getHospedagemById,
   listarAvaliacoesHospedagem,
   listarFavoritosHospedagens,
+  obterHospedagemPublicaPorId,
+  type CaminhoHospedagem,
   type CaminhoHospedagemAvaliacao,
   type CaminhoQuarto,
   type CaminhoServicoAdicional,
@@ -12,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function todayPlus(days: number) {
@@ -53,10 +54,11 @@ export default function HospedagemDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
-  const hospedagem = getHospedagemById(String(params.id || ""));
-  const [selectedQuarto, setSelectedQuarto] = useState<CaminhoQuarto | null>(hospedagem?.quartos[0] || null);
+  const [hospedagem, setHospedagem] = useState<CaminhoHospedagem | null>(null);
+  const [selectedQuarto, setSelectedQuarto] = useState<CaminhoQuarto | null>(null);
   const [favorite, setFavorite] = useState(false);
   const [avaliacoes, setAvaliacoes] = useState<CaminhoHospedagemAvaliacao[]>([]);
+  const [loading, setLoading] = useState(true);
   const checkin = todayPlus(7);
   const checkout = todayPlus(8);
 
@@ -66,14 +68,36 @@ export default function HospedagemDetailScreen() {
   }, [checkin, checkout, hospedagem, selectedQuarto]);
 
   useEffect(() => {
-    if (!hospedagem) return;
-    listarFavoritosHospedagens()
-      .then((items) => setFavorite(items.some((item) => item.hospedagemSlug === hospedagem.id)))
-      .catch(() => setFavorite(false));
-    listarAvaliacoesHospedagem(hospedagem.id)
-      .then(setAvaliacoes)
-      .catch(() => setAvaliacoes([]));
-  }, [hospedagem]);
+    let mounted = true;
+    setLoading(true);
+    obterHospedagemPublicaPorId(String(params.id || ""))
+      .then((item) => {
+        if (!mounted) return;
+        setHospedagem(item);
+        setSelectedQuarto(item?.quartos[0] || null);
+        if (!item) return;
+        listarFavoritosHospedagens()
+          .then((favoritos) => {
+            if (mounted) setFavorite(favoritos.some((favorito) => favorito.hospedagemSlug === item.id));
+          })
+          .catch(() => {
+            if (mounted) setFavorite(false);
+          });
+        listarAvaliacoesHospedagem(item.id)
+          .then((rows) => {
+            if (mounted) setAvaliacoes(rows);
+          })
+          .catch(() => {
+            if (mounted) setAvaliacoes([]);
+          });
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [params.id]);
 
   async function handleFavorite() {
     if (!hospedagem) return;
@@ -83,6 +107,14 @@ export default function HospedagemDetailScreen() {
     } catch (error: any) {
       Alert.alert("Atenção", error?.message || "Não foi possível atualizar favoritos.");
     }
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
   }
 
   if (!hospedagem) {
@@ -109,7 +141,7 @@ export default function HospedagemDetailScreen() {
           <View style={styles.heroCopy}>
             <Text style={styles.eyebrow}>{hospedagem.cidade} - {hospedagem.uf}</Text>
             <Text style={styles.title}>{hospedagem.nome}</Text>
-            <Text style={styles.subtitle}>{hospedagem.ramal} • {hospedagem.distanciaTrilhaKm.toFixed(1)} km da trilha</Text>
+            <Text style={styles.subtitle}>{hospedagem.ramal} • {hospedagem.quartos.length} quarto(s) disponível(is)</Text>
           </View>
         </View>
       </ImageBackground>
@@ -118,9 +150,9 @@ export default function HospedagemDetailScreen() {
         <View style={styles.ratingRow}>
           <View style={styles.ratingBadge}>
             <Ionicons name="star" size={15} color="#FACC15" />
-            <Text style={styles.ratingText}>{hospedagem.avaliacao.toFixed(1)}</Text>
+            <Text style={styles.ratingText}>{hospedagem.avaliacao ? hospedagem.avaliacao.toFixed(1) : "Novo"}</Text>
           </View>
-          <Text style={styles.ratingMeta}>Base inicial demonstrativa, pronta para validação com parceiro real.</Text>
+          <Text style={styles.ratingMeta}>Dados publicados pela pousada e protegidos por RLS.</Text>
         </View>
 
         <Text style={styles.description}>{hospedagem.descricao}</Text>
@@ -151,16 +183,16 @@ export default function HospedagemDetailScreen() {
             Adicione comodidades úteis para sua etapa e confirme os detalhes com a pousada antes da chegada.
           </Text>
           <View style={styles.extraList}>
-            {hospedagem.servicosAdicionais.map((service) => (
+            {hospedagem.servicosAdicionais.length ? hospedagem.servicosAdicionais.map((service) => (
               <ExtraServiceCard key={service.id} service={service} />
-            ))}
+            )) : <Text style={styles.emptyText}>Nenhum serviço adicional publicado.</Text>}
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Escolha o quarto</Text>
           <View style={styles.rooms}>
-            {hospedagem.quartos.map((quarto) => {
+            {hospedagem.quartos.length ? hospedagem.quartos.map((quarto) => {
               const active = selectedQuarto?.id === quarto.id;
               return (
                 <Pressable key={quarto.id} style={[styles.room, active && styles.roomActive]} onPress={() => setSelectedQuarto(quarto)}>
@@ -171,7 +203,7 @@ export default function HospedagemDetailScreen() {
                   <Text style={[styles.roomPrice, active && styles.roomTitleActive]}>{formatMoney(quarto.diaria)}</Text>
                 </Pressable>
               );
-            })}
+            }) : <Text style={styles.emptyText}>Nenhum quarto ativo disponível para reserva.</Text>}
           </View>
         </View>
 
@@ -280,4 +312,5 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: "#12372A", fontWeight: "900", fontSize: 16 },
   center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center", padding: 20 },
   emptyTitle: { color: "#12372A", fontWeight: "900", fontSize: 20, marginBottom: 16 },
+  emptyText: { color: "#4B5563", lineHeight: 20 },
 });

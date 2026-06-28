@@ -2,13 +2,15 @@ import {
   calcularReserva,
   criarReservaHospedagem,
   formatMoney,
-  getHospedagemById,
   getQuartoById,
+  obterHospedagemPublicaPorId,
+  type CaminhoHospedagem,
+  type CaminhoQuarto,
   type CaminhoServicoAdicional,
 } from "@/lib/caminhosHospedagens";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -31,8 +33,8 @@ export default function ReservarHospedagemScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ hospedagemId?: string; quartoId?: string }>();
-  const hospedagem = getHospedagemById(String(params.hospedagemId || ""));
-  const quarto = hospedagem ? getQuartoById(hospedagem, String(params.quartoId || "")) : null;
+  const [hospedagem, setHospedagem] = useState<CaminhoHospedagem | null>(null);
+  const [quarto, setQuarto] = useState<CaminhoQuarto | null>(null);
   const [checkin, setCheckin] = useState(datePlus(7));
   const [checkout, setCheckout] = useState(datePlus(8));
   const [hospedes, setHospedes] = useState("1");
@@ -41,6 +43,24 @@ export default function ReservarHospedagemScreen() {
   const [observacoes, setObservacoes] = useState("");
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    obterHospedagemPublicaPorId(String(params.hospedagemId || ""))
+      .then((item) => {
+        if (!mounted) return;
+        setHospedagem(item);
+        setQuarto(item ? getQuartoById(item, String(params.quartoId || "")) : null);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [params.hospedagemId, params.quartoId]);
 
   const resumo = useMemo(() => {
     if (!hospedagem || !quarto) return null;
@@ -107,6 +127,14 @@ export default function ReservarHospedagemScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
   }
 
   if (!hospedagem || !quarto || !resumo) {

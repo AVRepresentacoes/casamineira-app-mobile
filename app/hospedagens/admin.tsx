@@ -120,8 +120,8 @@ export default function HospedagensAdminScreen() {
       </View>
 
       <View style={styles.sourceNotice}>
-        <Ionicons name={data.source === "supabase" ? "cloud-done-outline" : "flask-outline"} size={17} color="#12372A" />
-        <Text style={styles.sourceNoticeText}>{data.source === "supabase" ? "Dados conectados ao Supabase dedicado." : "Modo demonstração ativo."}</Text>
+        <Ionicons name="cloud-done-outline" size={17} color="#12372A" />
+        <Text style={styles.sourceNoticeText}>Dados conectados ao Supabase dedicado.</Text>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>

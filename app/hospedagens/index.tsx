@@ -1,14 +1,15 @@
 import {
   CAMINHOS_CIDADES_INICIAIS,
   CAMINHOS_ASSETS,
-  HOSPEDAGENS_DEMO,
   formatMoney,
+  listarCatalogoHospedagens,
   type CaminhoHospedagem,
 } from "@/lib/caminhosHospedagens";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -35,6 +36,31 @@ export default function HospedagensHomeScreen() {
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todas");
+  const [catalogo, setCatalogo] = useState<CaminhoHospedagem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    listarCatalogoHospedagens()
+      .then((items) => {
+        if (!mounted) return;
+        setCatalogo(items);
+        setLoadError("");
+      })
+      .catch((error: any) => {
+        if (!mounted) return;
+        setCatalogo([]);
+        setLoadError(error?.message || "Não foi possível carregar o catálogo.");
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const hospedagens = useMemo(() => {
     const q = search
@@ -43,7 +69,7 @@ export default function HospedagensHomeScreen() {
       .toLowerCase()
       .trim();
 
-    return HOSPEDAGENS_DEMO.filter((item) => {
+    return catalogo.filter((item) => {
       const text = `${item.nome} ${item.cidade} ${item.ramal}`
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -51,7 +77,7 @@ export default function HospedagensHomeScreen() {
 
       return (!q || text.includes(q)) && matchFilter(item, filter);
     });
-  }, [filter, search]);
+  }, [catalogo, filter, search]);
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.content, { paddingTop: insets.top + 18 }]}>
@@ -122,8 +148,22 @@ export default function HospedagensHomeScreen() {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Pousadas em destaque</Text>
-        <Text style={styles.sectionMeta}>{hospedagens.length} opções iniciais</Text>
+        <Text style={styles.sectionMeta}>{hospedagens.length} opções reais</Text>
       </View>
+
+      {loading ? <ActivityIndicator color="#12372A" /> : null}
+      {!loading && loadError ? (
+        <View style={styles.emptyBox}>
+          <Text style={styles.emptyTitle}>Catálogo indisponível</Text>
+          <Text style={styles.emptyText}>{loadError}</Text>
+        </View>
+      ) : null}
+      {!loading && !loadError && !hospedagens.length ? (
+        <View style={styles.emptyBox}>
+          <Text style={styles.emptyTitle}>Nenhuma pousada publicada</Text>
+          <Text style={styles.emptyText}>Cadastre uma pousada aprovada, quartos ativos e disponibilidade livre para aparecer no catálogo.</Text>
+        </View>
+      ) : null}
 
       <View style={styles.cards}>
         {hospedagens.map((item) => (
@@ -131,7 +171,7 @@ export default function HospedagensHomeScreen() {
             <ImageBackground source={item.fotos[0]} style={styles.cardImage} imageStyle={styles.cardImageStyle}>
               <View style={styles.rating}>
                 <Ionicons name="star" size={13} color="#FACC15" />
-                <Text style={styles.ratingText}>{item.avaliacao.toFixed(1)}</Text>
+                <Text style={styles.ratingText}>{item.avaliacao ? item.avaliacao.toFixed(1) : "Novo"}</Text>
               </View>
             </ImageBackground>
             <View style={styles.cardBody}>
@@ -140,7 +180,7 @@ export default function HospedagensHomeScreen() {
               <Text style={styles.cardDescription}>{item.descricao}</Text>
               <View style={styles.cardFooter}>
                 <Text style={styles.price}>desde {formatMoney(item.diariaBase)}</Text>
-                <Text style={styles.distance}>{item.distanciaTrilhaKm.toFixed(1)} km da trilha</Text>
+                <Text style={styles.distance}>{item.quartos.length} quarto(s)</Text>
               </View>
             </View>
           </Pressable>
@@ -200,6 +240,9 @@ const styles = StyleSheet.create({
   sectionTitle: { color: "#12372A", fontSize: 20, fontWeight: "900" },
   sectionMeta: { color: "#6B7280", fontWeight: "700" },
   cards: { gap: 14 },
+  emptyBox: { backgroundColor: "#FFF9EA", borderRadius: 8, borderWidth: 1, borderColor: "#E5D9BD", padding: 14, gap: 5 },
+  emptyTitle: { color: "#12372A", fontSize: 16, fontWeight: "900" },
+  emptyText: { color: "#4B5563", lineHeight: 20 },
   card: { backgroundColor: "#FFFDF6", borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#E8DEC7" },
   cardImage: { height: 154 },
   cardImageStyle: { backgroundColor: "#12372A" },

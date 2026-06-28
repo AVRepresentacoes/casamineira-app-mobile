@@ -70,7 +70,7 @@ const REQUIRED_FIELDS: Array<keyof ClienteProfile> = [
 export default function HospedagensPerfilScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState("cliente@demo.com");
+  const [email, setEmail] = useState("");
   const [profile, setProfile] = useState<ClienteProfile>(EMPTY_PROFILE);
   const [reservas, setReservas] = useState<CaminhoHospedagemReservaCliente[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ export default function HospedagensPerfilScreen() {
         ]);
 
         if (!mounted) return;
-        setEmail(userData.user?.email || "cliente@demo.com");
+        setEmail(userData.user?.email || "");
         setReservas(reservasData);
 
         if (cachedProfile) {

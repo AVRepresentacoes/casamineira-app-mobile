@@ -1,6 +1,5 @@
 import {
   calcularResumoJornada,
-  getHospedagemById,
   listarMinhasReservasHospedagem,
   type CaminhoHospedagemReservaCliente,
 } from "@/lib/caminhosHospedagens";
@@ -63,7 +62,6 @@ export default function KmPercorridosHospedagensScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Etapas registradas</Text>
         {reservas.map((item) => {
-          const hospedagem = getHospedagemById(item.hospedagemSlug);
           return (
             <View key={item.id} style={styles.stageCard}>
               <View style={styles.stageIcon}>
@@ -73,7 +71,7 @@ export default function KmPercorridosHospedagensScreen() {
                 <Text style={styles.stageTitle}>{item.cidade}</Text>
                 <Text style={styles.stageMeta}>{item.hospedagemNome}</Text>
               </View>
-              <Text style={styles.stageKm}>{Math.round(hospedagem?.etapaKm || 0)} km</Text>
+              <Text style={styles.stageKm}>Real</Text>
             </View>
           );
         })}
@@ -81,7 +79,7 @@ export default function KmPercorridosHospedagensScreen() {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoTitle}>Como calculamos?</Text>
-        <Text style={styles.infoText}>Nesta primeira versão, os quilômetros são estimados pela cidade/etapa da hospedagem reservada. Depois podemos evoluir para check-in por GPS e carimbo digital.</Text>
+        <Text style={styles.infoText}>Os quilômetros agora dependem de dados reais de rota por pousada. Enquanto esse campo não existir no banco, a tela mantém apenas as etapas registradas.</Text>
       </View>
     </ScrollView>
   );

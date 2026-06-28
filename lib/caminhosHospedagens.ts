@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { resolveCurrentTenantId } from "@/lib/tenant";
 import type { ImageSourcePropType } from "react-native";
@@ -86,25 +85,6 @@ export type CaminhoHospedagemReservaCliente = {
   createdAt: string;
 };
 
-type HospedagemReservaLocal = {
-  id: string;
-  hospedagemNome: string;
-  cidade: string;
-  quartoNome: string;
-  checkin: string;
-  checkout: string;
-  hospedes: number;
-  total: number;
-  sinal: number;
-  restanteNaPousada: number;
-  servicosAdicionaisTotal: number;
-  servicosAdicionaisDescricao: string;
-  status: string;
-  statusPagamento: HospedagemPagamentoStatus;
-  provider: string | null;
-  providerPaymentId: string | null;
-};
-
 export type HospedagemPagamentoStatus = "pendente" | "aprovada" | "recusada" | "estornada";
 
 export type HospedagemPixPagamento = {
@@ -167,7 +147,7 @@ export type PainelPousadaDisponibilidade = {
 };
 
 export type PainelPousadaData = {
-  source: "supabase" | "demo";
+  source: "supabase";
   pousadaDbId: string | null;
   pousada: CaminhoHospedagem;
   reservas: PainelPousadaReserva[];
@@ -179,6 +159,27 @@ export type PainelPousadaData = {
   respostaRapida: string;
   gatewayStatus: string;
 };
+
+function buildEmptyHospedagem(): CaminhoHospedagem {
+  return {
+    id: "",
+    nome: "",
+    cidade: "",
+    uf: "MG",
+    ramal: "",
+    etapaKm: 0,
+    distanciaTrilhaKm: 0,
+    diariaBase: 0,
+    avaliacao: 0,
+    fotos: [CAMINHOS_ASSETS.pousadaExterior],
+    whatsapp: "",
+    endereco: "",
+    descricao: "",
+    amenidades: [],
+    servicosAdicionais: [],
+    quartos: [],
+  };
+}
 
 export type HospedagensAdminPousada = {
   id: string;
@@ -212,7 +213,7 @@ export type HospedagensAdminReserva = {
 };
 
 export type HospedagensAdminData = {
-  source: "supabase" | "demo";
+  source: "supabase";
   metrics: {
     pousadas: number;
     pousadasPendentes: number;
@@ -291,8 +292,6 @@ export const CAMINHOS_REGRAS_NEGOCIO = {
   horasCancelamentoIntermediario: 24,
 };
 
-const HOSPEDAGENS_RESERVAS_LOCAIS_KEY = "@hospedagens_caminhos_reservas_locais_v1";
-
 export const CAMINHOS_CIDADES_INICIAIS = [
   "Águas da Prata",
   "Andradas",
@@ -317,181 +316,10 @@ export const CAMINHOS_ASSETS = {
   featureGraphic: require("@/assets/images/hospedagens-caminhos-da-fe/feature-graphic.png"),
 };
 
-export const HOSPEDAGENS_DEMO: CaminhoHospedagem[] = [
-  {
-    id: "ouro-fino-refugio",
-    nome: "Refúgio do Peregrino Ouro Fino",
-    cidade: "Ouro Fino",
-    uf: "MG",
-    ramal: "Ramal Inconfidentes",
-    etapaKm: 178,
-    distanciaTrilhaKm: 0.6,
-    diariaBase: 120,
-    avaliacao: 4.8,
-    fotos: [CAMINHOS_ASSETS.pousadaExterior],
-    whatsapp: "+5535999990001",
-    endereco: "Centro, Ouro Fino - MG",
-    descricao: "Hospedagem modelo para peregrinos, com café cedo, espaço para bike e apoio para carimbo.",
-    amenidades: ["cafe", "jantar", "bike", "wifi", "carimbo", "privativo"],
-    servicosAdicionais: [
-      { id: "jantar-caseiro", nome: "Jantar caseiro", descricao: "Prato simples e reforçado para recuperação após a etapa.", preco: 38, unidade: "por pessoa", categoria: "alimentacao", icon: "restaurant-outline", confirmacao: "Confirmar até 16h" },
-      { id: "lanche-trilha", nome: "Lanche para trilha", descricao: "Kit com fruta, sanduíche simples e água para saída cedo.", preco: 24, unidade: "por kit", categoria: "alimentacao", icon: "bag-handle-outline", confirmacao: "Solicitar na véspera" },
-      { id: "lavagem-rapida", nome: "Lavanderia rápida", descricao: "Lavagem básica de roupas leves do peregrino.", preco: 28, unidade: "por carga", categoria: "lavanderia", icon: "shirt-outline", confirmacao: "Entrega conforme horário local" },
-    ],
-    quartos: [
-      { id: "privativo-1", nome: "Quarto privativo peregrino", tipo: "privativo", capacidade: 2, diaria: 140, disponivel: true },
-      { id: "compartilhado-1", nome: "Beliche compartilhado", tipo: "compartilhado", capacidade: 1, diaria: 85, disponivel: true },
-    ],
-  },
-  {
-    id: "borda-mata-estacao",
-    nome: "Estação Caminho Borda da Mata",
-    cidade: "Borda da Mata",
-    uf: "MG",
-    ramal: "Ramal Águas da Prata",
-    etapaKm: 214,
-    distanciaTrilhaKm: 0.3,
-    diariaBase: 110,
-    avaliacao: 4.7,
-    fotos: [CAMINHOS_ASSETS.quartoCompartilhado],
-    whatsapp: "+5535999990002",
-    endereco: "Próximo ao caminho, Borda da Mata - MG",
-    descricao: "Ponto de apoio modelo com jantar sob consulta, lavanderia rápida e quarto coletivo.",
-    amenidades: ["cafe", "jantar", "lavanderia", "bike", "wifi", "compartilhado"],
-    servicosAdicionais: [
-      { id: "almoco-simples", nome: "Almoço simples", descricao: "Refeição regional para chegada antes do check-in.", preco: 34, unidade: "por pessoa", categoria: "alimentacao", icon: "restaurant-outline", confirmacao: "Sob disponibilidade" },
-      { id: "jantar-peregrino", nome: "Jantar do peregrino", descricao: "Jantar com carboidrato, proteína e salada.", preco: 42, unidade: "por pessoa", categoria: "alimentacao", icon: "restaurant-outline", confirmacao: "Confirmar até 15h" },
-      { id: "lavanderia-express", nome: "Lavanderia express", descricao: "Lavagem e secagem de peças leves.", preco: 32, unidade: "por carga", categoria: "lavanderia", icon: "shirt-outline", confirmacao: "Prazo informado no check-in" },
-      { id: "guarda-bike", nome: "Guarda de bike", descricao: "Espaço protegido para bicicleta durante a noite.", preco: 15, unidade: "por diária", categoria: "apoio", icon: "bicycle-outline", confirmacao: "Vagas limitadas" },
-    ],
-    quartos: [
-      { id: "coletivo-1", nome: "Quarto coletivo", tipo: "compartilhado", capacidade: 1, diaria: 75, disponivel: true },
-      { id: "casal-1", nome: "Quarto casal simples", tipo: "casal", capacidade: 2, diaria: 130, disponivel: true },
-    ],
-  },
-  {
-    id: "estiva-casa-montanha",
-    nome: "Casa da Montanha Estiva",
-    cidade: "Estiva",
-    uf: "MG",
-    ramal: "Ramal Águas da Prata",
-    etapaKm: 263,
-    distanciaTrilhaKm: 1.1,
-    diariaBase: 135,
-    avaliacao: 4.9,
-    fotos: [CAMINHOS_ASSETS.quartoPrivativo],
-    whatsapp: "+5535999990003",
-    endereco: "Zona urbana, Estiva - MG",
-    descricao: "Hospedagem modelo para descanso entre etapas longas, com café reforçado e apoio para mochila.",
-    amenidades: ["cafe", "lavanderia", "mochila", "wifi", "privativo", "carimbo"],
-    servicosAdicionais: [
-      { id: "cafe-reforcado", nome: "Café reforçado", descricao: "Complemento com ovos, frutas e item extra para etapa longa.", preco: 22, unidade: "por pessoa", categoria: "alimentacao", icon: "cafe-outline", confirmacao: "Servido em horário combinado" },
-      { id: "lavanderia-peregrino", nome: "Lavanderia do peregrino", descricao: "Cuidado básico para roupas de caminhada.", preco: 30, unidade: "por carga", categoria: "lavanderia", icon: "shirt-outline", confirmacao: "Confirmar no check-in" },
-      { id: "apoio-mochila", nome: "Apoio com mochila", descricao: "Orientação para transporte local de mochila por parceiro da região.", preco: 45, unidade: "sob consulta", categoria: "apoio", icon: "bag-handle-outline", confirmacao: "Depende de parceiro local" },
-    ],
-    quartos: [
-      { id: "familia-1", nome: "Quarto família", tipo: "familia", capacidade: 4, diaria: 220, disponivel: true },
-      { id: "privativo-2", nome: "Suíte simples", tipo: "privativo", capacidade: 2, diaria: 150, disponivel: true },
-    ],
-  },
-  {
-    id: "paraisopolis-peregrino",
-    nome: "Pouso do Peregrino Paraisópolis",
-    cidade: "Paraisópolis",
-    uf: "MG",
-    ramal: "Ramal Paraisópolis",
-    etapaKm: 317,
-    distanciaTrilhaKm: 0.4,
-    diariaBase: 125,
-    avaliacao: 4.8,
-    fotos: [CAMINHOS_ASSETS.hero],
-    whatsapp: "+5535999990004",
-    endereco: "Centro, Paraisópolis - MG",
-    descricao: "Pouso modelo com atendimento cedo, guarda de bike e jantar mediante reserva.",
-    amenidades: ["cafe", "jantar", "bike", "wifi", "privativo", "carimbo"],
-    servicosAdicionais: [
-      { id: "jantar-reserva", nome: "Jantar mediante reserva", descricao: "Refeição preparada para chegada no fim da tarde.", preco: 40, unidade: "por pessoa", categoria: "alimentacao", icon: "restaurant-outline", confirmacao: "Confirmar até 14h" },
-      { id: "marmita-etapa", nome: "Marmita para próxima etapa", descricao: "Opção prática para levar no início da caminhada.", preco: 29, unidade: "por unidade", categoria: "alimentacao", icon: "bag-handle-outline", confirmacao: "Solicitar na chegada" },
-      { id: "bike-care", nome: "Espaço bike care", descricao: "Local de apoio para guardar e fazer limpeza simples da bike.", preco: 20, unidade: "por diária", categoria: "apoio", icon: "bicycle-outline", confirmacao: "Vagas limitadas" },
-    ],
-    quartos: [
-      { id: "privativo-3", nome: "Quarto privativo", tipo: "privativo", capacidade: 2, diaria: 145, disponivel: true },
-      { id: "compartilhado-2", nome: "Cama compartilhada", tipo: "compartilhado", capacidade: 1, diaria: 80, disponivel: true },
-    ],
-  },
-  {
-    id: "aparecida-chegada",
-    nome: "Chegada da Fé Aparecida",
-    cidade: "Aparecida",
-    uf: "SP",
-    ramal: "Chegada",
-    etapaKm: 497,
-    distanciaTrilhaKm: 0.8,
-    diariaBase: 160,
-    avaliacao: 4.7,
-    fotos: [CAMINHOS_ASSETS.pousadaExterior],
-    whatsapp: "+5512999990005",
-    endereco: "Região central, Aparecida - SP",
-    descricao: "Hospedagem modelo para chegada ao Santuário, com quarto privativo e check-in flexível.",
-    amenidades: ["cafe", "wifi", "privativo", "mochila"],
-    servicosAdicionais: [
-      { id: "checkin-flexivel", nome: "Check-in flexível", descricao: "Apoio para chegada fora do horário padrão, quando disponível.", preco: 35, unidade: "por reserva", categoria: "apoio", icon: "bag-handle-outline", confirmacao: "Sob confirmação" },
-      { id: "almoco-chegada", nome: "Almoço de chegada", descricao: "Refeição simples próxima ao horário de chegada em Aparecida.", preco: 39, unidade: "por pessoa", categoria: "alimentacao", icon: "restaurant-outline", confirmacao: "Confirmar até 11h" },
-      { id: "traslado-local", nome: "Traslado local", descricao: "Indicação de transporte local para deslocamentos curtos.", preco: 55, unidade: "sob consulta", categoria: "transporte", icon: "car-outline", confirmacao: "Depende de disponibilidade" },
-    ],
-    quartos: [
-      { id: "suite-1", nome: "Suíte chegada", tipo: "privativo", capacidade: 2, diaria: 190, disponivel: true },
-      { id: "familia-2", nome: "Quarto família", tipo: "familia", capacidade: 4, diaria: 280, disponivel: true },
-    ],
-  },
-];
-
-function demoDatePlus(days: number) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
-export function buildPainelPousadaReservasDemo(pousada: CaminhoHospedagem): PainelPousadaReserva[] {
-  const quartoA = pousada.quartos[0];
-  const quartoB = pousada.quartos[1] || pousada.quartos[0];
-  const base = [
-    { id: "res-001", cliente: "Marina Alves", telefone: "(35) 99921-4400", quarto: quartoA.nome, dias: [0, 1], hospedes: 1, total: quartoA.diaria, extras: 62, status: "checkin_hoje" as const, observacao: "Chegada prevista 17h. Solicitou jantar e lavanderia." },
-    { id: "res-002", cliente: "Paulo Henrique", telefone: "(11) 98870-2100", quarto: quartoB.nome, dias: [2, 3], hospedes: 2, total: quartoB.diaria, extras: 48, status: "confirmada" as const, observacao: "Casal em peregrinação. Quer café reforçado cedo." },
-    { id: "res-003", cliente: "Grupo Caminhar", telefone: "(31) 99720-1002", quarto: quartoA.nome, dias: [5, 6], hospedes: 4, total: quartoA.diaria * 2, extras: 120, status: "aguardando_pagamento" as const, observacao: "Grupo solicitou apoio com mochila sob consulta." },
-    { id: "res-004", cliente: "Renata Duarte", telefone: "(12) 99114-8820", quarto: quartoB.nome, dias: [-3, -2], hospedes: 1, total: quartoB.diaria, extras: 0, status: "concluida" as const, observacao: "Hospedagem concluída sem ocorrência." },
-  ];
-
-  return base.map((item) => {
-    const sinal = Number((item.total * CAMINHOS_REGRAS_NEGOCIO.sinalPercentual).toFixed(2));
-    const comissao = Number((item.total * CAMINHOS_REGRAS_NEGOCIO.comissaoLancamentoPercentual).toFixed(2));
-    return {
-      ...item,
-      checkin: demoDatePlus(item.dias[0]),
-      checkout: demoDatePlus(item.dias[1]),
-      sinal,
-      comissao,
-      repasseInicial: Number(Math.max(0, sinal - comissao).toFixed(2)),
-      restanteNaChegada: Number((item.total - sinal + item.extras).toFixed(2)),
-    };
-  });
-}
-
-export function buildPainelPousadaDisponibilidadeDemo(): PainelPousadaDisponibilidade[] {
-  return [
-    { dia: demoDatePlus(0), status: "ocupado", detalhe: "1 check-in confirmado" },
-    { dia: demoDatePlus(1), status: "livre", detalhe: "2 quartos livres" },
-    { dia: demoDatePlus(2), status: "ocupado", detalhe: "Reserva Paulo Henrique" },
-    { dia: demoDatePlus(3), status: "bloqueado", detalhe: "Bloqueio manual para manutenção" },
-    { dia: demoDatePlus(4), status: "livre", detalhe: "Disponível para venda" },
-    { dia: demoDatePlus(5), status: "ocupado", detalhe: "Grupo Caminhar aguardando sinal" },
-  ];
-}
-
 function statusReservaPainel(status: string, checkin: string): PainelPousadaReserva["status"] {
   if (status === "cancelada_cliente" || status === "cancelada_pousada") return "cancelada";
   if (status === "concluida" || status === "no_show") return "concluida";
-  if (status === "confirmada" && checkin === demoDatePlus(0)) return "checkin_hoje";
+  if (status === "confirmada" && checkin === new Date().toISOString().slice(0, 10)) return "checkin_hoje";
   if (status === "confirmada") return "confirmada";
   return "aguardando_pagamento";
 }
@@ -503,64 +331,158 @@ export function formatMoney(value: number) {
   });
 }
 
-export function getHospedagemById(id: string) {
-  return HOSPEDAGENS_DEMO.find((item) => item.id === id) || null;
-}
-
 export function getQuartoById(hospedagem: CaminhoHospedagem, quartoId: string) {
   return hospedagem.quartos.find((item) => item.id === quartoId) || hospedagem.quartos[0] || null;
 }
 
-function datePlus(days: number) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+function mapCategoriaServicoIcon(categoria: string): CaminhoServicoAdicional["icon"] {
+  if (categoria === "alimentacao") return "restaurant-outline";
+  if (categoria === "lavanderia") return "shirt-outline";
+  if (categoria === "transporte") return "car-outline";
+  return "bag-handle-outline";
 }
 
-export const MINHAS_RESERVAS_HOSPEDAGENS_DEMO: CaminhoHospedagemReservaCliente[] = [
-  {
-    id: "demo-ouro-fino",
-    hospedagemSlug: "ouro-fino-refugio",
-    hospedagemNome: "Refúgio do Peregrino Ouro Fino",
-    cidade: "Ouro Fino",
-    quartoNome: "Quarto privativo peregrino",
-    checkin: datePlus(-4),
-    checkout: datePlus(-3),
-    hospedes: 1,
-    total: 140,
-    sinal: 70,
-    restanteNaPousada: 70,
-    status: "concluida",
-    statusPagamento: "aprovada",
-    createdAt: datePlus(-12),
-  },
-  {
-    id: "demo-borda-mata",
-    hospedagemSlug: "borda-mata-estacao",
-    hospedagemNome: "Estação Caminho Borda da Mata",
-    cidade: "Borda da Mata",
-    quartoNome: "Quarto coletivo",
-    checkin: datePlus(5),
-    checkout: datePlus(6),
-    hospedes: 1,
-    total: 75,
-    sinal: 37.5,
-    restanteNaPousada: 37.5,
-    status: "confirmada",
-    statusPagamento: "aprovada",
-    createdAt: datePlus(-2),
-  },
-];
+function mapPousadaFoto(row: any): ImageSourcePropType {
+  const fotos = Array.isArray(row?.fotos) ? row.fotos.map(String).filter(Boolean) : [];
+  return fotos[0] ? { uri: fotos[0] } : CAMINHOS_ASSETS.pousadaExterior;
+}
+
+function mapQuartoRow(row: any): CaminhoQuarto {
+  return {
+    id: String(row.slug || row.id),
+    nome: String(row.nome || "Quarto"),
+    tipo: String(row.tipo || "privativo") as CaminhoQuarto["tipo"],
+    capacidade: Number(row.capacidade || 1),
+    diaria: Number(row.diaria || 0),
+    disponivel: Boolean(row.disponivel),
+    descricao: row.descricao ? String(row.descricao) : "",
+    fotos: Array.isArray(row.fotos) ? row.fotos.map(String).filter(Boolean) : [],
+  };
+}
+
+function mapServicoRow(row: any): CaminhoServicoAdicional {
+  const categoria = String(row.categoria || "apoio") as CaminhoServicoAdicional["categoria"];
+  return {
+    id: String(row.slug || row.id),
+    nome: String(row.nome || "Serviço"),
+    descricao: String(row.descricao || ""),
+    preco: Number(row.preco || 0),
+    unidade: String(row.unidade || "por unidade"),
+    categoria,
+    icon: mapCategoriaServicoIcon(categoria),
+    confirmacao: String(row.confirmacao || "Sob confirmação"),
+  };
+}
+
+async function carregarCatalogoRows() {
+  const { data: pousadas, error: pousadasError } = await supabase
+    .from("caminho_hospedagem_pousadas")
+    .select("id,slug,nome,cidade,uf,ramal,endereco,whatsapp,descricao,status,visivel,fotos")
+    .eq("status", "aprovada")
+    .eq("visivel", true)
+    .order("cidade", { ascending: true })
+    .order("nome", { ascending: true });
+
+  if (pousadasError) {
+    throw new Error(pousadasError.message);
+  }
+
+  const pousadaRows = (pousadas || []) as any[];
+  if (!pousadaRows.length) return [];
+
+  const pousadaIds = pousadaRows.map((row) => String(row.id));
+
+  const [quartosRes, servicosRes, avaliacoesRes] = await Promise.all([
+    supabase
+      .from("caminho_hospedagem_quartos")
+      .select("id,pousada_id,slug,nome,tipo,capacidade,diaria,disponivel,ativo,descricao,fotos")
+      .in("pousada_id", pousadaIds)
+      .eq("ativo", true)
+      .eq("disponivel", true)
+      .order("diaria", { ascending: true }),
+    supabase
+      .from("caminho_hospedagem_servicos")
+      .select("id,pousada_id,slug,nome,descricao,preco,unidade,categoria,confirmacao,ativo")
+      .in("pousada_id", pousadaIds)
+      .eq("ativo", true)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("caminho_hospedagem_avaliacoes")
+      .select("hospedagem_slug,nota_geral")
+      .eq("publicada", true)
+      .limit(1000),
+  ]);
+
+  if (quartosRes.error) throw new Error(quartosRes.error.message);
+  if (servicosRes.error) throw new Error(servicosRes.error.message);
+  if (avaliacoesRes.error) throw new Error(avaliacoesRes.error.message);
+
+  const quartosPorPousada = new Map<string, CaminhoQuarto[]>();
+  for (const row of ((quartosRes.data || []) as any[])) {
+    const pousadaId = String(row.pousada_id || "");
+    if (!pousadaId) continue;
+    quartosPorPousada.set(pousadaId, [...(quartosPorPousada.get(pousadaId) || []), mapQuartoRow(row)]);
+  }
+
+  const servicosPorPousada = new Map<string, CaminhoServicoAdicional[]>();
+  for (const row of ((servicosRes.data || []) as any[])) {
+    const pousadaId = String(row.pousada_id || "");
+    if (!pousadaId) continue;
+    servicosPorPousada.set(pousadaId, [...(servicosPorPousada.get(pousadaId) || []), mapServicoRow(row)]);
+  }
+
+  const avaliacoesPorSlug = new Map<string, number[]>();
+  for (const row of ((avaliacoesRes.data || []) as any[])) {
+    const slug = String(row.hospedagem_slug || "");
+    if (!slug) continue;
+    avaliacoesPorSlug.set(slug, [...(avaliacoesPorSlug.get(slug) || []), Number(row.nota_geral || 0)]);
+  }
+
+  return pousadaRows.map((row) => {
+    const id = String(row.slug || row.id);
+    const quartos = quartosPorPousada.get(String(row.id)) || [];
+    const notas = avaliacoesPorSlug.get(id) || [];
+    const diariaBase = quartos.reduce((min, quarto) => Math.min(min, quarto.diaria), Number.POSITIVE_INFINITY);
+    const avaliacao = notas.length
+      ? notas.reduce((sum, nota) => sum + nota, 0) / notas.length
+      : 0;
+
+    return {
+      id,
+      nome: String(row.nome || "Pousada"),
+      cidade: String(row.cidade || ""),
+      uf: String(row.uf || "MG") as "MG" | "SP",
+      ramal: String(row.ramal || "Caminho da Fé"),
+      etapaKm: 0,
+      distanciaTrilhaKm: 0,
+      diariaBase: Number.isFinite(diariaBase) ? diariaBase : 0,
+      avaliacao,
+      fotos: [mapPousadaFoto(row)],
+      whatsapp: String(row.whatsapp || ""),
+      endereco: String(row.endereco || ""),
+      descricao: String(row.descricao || ""),
+      amenidades: [] as HospedagemAmenidade[],
+      servicosAdicionais: servicosPorPousada.get(String(row.id)) || [],
+      quartos,
+    } satisfies CaminhoHospedagem;
+  });
+}
+
+export async function listarCatalogoHospedagens() {
+  return carregarCatalogoRows();
+}
+
+export async function obterHospedagemPublicaPorId(id: string) {
+  const catalogo = await carregarCatalogoRows();
+  return catalogo.find((item) => item.id === id) || null;
+}
 
 export function calcularResumoJornada(reservas: CaminhoHospedagemReservaCliente[]) {
   const reservasValidas = reservas.filter((item) => item.status !== "cancelada_cliente" && item.status !== "cancelada_pousada");
   const totalReservado = reservasValidas.reduce((sum, item) => sum + Number(item.total || 0), 0);
   const totalSinais = reservasValidas.reduce((sum, item) => sum + Number(item.sinal || 0), 0);
   const restantePousadas = reservasValidas.reduce((sum, item) => sum + Number(item.restanteNaPousada || 0), 0);
-  const kmPercorridos = reservasValidas.reduce((sum, item) => {
-    const hospedagem = getHospedagemById(item.hospedagemSlug);
-    return sum + Number(hospedagem?.etapaKm || 0);
-  }, 0);
+  const kmPercorridos = 0;
 
   return {
     reservas: reservasValidas.length,
@@ -596,7 +518,7 @@ export async function listarMinhasReservasHospedagem() {
   } = await supabase.auth.getSession();
 
   if (!session?.user) {
-    return MINHAS_RESERVAS_HOSPEDAGENS_DEMO;
+    return [];
   }
 
   const { data, error } = await supabase
@@ -610,10 +532,10 @@ export async function listarMinhasReservasHospedagem() {
 
   if (error) {
     console.log("HOSPEDAGENS RESERVAS LOAD ERROR:", error.message);
-    return MINHAS_RESERVAS_HOSPEDAGENS_DEMO;
+    return [];
   }
 
-  return data?.length ? data.map(mapReservaRow) : MINHAS_RESERVAS_HOSPEDAGENS_DEMO;
+  return data?.length ? data.map(mapReservaRow) : [];
 }
 
 export function calcularNoites(checkin: string, checkout: string) {
@@ -654,27 +576,6 @@ export function calcularReserva(params: {
   };
 }
 
-async function listarReservasLocais() {
-  try {
-    const raw = await AsyncStorage.getItem(HOSPEDAGENS_RESERVAS_LOCAIS_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as HospedagemReservaLocal[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function salvarReservaLocal(reserva: HospedagemReservaLocal) {
-  const atuais = await listarReservasLocais();
-  const next = [reserva, ...atuais.filter((item) => item.id !== reserva.id)].slice(0, 30);
-  await AsyncStorage.setItem(HOSPEDAGENS_RESERVAS_LOCAIS_KEY, JSON.stringify(next));
-}
-
-async function obterReservaLocal(reservaId: string) {
-  const reservas = await listarReservasLocais();
-  return reservas.find((item) => item.id === reservaId) || null;
-}
-
 export async function criarReservaHospedagem(payload: {
   hospedagemId: string;
   quartoId: string;
@@ -687,10 +588,11 @@ export async function criarReservaHospedagem(payload: {
   servicosAdicionaisTotal?: number;
   servicosAdicionaisDescricao?: string;
 }) {
-  const hospedagem = getHospedagemById(payload.hospedagemId);
+  const hospedagem = await obterHospedagemPublicaPorId(payload.hospedagemId);
   if (!hospedagem) throw new Error("Hospedagem indisponível.");
   const quarto = getQuartoById(hospedagem, payload.quartoId);
   if (!quarto) throw new Error("Quarto indisponível.");
+  if (!quarto.disponivel) throw new Error("Quarto indisponível para reserva.");
 
   const resumo = calcularReserva({
     hospedagem,
@@ -710,6 +612,47 @@ export async function criarReservaHospedagem(payload: {
   }
 
   const tenantId = await resolveCurrentTenantId().catch(() => null);
+  if (!tenantId) {
+    throw new Error("Tenant do app não encontrado.");
+  }
+
+  const noites = calcularNoites(payload.checkin, payload.checkout);
+  const diasReserva = Array.from({ length: noites }, (_, index) => {
+    const date = new Date(`${payload.checkin}T12:00:00`);
+    date.setDate(date.getDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
+
+  const { data: pousadaRow, error: pousadaError } = await supabase
+    .from("caminho_hospedagem_pousadas")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("slug", hospedagem.id)
+    .eq("status", "aprovada")
+    .eq("visivel", true)
+    .maybeSingle();
+
+  if (pousadaError || !pousadaRow?.id) {
+    throw new Error(pousadaError?.message || "Pousada indisponível para reserva.");
+  }
+
+  const { data: disponibilidade, error: disponibilidadeError } = await supabase
+    .from("caminho_hospedagem_disponibilidade")
+    .select("dia,status")
+    .eq("pousada_id", String(pousadaRow.id))
+    .in("dia", diasReserva)
+    .eq("status", "livre");
+
+  if (disponibilidadeError) {
+    throw new Error(disponibilidadeError.message);
+  }
+
+  const diasLivres = new Set(((disponibilidade || []) as any[]).map((row) => String(row.dia)));
+  const todosDiasLivres = diasReserva.every((dia) => diasLivres.has(dia));
+  if (!todosDiasLivres) {
+    throw new Error("Disponibilidade não confirmada para as datas selecionadas.");
+  }
+
   const insertPayload = {
     tenant_id: tenantId,
     cliente_id: session.user.id,
@@ -740,37 +683,13 @@ export async function criarReservaHospedagem(payload: {
     .single();
 
   if (error || !data) {
-    console.log("HOSPEDAGENS RESERVA INSERT FALLBACK:", error?.message);
-    const localReserva: HospedagemReservaLocal = {
-      id: `local-${Date.now()}`,
-      hospedagemNome: hospedagem.nome,
-      cidade: hospedagem.cidade,
-      quartoNome: quarto.nome,
-      checkin: payload.checkin,
-      checkout: payload.checkout,
-      hospedes: payload.hospedes,
-      total: resumo.total,
-      sinal: resumo.sinal,
-      restanteNaPousada: resumo.restanteNaPousada,
-      servicosAdicionaisTotal: Number(payload.servicosAdicionaisTotal || 0),
-      servicosAdicionaisDescricao: payload.servicosAdicionaisDescricao?.trim() || "",
-      status: "aguardando_pagamento",
-      statusPagamento: "pendente",
-      provider: null,
-      providerPaymentId: null,
-    };
-    await salvarReservaLocal(localReserva);
-    return { reservaId: localReserva.id, resumo, local: true };
+    throw new Error(error?.message || "Não foi possível criar a reserva no Supabase.");
   }
 
   return { reservaId: String(data.id), resumo };
 }
 
 export async function obterReservaHospedagemPorId(reservaId: string) {
-  if (reservaId.startsWith("local-")) {
-    return obterReservaLocal(reservaId);
-  }
-
   const {
     data: { session },
     error: sessionError,
@@ -823,14 +742,7 @@ export async function obterReservaHospedagemPorId(reservaId: string) {
 async function invokeHospedagemPaymentFunction(body: Record<string, unknown>) {
   const reservaId = String(body.reservaId || "");
   if (reservaId.startsWith("local-")) {
-    const reserva = await obterReservaLocal(reservaId);
-    return {
-      checkoutConfigured: false,
-      provider: "mercadopago",
-      reservaId,
-      valorSinal: reserva?.sinal || 0,
-      message: "Reserva local criada para teste. Para cobrança real, sincronize a tabela de reservas e o tenant no Supabase.",
-    };
+    throw new Error("Reserva local não é aceita no GO LIVE. Crie a reserva no Supabase antes do pagamento.");
   }
 
   const { data, error } = await supabase.functions.invoke("create-caminho-hospedagem-pix-payment", {
@@ -866,16 +778,16 @@ export async function pagarSinalHospedagemComCartao(
 }
 
 export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaData> {
-  const demoPousada = HOSPEDAGENS_DEMO[0];
-  const demoData: PainelPousadaData = {
-    source: "demo",
+  const emptyPousada = buildEmptyHospedagem();
+  const emptyData: PainelPousadaData = {
+    source: "supabase",
     pousadaDbId: null,
-    pousada: demoPousada,
-    reservas: buildPainelPousadaReservasDemo(demoPousada),
-    quartos: demoPousada.quartos,
-    servicos: demoPousada.servicosAdicionais,
-    disponibilidade: buildPainelPousadaDisponibilidadeDemo(),
-    visivel: true,
+    pousada: emptyPousada,
+    reservas: [],
+    quartos: [],
+    servicos: [],
+    disponibilidade: [],
+    visivel: false,
     autoConfirmar: false,
     respostaRapida: "Olá! Sua reserva foi recebida. Vamos confirmar os detalhes da chegada e serviços adicionais.",
     gatewayStatus: "pendente",
@@ -885,10 +797,10 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session?.user) return demoData;
+    if (!session?.user) return emptyData;
 
     const tenantId = await resolveCurrentTenantId().catch(() => null);
-    if (!tenantId) return demoData;
+    if (!tenantId) return emptyData;
 
     let { data: pousada, error: pousadaError } = await supabase
       .from("caminho_hospedagem_pousadas")
@@ -898,8 +810,8 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
       .maybeSingle();
 
     if (pousadaError) {
-      console.log("HOSPEDAGENS PAINEL LOAD DEMO:", pousadaError.message);
-      return demoData;
+      console.log("HOSPEDAGENS PAINEL LOAD ERROR:", pousadaError.message);
+      return emptyData;
     }
 
     if (!pousada) {
@@ -908,18 +820,18 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
         .insert({
           tenant_id: tenantId,
           owner_user_id: session.user.id,
-          slug: demoPousada.id,
-          nome: demoPousada.nome,
-          cidade: demoPousada.cidade,
-          uf: demoPousada.uf,
-          ramal: demoPousada.ramal,
-          endereco: demoPousada.endereco,
-          whatsapp: demoPousada.whatsapp,
-          descricao: demoPousada.descricao,
+          slug: `pousada-${session.user.id.slice(0, 8)}`,
+          nome: "Minha pousada",
+          cidade: "",
+          uf: "MG",
+          ramal: "",
+          endereco: "",
+          whatsapp: "",
+          descricao: "",
           status: "pendente",
-          visivel: true,
+          visivel: false,
           auto_confirmar: false,
-          resposta_rapida: demoData.respostaRapida,
+          resposta_rapida: emptyData.respostaRapida,
           gateway_provider: "mercadopago",
           gateway_status: "pendente",
         })
@@ -927,8 +839,8 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
         .single();
 
       if (insertError || !inserted) {
-        console.log("HOSPEDAGENS PAINEL CREATE DEMO:", insertError?.message);
-        return demoData;
+        console.log("HOSPEDAGENS PAINEL CREATE ERROR:", insertError?.message);
+        return emptyData;
       }
       pousada = inserted;
     }
@@ -943,71 +855,14 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
         .from("caminho_hospedagem_reservas")
         .select("*")
         .eq("tenant_id", tenantId)
-        .eq("hospedagem_slug", String(pousada.slug || demoPousada.id))
+        .eq("hospedagem_slug", String(pousada.slug || ""))
         .order("checkin", { ascending: true })
         .limit(80),
     ]);
 
-    let quartos: CaminhoQuarto[] = (quartosRes.data || []).map((row: any) => ({
-      id: String(row.slug || row.id),
-      nome: String(row.nome || "Quarto"),
-      tipo: String(row.tipo || "privativo") as CaminhoQuarto["tipo"],
-      capacidade: Number(row.capacidade || 1),
-      diaria: Number(row.diaria || 0),
-      disponivel: Boolean(row.disponivel),
-      descricao: row.descricao ? String(row.descricao) : "",
-      fotos: Array.isArray(row.fotos) ? row.fotos.map(String) : [],
-    }));
+    const quartos: CaminhoQuarto[] = (quartosRes.data || []).map(mapQuartoRow);
 
-    if (!quartos.length) {
-      await supabase.from("caminho_hospedagem_quartos").insert(
-        demoPousada.quartos.map((item) => ({
-          tenant_id: tenantId,
-          pousada_id: pousadaDbId,
-          slug: item.id,
-          nome: item.nome,
-          tipo: item.tipo,
-          capacidade: item.capacidade,
-          diaria: item.diaria,
-          disponivel: item.disponivel,
-          descricao: item.descricao || null,
-          fotos: item.fotos || [],
-        })),
-      );
-      quartos = demoPousada.quartos.map((item) => ({
-        ...item,
-        descricao: item.descricao || "",
-        fotos: item.fotos || [],
-      }));
-    }
-
-    let servicos = (servicosRes.data || []).map((row: any) => ({
-      id: String(row.slug || row.id),
-      nome: String(row.nome || "Serviço"),
-      descricao: String(row.descricao || ""),
-      preco: Number(row.preco || 0),
-      unidade: String(row.unidade || "por unidade"),
-      categoria: String(row.categoria || "apoio") as CaminhoServicoAdicional["categoria"],
-      icon: "bag-handle-outline" as CaminhoServicoAdicional["icon"],
-      confirmacao: String(row.confirmacao || "Sob confirmação"),
-    }));
-
-    if (!servicos.length) {
-      await supabase.from("caminho_hospedagem_servicos").insert(
-        demoPousada.servicosAdicionais.map((item) => ({
-          tenant_id: tenantId,
-          pousada_id: pousadaDbId,
-          slug: item.id,
-          nome: item.nome,
-          descricao: item.descricao,
-          preco: item.preco,
-          unidade: item.unidade,
-          categoria: item.categoria,
-          confirmacao: item.confirmacao,
-        })),
-      );
-      servicos = demoPousada.servicosAdicionais;
-    }
+    const servicos = (servicosRes.data || []).map(mapServicoRow);
 
     const disponibilidade = (disponibilidadeRes.data || []).map((row: any) => ({
       dia: String(row.dia),
@@ -1042,28 +897,32 @@ export async function carregarPainelPousadaHospedagens(): Promise<PainelPousadaD
       source: "supabase",
       pousadaDbId,
       pousada: {
-        ...demoPousada,
-        id: String(pousada.slug || demoPousada.id),
-        nome: String(pousada.nome || demoPousada.nome),
-        cidade: String(pousada.cidade || demoPousada.cidade),
-        uf: String(pousada.uf || demoPousada.uf) as "MG" | "SP",
-        ramal: String(pousada.ramal || demoPousada.ramal),
-        endereco: String(pousada.endereco || demoPousada.endereco),
-        whatsapp: String(pousada.whatsapp || demoPousada.whatsapp),
-        descricao: String(pousada.descricao || demoPousada.descricao),
+        ...emptyPousada,
+        id: String(pousada.slug || ""),
+        nome: String(pousada.nome || ""),
+        cidade: String(pousada.cidade || ""),
+        uf: String(pousada.uf || "MG") as "MG" | "SP",
+        ramal: String(pousada.ramal || ""),
+        endereco: String(pousada.endereco || ""),
+        whatsapp: String(pousada.whatsapp || ""),
+        descricao: String(pousada.descricao || ""),
+        fotos: [mapPousadaFoto(pousada)],
+        diariaBase: quartos.length ? quartos.reduce((min, quarto) => Math.min(min, quarto.diaria), Number.POSITIVE_INFINITY) : 0,
+        quartos,
+        servicosAdicionais: servicos,
       },
-      reservas: reservas.length ? reservas : buildPainelPousadaReservasDemo(demoPousada),
+      reservas,
       quartos,
       servicos,
-      disponibilidade: disponibilidade.length ? disponibilidade : buildPainelPousadaDisponibilidadeDemo(),
+      disponibilidade,
       visivel: Boolean(pousada.visivel),
       autoConfirmar: Boolean(pousada.auto_confirmar),
-      respostaRapida: String(pousada.resposta_rapida || demoData.respostaRapida),
+      respostaRapida: String(pousada.resposta_rapida || emptyData.respostaRapida),
       gatewayStatus: String(pousada.gateway_status || "pendente"),
     };
   } catch (error: any) {
-    console.log("HOSPEDAGENS PAINEL UNEXPECTED DEMO:", error?.message || error);
-    return demoData;
+    console.log("HOSPEDAGENS PAINEL UNEXPECTED ERROR:", error?.message || error);
+    return emptyData;
   }
 }
 
@@ -1220,96 +1079,26 @@ export async function atualizarStatusReservaPainelPousada(
   return { ok: true };
 }
 
-function buildAdminDemoData(): HospedagensAdminData {
-  const reservas = buildPainelPousadaReservasDemo(HOSPEDAGENS_DEMO[0]).map((item) => ({
-    id: item.id,
-    hospedagemNome: HOSPEDAGENS_DEMO[0].nome,
-    cidade: HOSPEDAGENS_DEMO[0].cidade,
-    cliente: item.cliente,
-    quarto: item.quarto,
-    checkin: item.checkin,
-    checkout: item.checkout,
-    total: item.total + item.extras,
-    sinal: item.sinal,
-    comissao: item.comissao,
-    repasseInicial: item.repasseInicial,
-    restanteNaPousada: item.restanteNaChegada,
-    status: item.status,
-    statusPagamento: item.status === "aguardando_pagamento" ? "pendente" : "aprovada",
-    createdAt: new Date().toISOString(),
-  }));
-  const gmv = reservas.filter((item) => !item.status.includes("cancelada")).reduce((sum, item) => sum + item.total, 0);
-  const sinais = reservas.reduce((sum, item) => sum + item.sinal, 0);
-  const comissao = reservas.reduce((sum, item) => sum + item.comissao, 0);
-  const repasse = reservas.reduce((sum, item) => sum + item.repasseInicial, 0);
-
-  const chamados: CaminhoHospedagemChamado[] = [
-    {
-      id: "chamado-demo-1",
-      reservaId: reservas[0]?.id || null,
-      clienteId: null,
-      pousadaId: null,
-      papelAbertura: "cliente",
-      tipo: "duvida",
-      prioridade: "normal",
-      status: "aberto",
-      titulo: "Confirmar horário de chegada",
-      descricao: "Cliente quer confirmar se pode chegar após 18h.",
-      respostaAdmin: "",
-      decisao: "",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "chamado-demo-2",
-      reservaId: reservas[2]?.id || null,
-      clienteId: null,
-      pousadaId: null,
-      papelAbertura: "pousada",
-      tipo: "pagamento",
-      prioridade: "alta",
-      status: "em_analise",
-      titulo: "Sinal pendente em reserva de grupo",
-      descricao: "Pousada solicitou revisão do status de pagamento antes de reservar os quartos.",
-      respostaAdmin: "Aguardando compensação do provedor.",
-      decisao: "",
-      createdAt: new Date().toISOString(),
-    },
-  ];
-
-  return {
-    source: "demo",
-    metrics: {
-      pousadas: HOSPEDAGENS_DEMO.length,
-      pousadasPendentes: 1,
-      reservas: reservas.length,
-      gmv,
-      sinais,
-      comissao,
-      repasse,
-      canceladas: reservas.filter((item) => item.status.includes("cancelada")).length,
-    },
-    pousadas: HOSPEDAGENS_DEMO.map((item, index) => ({
-      id: item.id,
-      slug: item.id,
-      nome: item.nome,
-      cidade: item.cidade,
-      uf: item.uf,
-      status: index === 0 ? "pendente" : "aprovada",
-      visivel: index !== 0,
-      gatewayStatus: index === 0 ? "pendente" : "ativa",
-      quartos: item.quartos.length,
-      createdAt: new Date().toISOString(),
-    })),
-    reservas,
-    chamados,
-  };
-}
-
 export async function carregarAdminHospedagens(): Promise<HospedagensAdminData> {
-  const demoData = buildAdminDemoData();
+  const emptyData: HospedagensAdminData = {
+    source: "supabase",
+    metrics: {
+      pousadas: 0,
+      pousadasPendentes: 0,
+      reservas: 0,
+      gmv: 0,
+      sinais: 0,
+      comissao: 0,
+      repasse: 0,
+      canceladas: 0,
+    },
+    pousadas: [],
+    reservas: [],
+    chamados: [],
+  };
   try {
     const tenantId = await resolveCurrentTenantId().catch(() => null);
-    if (!tenantId) return demoData;
+    if (!tenantId) return emptyData;
 
     const [pousadasRes, quartosRes, reservasRes, chamadosRes] = await Promise.all([
       supabase
@@ -1338,8 +1127,8 @@ export async function carregarAdminHospedagens(): Promise<HospedagensAdminData> 
     ]);
 
     if (pousadasRes.error || reservasRes.error) {
-      console.log("HOSPEDAGENS ADMIN LOAD DEMO:", pousadasRes.error?.message || reservasRes.error?.message);
-      return demoData;
+      console.log("HOSPEDAGENS ADMIN LOAD ERROR:", pousadasRes.error?.message || reservasRes.error?.message);
+      return emptyData;
     }
 
     const quartosPorPousada = new Map<string, number>();
@@ -1394,13 +1183,13 @@ export async function carregarAdminHospedagens(): Promise<HospedagensAdminData> 
         repasse: reservasAtivas.reduce((sum, item) => sum + item.repasseInicial, 0),
         canceladas: reservas.filter((item) => ["cancelada_cliente", "cancelada_pousada"].includes(item.status)).length,
       },
-      pousadas: pousadas.length ? pousadas : demoData.pousadas,
-      reservas: reservas.length ? reservas : demoData.reservas,
-      chamados: chamados.length ? chamados : demoData.chamados,
+      pousadas,
+      reservas,
+      chamados,
     };
   } catch (error: any) {
-    console.log("HOSPEDAGENS ADMIN UNEXPECTED DEMO:", error?.message || error);
-    return demoData;
+    console.log("HOSPEDAGENS ADMIN UNEXPECTED ERROR:", error?.message || error);
+    return emptyData;
   }
 }
 
@@ -1423,12 +1212,11 @@ function mapChamadoRow(row: any): CaminhoHospedagemChamado {
 }
 
 export async function listarChamadosHospedagens(escopo: "cliente" | "pousada" | "admin" = "cliente") {
-  const demo = buildAdminDemoData().chamados;
   try {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session?.user) return demo.filter((item) => item.papelAbertura === escopo || escopo === "admin");
+    if (!session?.user) return [];
 
     const tenantId = await resolveCurrentTenantId().catch(() => null);
     let query = supabase
@@ -1442,13 +1230,13 @@ export async function listarChamadosHospedagens(escopo: "cliente" | "pousada" | 
 
     const { data, error } = await query;
     if (error) {
-      console.log("HOSPEDAGENS CHAMADOS LOAD DEMO:", error.message);
-      return demo.filter((item) => item.papelAbertura === escopo || escopo === "admin");
+      console.log("HOSPEDAGENS CHAMADOS LOAD ERROR:", error.message);
+      return [];
     }
     return data?.length ? data.map(mapChamadoRow) : [];
   } catch (error: any) {
-    console.log("HOSPEDAGENS CHAMADOS UNEXPECTED DEMO:", error?.message || error);
-    return demo.filter((item) => item.papelAbertura === escopo || escopo === "admin");
+    console.log("HOSPEDAGENS CHAMADOS UNEXPECTED ERROR:", error?.message || error);
+    return [];
   }
 }
 
@@ -1687,9 +1475,7 @@ export async function listarNotificacoesHospedagens() {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.user) {
-    return [
-      { id: "demo-1", papel: "cliente", titulo: "Bem-vindo", mensagem: "Suas reservas e avisos importantes aparecerão aqui.", tipo: "sistema", lida: false, createdAt: new Date().toISOString() },
-    ] as CaminhoHospedagemNotificacao[];
+    return [] as CaminhoHospedagemNotificacao[];
   }
   const tenantId = await resolveCurrentTenantId().catch(() => null);
   let query = supabase
