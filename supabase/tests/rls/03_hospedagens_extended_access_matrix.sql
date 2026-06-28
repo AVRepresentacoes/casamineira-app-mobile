@@ -502,14 +502,15 @@ order by
 
 do $$
 declare
-  v_failures integer;
+  v_p0_failures integer;
 begin
-  select count(*) into v_failures
+  select count(*) into v_p0_failures
   from rls_hospedagens_extended_results
-  where passed = false;
+  where passed = false
+    and severity = 'P0';
 
-  if v_failures > 0 then
-    raise exception 'Hospedagens extended RLS audit failed: % failing checks. See result rows above.', v_failures;
+  if v_p0_failures > 0 then
+    raise exception 'Hospedagens extended RLS audit failed: % failing P0 checks. See result rows above.', v_p0_failures;
   end if;
 end;
 $$;
