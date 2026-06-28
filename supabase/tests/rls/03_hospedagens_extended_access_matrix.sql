@@ -1,5 +1,5 @@
--- Sprint Enterprise 018
--- Matriz estendida de auditoria RLS para Hospedagens Caminhos da Fe.
+-- Sprint Enterprise 018/020
+-- Matriz estendida de auditoria e hardening RLS para Hospedagens Caminhos da Fe.
 --
 -- Pre-requisito:
 --   psql local -f supabase/seed/rls_personas_seed.sql
@@ -431,9 +431,13 @@ select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_h
 select pg_temp.record_eq('cliente ve apenas dados privados proprios', 'cliente_hospedagens', 'caminho_hospedagem_avaliacoes', 'avaliacoes privadas de outro cliente', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_avaliacoes where cliente_id <> auth.uid() and publicada = false and comentario like '%RLS 018%'$$));
 
 select pg_temp.record_eq('cliente nao ve dados operacionais privados', 'cliente_hospedagens', 'caminho_hospedagem_pousadas', 'pousadas privadas operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-privada'$$));
+select pg_temp.record_eq('cliente ve catalogo operacional publico', 'cliente_hospedagens', 'caminho_hospedagem_pousadas', 'pousadas publicas', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-publica'$$));
 select pg_temp.record_eq('cliente nao ve dados operacionais privados', 'cliente_hospedagens', 'caminho_hospedagem_quartos', 'quartos privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-privado'$$));
+select pg_temp.record_eq('cliente ve catalogo operacional publico', 'cliente_hospedagens', 'caminho_hospedagem_quartos', 'quartos publicos', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-publico'$$));
 select pg_temp.record_eq('cliente nao ve dados operacionais privados', 'cliente_hospedagens', 'caminho_hospedagem_servicos', 'servicos privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-privado'$$));
+select pg_temp.record_eq('cliente ve catalogo operacional publico', 'cliente_hospedagens', 'caminho_hospedagem_servicos', 'servicos publicos', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-publico'$$));
 select pg_temp.record_eq('cliente nao ve dados operacionais privados', 'cliente_hospedagens', 'caminho_hospedagem_disponibilidade', 'bloqueios privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status <> 'livre' and detalhe like '%RLS 018%'$$));
+select pg_temp.record_eq('cliente ve catalogo operacional publico', 'cliente_hospedagens', 'caminho_hospedagem_disponibilidade', 'disponibilidade livre publica', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status = 'livre' and detalhe like '%RLS 018%'$$));
 
 -- hospedagens_owner: deve ver dados do tenant.
 reset role;
@@ -465,6 +469,10 @@ select set_config(
 select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_chamados', 'chamados rls018', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where titulo like '%RLS 018%'$$));
 select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_notificacoes', 'notificacoes rls018', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where titulo like '%RLS 018%'$$));
 select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_favoritos', 'favoritos rls018', 'P0', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_favoritos where hospedagem_slug like 'pousada-rls-018%'$$));
+select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_pousadas', 'pousadas privadas operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-privada'$$));
+select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_quartos', 'quartos privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-privado'$$));
+select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_servicos', 'servicos privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-privado'$$));
+select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_disponibilidade', 'bloqueios privados operacionais', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status <> 'livre' and detalhe like '%RLS 018%'$$));
 select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_pousada_saldos', 'saldos rls018', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousada_saldos where hospedagem_slug = 'pousada-rls-018-publica'$$));
 select pg_temp.record_eq('outro tenant nao ve hospedagens privadas', 'casa_mineira_servicos_owner', 'caminho_hospedagem_movimentos', 'movimentos rls018', 'P1', 0, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_movimentos where descricao like '%RLS 018%'$$));
 
@@ -477,10 +485,14 @@ select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_movimentos', 'movimentos privados', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_movimentos where descricao like '%RLS 018%'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_chamados', 'chamados privados', 'P0', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_chamados where titulo like '%RLS 018%'$$));
 select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_notificacoes', 'notificacoes privadas', 'P0', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_notificacoes where titulo like '%RLS 018%'$$));
-select pg_temp.record_private_zero_or_denied('anon catalogo publico explicitamente permitido', 'anon', 'caminho_hospedagem_pousadas', 'pousadas publicas', 'P2', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-publica'$$));
-select pg_temp.record_private_zero_or_denied('anon catalogo publico explicitamente permitido', 'anon', 'caminho_hospedagem_quartos', 'quartos publicos', 'P2', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-publico'$$));
-select pg_temp.record_private_zero_or_denied('anon catalogo publico explicitamente permitido', 'anon', 'caminho_hospedagem_servicos', 'servicos publicos', 'P2', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-publico'$$));
-select pg_temp.record_private_zero_or_denied('anon catalogo publico explicitamente permitido', 'anon', 'caminho_hospedagem_disponibilidade', 'disponibilidade publica', 'P2', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status = 'livre' and detalhe like '%RLS 018%'$$));
+select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_pousadas', 'pousadas privadas operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-privada'$$));
+select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_quartos', 'quartos privados operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-privado'$$));
+select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_servicos', 'servicos privados operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-privado'$$));
+select pg_temp.record_private_zero_or_denied('anon nao ve dados privados', 'anon', 'caminho_hospedagem_disponibilidade', 'bloqueios privados operacionais', 'P1', pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status <> 'livre' and detalhe like '%RLS 018%'$$));
+select pg_temp.record_eq('anon catalogo publico permitido por RLS filtrada', 'anon', 'caminho_hospedagem_pousadas', 'pousadas publicas', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_pousadas where slug = 'pousada-rls-018-publica'$$));
+select pg_temp.record_eq('anon catalogo publico permitido por RLS filtrada', 'anon', 'caminho_hospedagem_quartos', 'quartos publicos', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_quartos where slug = 'quarto-rls-018-publico'$$));
+select pg_temp.record_eq('anon catalogo publico permitido por RLS filtrada', 'anon', 'caminho_hospedagem_servicos', 'servicos publicos', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_servicos where slug = 'servico-rls-018-publico'$$));
+select pg_temp.record_eq('anon catalogo publico permitido por RLS filtrada', 'anon', 'caminho_hospedagem_disponibilidade', 'disponibilidade publica', 'P1', 1, pg_temp.visible_count($$select count(*) from public.caminho_hospedagem_disponibilidade where status = 'livre' and detalhe like '%RLS 018%'$$));
 
 reset role;
 
@@ -502,15 +514,15 @@ order by
 
 do $$
 declare
-  v_p0_failures integer;
+  v_blocking_failures integer;
 begin
-  select count(*) into v_p0_failures
+  select count(*) into v_blocking_failures
   from rls_hospedagens_extended_results
   where passed = false
-    and severity = 'P0';
+    and severity in ('P0', 'P1');
 
-  if v_p0_failures > 0 then
-    raise exception 'Hospedagens extended RLS audit failed: % failing P0 checks. See result rows above.', v_p0_failures;
+  if v_blocking_failures > 0 then
+    raise exception 'Hospedagens extended RLS matrix failed: % failing P0/P1 checks. See result rows above.', v_blocking_failures;
   end if;
 end;
 $$;
