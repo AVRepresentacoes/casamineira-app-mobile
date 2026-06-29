@@ -115,7 +115,10 @@ serve(async (req) => {
     }
 
     const mercadoPagoToken = String(
-      Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") || Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") || "",
+      Deno.env.get("HOSPEDAGENS_MERCADO_PAGO_ACCESS_TOKEN") ||
+        Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") ||
+        Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") ||
+        "",
     ).trim();
 
     if (!mercadoPagoToken) {

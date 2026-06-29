@@ -344,7 +344,12 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const mercadoPagoToken = String(Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") || Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") || "").trim();
+    const mercadoPagoToken = String(
+      Deno.env.get("HOSPEDAGENS_MERCADO_PAGO_ACCESS_TOKEN") ||
+        Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") ||
+        Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") ||
+        "",
+    ).trim();
 
     if (!supabaseUrl || !supabaseServiceRoleKey || !mercadoPagoToken) {
       throw new Error("Configuração ausente no webhook.");
