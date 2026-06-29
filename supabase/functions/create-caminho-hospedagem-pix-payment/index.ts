@@ -140,6 +140,8 @@ serve(async (req) => {
       external_reference: externalReference,
       metadata: {
         reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        quarto_id: reserva.quarto_id,
         produto: "hospedagens_caminhos_da_fe",
         hospedagem_slug: reserva.hospedagem_slug,
         metodo,

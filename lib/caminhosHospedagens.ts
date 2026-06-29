@@ -45,6 +45,7 @@ export type CaminhoServicoAdicional = {
 
 export type CaminhoQuarto = {
   id: string;
+  dbId?: string;
   nome: string;
   tipo: "privativo" | "compartilhado" | "casal" | "familia";
   capacidade: number;
@@ -350,6 +351,7 @@ function mapPousadaFoto(row: any): ImageSourcePropType {
 function mapQuartoRow(row: any): CaminhoQuarto {
   return {
     id: String(row.slug || row.id),
+    dbId: row.id ? String(row.id) : undefined,
     nome: String(row.nome || "Quarto"),
     tipo: String(row.tipo || "privativo") as CaminhoQuarto["tipo"],
     capacidade: Number(row.capacidade || 1),
@@ -593,6 +595,7 @@ export async function criarReservaHospedagem(payload: {
   const quarto = getQuartoById(hospedagem, payload.quartoId);
   if (!quarto) throw new Error("Quarto indisponível.");
   if (!quarto.disponivel) throw new Error("Quarto indisponível para reserva.");
+  if (!quarto.dbId) throw new Error("Quarto sem vínculo real no banco.");
 
   const resumo = calcularReserva({
     hospedagem,
@@ -636,10 +639,24 @@ export async function criarReservaHospedagem(payload: {
     throw new Error(pousadaError?.message || "Pousada indisponível para reserva.");
   }
 
+  const { data: quartoRow, error: quartoError } = await supabase
+    .from("caminho_hospedagem_quartos")
+    .select("id,ativo,disponivel")
+    .eq("id", quarto.dbId)
+    .eq("pousada_id", String(pousadaRow.id))
+    .eq("ativo", true)
+    .eq("disponivel", true)
+    .maybeSingle();
+
+  if (quartoError || !quartoRow?.id) {
+    throw new Error(quartoError?.message || "Quarto indisponível para reserva.");
+  }
+
   const { data: disponibilidade, error: disponibilidadeError } = await supabase
     .from("caminho_hospedagem_disponibilidade")
     .select("dia,status")
     .eq("pousada_id", String(pousadaRow.id))
+    .eq("quarto_id", quarto.dbId)
     .in("dia", diasReserva)
     .eq("status", "livre");
 
@@ -653,12 +670,31 @@ export async function criarReservaHospedagem(payload: {
     throw new Error("Disponibilidade não confirmada para as datas selecionadas.");
   }
 
+  const { data: conflito, error: conflitoError } = await supabase
+    .from("caminho_hospedagem_reservas")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("quarto_id", quarto.dbId)
+    .in("status", ["aguardando_pagamento", "confirmada"])
+    .lt("checkin", payload.checkout)
+    .gt("checkout", payload.checkin)
+    .limit(1);
+
+  if (conflitoError) {
+    throw new Error(conflitoError.message);
+  }
+
+  if ((conflito || []).length > 0) {
+    throw new Error("Este quarto já possui reserva pendente ou confirmada nesse período.");
+  }
+
   const insertPayload = {
     tenant_id: tenantId,
     cliente_id: session.user.id,
     hospedagem_slug: hospedagem.id,
     hospedagem_nome: hospedagem.nome,
     cidade: hospedagem.cidade,
+    quarto_id: quarto.dbId,
     quarto_slug: quarto.id,
     quarto_nome: quarto.nome,
     checkin: payload.checkin,
@@ -683,6 +719,9 @@ export async function criarReservaHospedagem(payload: {
     .single();
 
   if (error || !data) {
+    if (error?.code === "23P01") {
+      throw new Error("Este quarto já possui reserva pendente ou confirmada nesse período.");
+    }
     throw new Error(error?.message || "Não foi possível criar a reserva no Supabase.");
   }
 
@@ -1012,6 +1051,7 @@ export async function adicionarPainelPousadaQuarto(
   }
 
   return {
+    dbId: data.id ? String(data.id) : undefined,
     id: String(data.slug),
     nome: String(data.nome),
     tipo: String(data.tipo || "privativo") as CaminhoQuarto["tipo"],
@@ -1039,19 +1079,35 @@ export async function salvarPainelPousadaDisponibilidade(
   dia: string,
   status: PainelPousadaDisponibilidade["status"],
   detalhe: string,
+  quartoDbIds?: string[],
 ) {
   if (!pousadaDbId) return;
   const tenantId = await resolveCurrentTenantId().catch(() => null);
   if (!tenantId) return;
+
+  const quartos =
+    quartoDbIds && quartoDbIds.length
+      ? quartoDbIds
+      : (
+          await supabase
+            .from("caminho_hospedagem_quartos")
+            .select("id")
+            .eq("pousada_id", pousadaDbId)
+            .eq("ativo", true)
+        ).data?.map((row: any) => String(row.id)) || [];
+
+  if (!quartos.length) return;
+
   await supabase.from("caminho_hospedagem_disponibilidade").upsert(
-    {
+    quartos.map((quartoId) => ({
       tenant_id: tenantId,
       pousada_id: pousadaDbId,
+      quarto_id: quartoId,
       dia,
       status,
       detalhe,
-    },
-    { onConflict: "pousada_id,dia" },
+    })),
+    { onConflict: "pousada_id,quarto_id,dia" },
   );
 }
 

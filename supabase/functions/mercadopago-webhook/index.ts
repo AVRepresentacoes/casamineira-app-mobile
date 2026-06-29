@@ -57,9 +57,40 @@ async function syncHospedagemReservaStatus(params: {
   supabaseAdmin: any;
   reservaId: string;
   paymentId?: string | null;
+  tenantId?: string | null;
   statusPagamento: "pendente" | "aprovada" | "recusada" | "estornada";
 }) {
-  const { supabaseAdmin, reservaId, paymentId, statusPagamento } = params;
+  const { supabaseAdmin, reservaId, paymentId, tenantId, statusPagamento } = params;
+
+  const { data: reserva, error: reservaError } = await supabaseAdmin
+    .from("caminho_hospedagem_reservas")
+    .select("id,tenant_id,provider_payment_id,status_pagamento,status")
+    .eq("id", reservaId)
+    .maybeSingle();
+
+  if (reservaError || !reserva) {
+    throw new Error(reservaError?.message || "Reserva de hospedagem não encontrada.");
+  }
+
+  if (tenantId && String(reserva.tenant_id) !== String(tenantId)) {
+    throw new Error("Tenant da reserva não confere com o pagamento.");
+  }
+
+  const currentPaymentId = String(reserva.provider_payment_id || "");
+  if (currentPaymentId && paymentId && currentPaymentId !== String(paymentId)) {
+    throw new Error("Pagamento Mercado Pago não confere com a reserva.");
+  }
+
+  const jaAprovada = String(reserva.status_pagamento || "") === "aprovada";
+  if (jaAprovada && statusPagamento !== "aprovada" && statusPagamento !== "estornada") {
+    console.log("[MP webhook hospedagens] ignorando downgrade", {
+      reserva_id: reservaId,
+      payment_id: paymentId || currentPaymentId || null,
+      incoming_status: statusPagamento,
+    });
+    return;
+  }
+
   const statusReserva =
     statusPagamento === "aprovada"
       ? "confirmada"
@@ -73,7 +104,7 @@ async function syncHospedagemReservaStatus(params: {
     .from("caminho_hospedagem_reservas")
     .update({
       provider: "mercadopago",
-      provider_payment_id: paymentId || null,
+      provider_payment_id: paymentId || currentPaymentId || null,
       status_pagamento: statusPagamento,
       status: statusReserva,
       ...(statusPagamento === "estornada" ? { cancelado_por: "sistema" } : {}),
@@ -83,6 +114,13 @@ async function syncHospedagemReservaStatus(params: {
   if (error) {
     throw new Error(error.message);
   }
+
+  console.log("[MP webhook hospedagens] reserva sincronizada", {
+    reserva_id: reservaId,
+    payment_id: paymentId || currentPaymentId || null,
+    status_pagamento: statusPagamento,
+    status: statusReserva,
+  });
 }
 
 async function baixarEstoquePedido(params: { supabaseAdmin: any; pedidoId: string; tenantId: string | null }) {
@@ -306,7 +344,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const mercadoPagoToken = String(Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") || "").trim();
+    const mercadoPagoToken = String(Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") || Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") || "").trim();
 
     if (!supabaseUrl || !supabaseServiceRoleKey || !mercadoPagoToken) {
       throw new Error("Configuração ausente no webhook.");
@@ -377,6 +415,7 @@ Deno.serve(async (req) => {
         supabaseAdmin,
         reservaId,
         paymentId,
+        tenantId: mpPayment?.metadata?.tenant_id ? String(mpPayment.metadata.tenant_id) : null,
         statusPagamento,
       });
 

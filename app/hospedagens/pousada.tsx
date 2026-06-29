@@ -311,7 +311,8 @@ export default function PainelPousadaHospedagensScreen() {
   }
 
   function persistDay(item: PainelPousadaDisponibilidade) {
-    void salvarPainelPousadaDisponibilidade(pousadaDbId, item.dia, item.status, item.detalhe);
+    const quartoDbIds = quartos.map((quarto) => quarto.dbId).filter(Boolean) as string[];
+    void salvarPainelPousadaDisponibilidade(pousadaDbId, item.dia, item.status, item.detalhe, quartoDbIds);
     return item;
   }
 
