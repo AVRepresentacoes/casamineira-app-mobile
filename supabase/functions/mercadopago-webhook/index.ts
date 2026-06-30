@@ -32,6 +32,37 @@ function mapGasOrderStatus(statusPagamento: "pendente" | "aprovada" | "recusada"
   return "aguardando_pagamento";
 }
 
+type MercadoPagoProduct = "servicos" | "hospedagens";
+
+function parseProductReference(rawReference: string, metadata: any): {
+  product: MercadoPagoProduct;
+  entityId: string;
+  legacy: boolean;
+} | null {
+  const reference = String(rawReference || "").trim();
+  if (reference.startsWith("caminho_hospedagem:")) {
+    const entityId = reference.replace("caminho_hospedagem:", "").trim();
+    return entityId ? { product: "hospedagens", entityId, legacy: false } : null;
+  }
+
+  if (reference.startsWith("casa_mineira_servicos:")) {
+    const entityId = reference.replace("casa_mineira_servicos:", "").trim();
+    return entityId ? { product: "servicos", entityId, legacy: false } : null;
+  }
+
+  const metadataProduct = String(metadata?.product_id || metadata?.produto || "").trim();
+  const metadataPedidoId = String(metadata?.pedido_id || "").trim();
+  if (metadataProduct === "casa_mineira_servicos" && metadataPedidoId) {
+    return { product: "servicos", entityId: metadataPedidoId, legacy: false };
+  }
+
+  if (reference && !reference.includes(":")) {
+    return { product: "servicos", entityId: reference, legacy: true };
+  }
+
+  return null;
+}
+
 async function syncGasPedidoStatus(params: {
   supabaseAdmin: any;
   pedidoId: string;
@@ -370,6 +401,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const forcedProduct = String(req.headers.get("x-cm-product-webhook") || "").trim() as MercadoPagoProduct | "";
     const mercadoPagoToken = String(
       Deno.env.get("HOSPEDAGENS_MERCADO_PAGO_ACCESS_TOKEN") ||
         Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN") ||
@@ -433,27 +465,40 @@ Deno.serve(async (req) => {
       paymentId,
       tokenCandidates,
     });
-    console.log("[hospedagens.webhook] webhook_recebido", {
+    console.log("[mercadopago.webhook] webhook_recebido", {
       payment_id: paymentId,
       token_label: tokenLabel,
       external_reference: mpPayment?.external_reference || null,
+      product_hint: forcedProduct || null,
       status: mpPayment?.status || null,
     });
 
     const mpStatus = String(mpPayment?.status || "");
     const statusPagamento = mapMpStatus(mpStatus);
-    const pedidoId =
+    const rawReference =
       String(mpPayment?.external_reference || "") || String(mpPayment?.metadata?.pedido_id || "");
+    const routedReference = parseProductReference(rawReference, mpPayment?.metadata || {});
 
-    if (!pedidoId) {
+    if (!routedReference) {
       throw new Error("Pagamento sem external_reference/pedido_id.");
     }
 
-    if (pedidoId.startsWith("caminho_hospedagem:")) {
-      const reservaId = pedidoId.replace("caminho_hospedagem:", "").trim();
-      if (!reservaId) {
-        throw new Error("Reserva de hospedagem ausente no external_reference.");
-      }
+    if (forcedProduct && routedReference.product !== forcedProduct) {
+      console.log("[mercadopago.webhook] webhook_ignorado", {
+        payment_id: paymentId,
+        expected_product: forcedProduct,
+        actual_product: routedReference.product,
+        external_reference: rawReference,
+        reason: "produto_incompativel_com_endpoint",
+      });
+      return new Response(JSON.stringify({ ok: true, ignored: true, reason: "produto_incompativel_com_endpoint" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (routedReference.product === "hospedagens") {
+      const reservaId = routedReference.entityId;
 
       await syncHospedagemReservaStatus({
         supabaseAdmin,
@@ -469,11 +514,27 @@ Deno.serve(async (req) => {
         status_pagamento: statusPagamento,
       });
 
+      console.log("[hospedagens.metrics] pagamento_processado", {
+        reserva_id: reservaId,
+        payment_id: paymentId,
+        status_pagamento: statusPagamento,
+        external_reference: rawReference,
+      });
+
       return new Response(JSON.stringify({ ok: true, produto: "hospedagens_caminhos_da_fe" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const pedidoId = routedReference.entityId;
+    console.log("[servicos.webhook] pedido_processamento_iniciado", {
+      pedido_id: pedidoId,
+      payment_id: paymentId,
+      status_pagamento: statusPagamento,
+      external_reference: rawReference,
+      legacy_reference: routedReference.legacy,
+    });
 
     const { data: pedido, error: pedidoError } = await supabaseAdmin
       .from("pedidos")
@@ -541,7 +602,7 @@ Deno.serve(async (req) => {
           valor_comissao: Number(valorComissao.toFixed(2)),
           valor_profissional: Number(valorProfissional.toFixed(2)),
           payment_id: paymentId,
-          external_reference: pedidoId,
+          external_reference: rawReference,
           preference_id: String(mpPayment?.order?.id || mpPayment?.metadata?.preference_id || ""),
           status_pagamento: statusPagamento,
         },
@@ -615,6 +676,14 @@ Deno.serve(async (req) => {
         throw new Error(pedidoError.message);
       }
     }
+
+    console.log("[servicos.metrics] pagamento_processado", {
+      pedido_id: pedidoId,
+      payment_id: paymentId,
+      status_pagamento: statusPagamento,
+      external_reference: rawReference,
+      legacy_reference: routedReference.legacy,
+    });
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

@@ -231,8 +231,9 @@ Deno.serve(async (req) => {
       splitDestinationId = gatewayAccount.provider_user_id || null;
     }
 
-    const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook`;
+    const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook-servicos`;
     const appScheme = Deno.env.get("APP_SCHEME") || "casamineira://";
+    const externalReference = `casa_mineira_servicos:${pedidoId}`;
 
     const payerEmail = user.email || `cliente-${user.id.slice(0, 8)}@casamineira.app`;
 
@@ -245,7 +246,7 @@ Deno.serve(async (req) => {
           unit_price: Number(valorTotal.toFixed(2)),
         },
       ],
-      external_reference: pedidoId,
+      external_reference: externalReference,
       notification_url: webhookUrl,
       back_urls: {
         success: `${appScheme}pagamento/sucesso?pedido_id=${pedidoId}`,
@@ -255,6 +256,7 @@ Deno.serve(async (req) => {
       auto_return: "approved",
       metadata: {
         pedido_id: pedidoId,
+        product_id: "casa_mineira_servicos",
         profissional_id: profissionalId,
         split_mode: splitMode,
         split_destination_id: splitDestinationId,
@@ -300,7 +302,7 @@ Deno.serve(async (req) => {
         valor_comissao: Number(comissao.valor_comissao),
         valor_profissional: Number(comissao.valor_profissional),
         preference_id: preferenceId,
-        external_reference: pedidoId,
+        external_reference: externalReference,
         init_point: initPoint,
         status_pagamento: "pendente",
         split_mode: splitMode,

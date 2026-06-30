@@ -172,7 +172,7 @@ serve(async (req) => {
       }, 200, corsHeaders);
     }
 
-    const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook`;
+    const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook-hospedagens`;
     const payerEmail = user.email || `cliente-${user.id.slice(0, 8)}@hospedagenscaminhosdafe.app`;
     const externalReference = `caminho_hospedagem:${reservaId}`;
     const basePayload: any = {
