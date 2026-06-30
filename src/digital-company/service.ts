@@ -112,8 +112,8 @@ function getRecommendedTemplates(templateSlug?: string | null) {
 
 export const DigitalCompanyService = {
   compose(source: DigitalCompanySource): DigitalCompany {
-    const businessDna = source.project ? findBusinessDnaBySlug(source.project.businessDnaSlug) : null;
-    const template = source.project ? findPremiumTemplateBySlug(source.project.templateSlug) : null;
+    const businessDna = source.project ? findBusinessDnaBySlug(source.project.businessDnaSlug) ?? null : null;
+    const template = source.project ? findPremiumTemplateBySlug(source.project.templateSlug) ?? null : null;
     const tenant = buildTenant(source);
     const billing = buildBilling(source);
     const modules = buildModules(source);

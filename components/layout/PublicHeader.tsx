@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 12,
     fontWeight: "900",
-    whiteSpace: "nowrap",
   },
   navTextActive: {
     color: colors.brandText,

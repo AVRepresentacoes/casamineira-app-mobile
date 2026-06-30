@@ -33,6 +33,11 @@ serve(async (req) => {
       .toLowerCase();
 
     if (!supabaseUrl || !supabaseAnonKey || !serviceRole) {
+      console.log("[hospedagens.payment] erro_configuracao", {
+        missing_supabase_url: !supabaseUrl,
+        missing_anon_key: !supabaseAnonKey,
+        missing_service_role: !serviceRole,
+      });
       return json({ error: "Configuração Supabase ausente." }, 500, corsHeaders);
     }
 
@@ -48,6 +53,9 @@ serve(async (req) => {
     } = await supabaseAuth.auth.getUser();
 
     if (userError || !user) {
+      console.log("[hospedagens.payment] usuario_nao_autenticado", {
+        message: userError?.message || null,
+      });
       return json({ error: "Usuário não autenticado." }, 401, corsHeaders);
     }
 
@@ -56,10 +64,16 @@ serve(async (req) => {
     const metodo = String(body?.metodo || "pix").trim().toLowerCase();
 
     if (!reservaId) {
+      console.log("[hospedagens.payment] payload_invalido", { reason: "reservaId ausente" });
       return json({ error: "reservaId é obrigatório." }, 400, corsHeaders);
     }
 
     if (!["pix", "cartao"].includes(metodo)) {
+      console.log("[hospedagens.payment] payload_invalido", {
+        reserva_id: reservaId,
+        metodo,
+        reason: "metodo invalido",
+      });
       return json({ error: "Método de pagamento inválido." }, 400, corsHeaders);
     }
 
@@ -71,10 +85,29 @@ serve(async (req) => {
       .maybeSingle();
 
     if (reservaError || !reserva) {
+      console.log("[hospedagens.payment] erro_supabase", {
+        reserva_id: reservaId,
+        user_id: user.id,
+        message: reservaError?.message || "Reserva nao encontrada.",
+      });
       return json({ error: reservaError?.message || "Reserva não encontrada." }, 404, corsHeaders);
     }
 
+    console.log("[hospedagens.payment] pagamento_solicitado", {
+      reserva_id: reservaId,
+      tenant_id: reserva.tenant_id,
+      quarto_id: reserva.quarto_id,
+      metodo,
+      provider,
+      status_pagamento_atual: reserva.status_pagamento || null,
+    });
+
     if (reserva.status_pagamento === "aprovada") {
+      console.log("[hospedagens.payment] pagamento_ja_confirmado", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        payment_id: reserva.provider_payment_id || null,
+      });
       return json({
         checkoutConfigured: true,
         provider: reserva.provider || provider,
@@ -122,6 +155,12 @@ serve(async (req) => {
     ).trim();
 
     if (!mercadoPagoToken) {
+      console.log("[hospedagens.payment] checkout_nao_configurado", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        metodo,
+        provider: "mercadopago",
+      });
       return json({
         checkoutConfigured: false,
         provider: "mercadopago",
@@ -154,6 +193,13 @@ serve(async (req) => {
 
     if (metodo === "pix") {
       const paymentPayload = { ...basePayload, payment_method_id: "pix" };
+      console.log("[hospedagens.payment] mercado_pago_request", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        quarto_id: reserva.quarto_id,
+        metodo,
+        external_reference: externalReference,
+      });
       const mpResponse = await fetch("https://api.mercadopago.com/v1/payments", {
         method: "POST",
         headers: {
@@ -166,7 +212,13 @@ serve(async (req) => {
 
       const mpJson = await mpResponse.json();
       if (!mpResponse.ok) {
-        console.log("[Hospedagens MP] erro pix", mpJson);
+        console.log("[hospedagens.payment] erro_mercado_pago", {
+          reserva_id: reservaId,
+          tenant_id: reserva.tenant_id,
+          metodo,
+          status: mpResponse.status,
+          error: mpJson,
+        });
         return json({ error: mpJson?.message || "Falha ao gerar pagamento PIX no Mercado Pago." }, 500, corsHeaders);
       }
 
@@ -177,10 +229,17 @@ serve(async (req) => {
       const statusPagamento = mapMpStatus(String(mpJson?.status || ""));
 
       if (!paymentId || !qrCode || !qrCodeBase64) {
+        console.log("[hospedagens.payment] erro_mercado_pago", {
+          reserva_id: reservaId,
+          tenant_id: reserva.tenant_id,
+          metodo,
+          reason: "payload pix invalido",
+          payment_id: paymentId || null,
+        });
         return json({ error: "Mercado Pago retornou payload PIX inválido." }, 500, corsHeaders);
       }
 
-      await supabaseAdmin
+      const { error: updateError } = await supabaseAdmin
         .from("caminho_hospedagem_reservas")
         .update({
           provider: "mercadopago",
@@ -189,6 +248,26 @@ serve(async (req) => {
           status: statusPagamento === "aprovada" ? "confirmada" : "aguardando_pagamento",
         })
         .eq("id", reservaId);
+
+      if (updateError) {
+        console.log("[hospedagens.payment] erro_supabase", {
+          reserva_id: reservaId,
+          tenant_id: reserva.tenant_id,
+          payment_id: paymentId,
+          metodo,
+          message: updateError.message,
+        });
+        return json({ error: updateError.message }, 500, corsHeaders);
+      }
+
+      console.log("[hospedagens.payment] pagamento_preparado", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        quarto_id: reserva.quarto_id,
+        payment_id: paymentId,
+        metodo,
+        status_pagamento: statusPagamento,
+      });
 
       return json({
         checkoutConfigured: true,
@@ -250,7 +329,13 @@ serve(async (req) => {
 
     const mpJson = await mpResponse.json();
     if (!mpResponse.ok) {
-      console.log("[Hospedagens MP] erro cartao", mpJson);
+      console.log("[hospedagens.payment] erro_mercado_pago", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        metodo,
+        status: mpResponse.status,
+        error: mpJson,
+      });
       return json(
         { error: mpJson?.message || mpJson?.cause?.[0]?.description || "Falha no pagamento com cartão." },
         500,
@@ -263,10 +348,16 @@ serve(async (req) => {
     const statusDetail = String(mpJson?.status_detail || "");
 
     if (!paymentId) {
+      console.log("[hospedagens.payment] erro_mercado_pago", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        metodo,
+        reason: "payload cartao invalido",
+      });
       return json({ error: "Mercado Pago retornou payload de cartão inválido." }, 500, corsHeaders);
     }
 
-    await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from("caminho_hospedagem_reservas")
       .update({
         provider: "mercadopago",
@@ -275,6 +366,26 @@ serve(async (req) => {
         status: statusPagamento === "aprovada" ? "confirmada" : "aguardando_pagamento",
       })
       .eq("id", reservaId);
+
+    if (updateError) {
+      console.log("[hospedagens.payment] erro_supabase", {
+        reserva_id: reservaId,
+        tenant_id: reserva.tenant_id,
+        payment_id: paymentId,
+        metodo,
+        message: updateError.message,
+      });
+      return json({ error: updateError.message }, 500, corsHeaders);
+    }
+
+    console.log("[hospedagens.payment] pagamento_preparado", {
+      reserva_id: reservaId,
+      tenant_id: reserva.tenant_id,
+      quarto_id: reserva.quarto_id,
+      payment_id: paymentId,
+      metodo,
+      status_pagamento: statusPagamento,
+    });
 
     return json({
       checkoutConfigured: true,
@@ -287,6 +398,9 @@ serve(async (req) => {
       transaction_amount: Number(mpJson?.transaction_amount || valorSinal),
     }, 200, corsHeaders);
   } catch (error) {
+    console.log("[hospedagens.payment] erro_inesperado", {
+      message: error instanceof Error ? error.message : "Erro inesperado.",
+    });
     return json({ error: error instanceof Error ? error.message : "Erro inesperado." }, 500, corsHeaders);
   }
 });

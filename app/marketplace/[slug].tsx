@@ -108,11 +108,12 @@ export default function TemplateDetailScreen() {
     );
   }
 
-  const fallbackRelated = related.length ? related : premiumTemplates.filter((item) => item.slug !== template.slug).slice(0, 3);
+  const selectedTemplate = template;
+  const fallbackRelated = related.length ? related : premiumTemplates.filter((item) => item.slug !== selectedTemplate.slug).slice(0, 3);
 
   async function handleUseTemplate() {
     try {
-      await BusinessProjectService.associateTemplate(template.slug);
+      await BusinessProjectService.associateTemplate(selectedTemplate.slug);
       router.push("/projects" as never);
     } catch (error: any) {
       const message = String(error?.message || "");
@@ -125,7 +126,7 @@ export default function TemplateDetailScreen() {
   }
 
   return (
-    <SaasProductShell title={template.name} subtitle={template.longDescription}>
+    <SaasProductShell title={selectedTemplate.name} subtitle={selectedTemplate.longDescription}>
       <View style={[styles.hero, { backgroundColor: template.secondaryColor, borderColor: `${template.primaryColor}55` }]}>
         <View style={[styles.heroGlow, { backgroundColor: `${template.primaryColor}33` }]} />
         <View style={[styles.heroIcon, { backgroundColor: `${template.primaryColor}22`, borderColor: `${template.primaryColor}66` }]}>

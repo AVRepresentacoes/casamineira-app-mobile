@@ -20,7 +20,7 @@ export function BrandLogo({
   return (
     <View style={styles.row}>
       <View style={[styles.logoFrame, { width: logoSize, height: logoSize, borderRadius: 8 }]}>
-        <Image source={require("@/assets/images/icons/icon.png")} style={styles.logo} contentFit="contain" />
+        <Image source={require("@/assets/images/icons/icon.png")} style={styles.logo} resizeMode="contain" />
       </View>
       {showText ? (
         <View>

@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     color: "#cbd5e1",
     fontSize: 12,
     fontWeight: "900",
-    whiteSpace: "nowrap",
   },
   navTextActive: {
     color: "#08101c",

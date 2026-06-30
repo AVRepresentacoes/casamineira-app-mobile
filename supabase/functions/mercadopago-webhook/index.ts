@@ -69,23 +69,42 @@ async function syncHospedagemReservaStatus(params: {
     .maybeSingle();
 
   if (reservaError || !reserva) {
+    console.log("[hospedagens.webhook] erro_supabase", {
+      reserva_id: reservaId,
+      payment_id: paymentId || null,
+      message: reservaError?.message || "Reserva de hospedagem nao encontrada.",
+    });
     throw new Error(reservaError?.message || "Reserva de hospedagem não encontrada.");
   }
 
   if (tenantId && String(reserva.tenant_id) !== String(tenantId)) {
+    console.log("[hospedagens.webhook] webhook_ignorado", {
+      reserva_id: reservaId,
+      payment_id: paymentId || null,
+      reason: "tenant_mismatch",
+      tenant_id_pagamento: tenantId,
+      tenant_id_reserva: reserva.tenant_id,
+    });
     throw new Error("Tenant da reserva não confere com o pagamento.");
   }
 
   const currentPaymentId = String(reserva.provider_payment_id || "");
   if (currentPaymentId && paymentId && currentPaymentId !== String(paymentId)) {
+    console.log("[hospedagens.webhook] webhook_ignorado", {
+      reserva_id: reservaId,
+      payment_id: paymentId,
+      reason: "payment_id_mismatch",
+      current_payment_id: currentPaymentId,
+    });
     throw new Error("Pagamento Mercado Pago não confere com a reserva.");
   }
 
   const jaAprovada = String(reserva.status_pagamento || "") === "aprovada";
   if (jaAprovada && statusPagamento !== "aprovada" && statusPagamento !== "estornada") {
-    console.log("[MP webhook hospedagens] ignorando downgrade", {
+    console.log("[hospedagens.webhook] webhook_ignorado", {
       reserva_id: reservaId,
       payment_id: paymentId || currentPaymentId || null,
+      reason: "downgrade_pos_confirmacao",
       incoming_status: statusPagamento,
     });
     return;
@@ -112,10 +131,16 @@ async function syncHospedagemReservaStatus(params: {
     .eq("id", reservaId);
 
   if (error) {
+    console.log("[hospedagens.webhook] erro_supabase", {
+      reserva_id: reservaId,
+      payment_id: paymentId || currentPaymentId || null,
+      status_pagamento: statusPagamento,
+      message: error.message,
+    });
     throw new Error(error.message);
   }
 
-  console.log("[MP webhook hospedagens] reserva sincronizada", {
+  console.log("[hospedagens.webhook] pagamento_confirmado", {
     reserva_id: reservaId,
     payment_id: paymentId || currentPaymentId || null,
     status_pagamento: statusPagamento,
@@ -325,8 +350,9 @@ async function fetchMercadoPagoPayment(params: {
     }
 
     lastErrorPayload = mpPayment;
-    console.log("[MP webhook] erro ao consultar pagamento", {
+    console.log("[hospedagens.webhook] retry_token_candidate_failed", {
       token_label: candidate.label,
+      payment_id: paymentId,
       status: mpResponse.status,
       error: mpPayment,
     });
@@ -375,6 +401,10 @@ Deno.serve(async (req) => {
       null;
 
     if (!paymentId) {
+      console.log("[hospedagens.webhook] webhook_ignorado", {
+        reason: "payment_id_ausente",
+        body_type: body?.type || body?.topic || null,
+      });
       return new Response(JSON.stringify({ ok: true, ignored: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -383,6 +413,10 @@ Deno.serve(async (req) => {
 
     const assinaturaValida = await validarAssinaturaMercadoPago(req, paymentId);
     if (!assinaturaValida) {
+      console.log("[hospedagens.webhook] webhook_ignorado", {
+        payment_id: paymentId,
+        reason: "assinatura_invalida",
+      });
       return new Response(JSON.stringify({ error: "Assinatura do webhook inválida." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -399,7 +433,12 @@ Deno.serve(async (req) => {
       paymentId,
       tokenCandidates,
     });
-    console.log("[MP webhook] pagamento consultado", { payment_id: paymentId, token_label: tokenLabel });
+    console.log("[hospedagens.webhook] webhook_recebido", {
+      payment_id: paymentId,
+      token_label: tokenLabel,
+      external_reference: mpPayment?.external_reference || null,
+      status: mpPayment?.status || null,
+    });
 
     const mpStatus = String(mpPayment?.status || "");
     const statusPagamento = mapMpStatus(mpStatus);
@@ -422,6 +461,12 @@ Deno.serve(async (req) => {
         paymentId,
         tenantId: mpPayment?.metadata?.tenant_id ? String(mpPayment.metadata.tenant_id) : null,
         statusPagamento,
+      });
+
+      console.log("[hospedagens.webhook] reserva_hospedagem_processada", {
+        reserva_id: reservaId,
+        payment_id: paymentId,
+        status_pagamento: statusPagamento,
       });
 
       return new Response(JSON.stringify({ ok: true, produto: "hospedagens_caminhos_da_fe" }), {
@@ -576,7 +621,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.log("[mercadopago-webhook] erro:", error);
+    console.log("[hospedagens.webhook] erro_webhook", {
+      message: error instanceof Error ? error.message : String(error),
+    });
 
     return new Response(
       JSON.stringify({

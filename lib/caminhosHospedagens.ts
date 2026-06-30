@@ -712,6 +712,18 @@ export async function criarReservaHospedagem(payload: {
     status_pagamento: "pendente",
   };
 
+  console.log("[hospedagens.reserva] criar_reserva_iniciada", {
+    tenant_id: tenantId,
+    hospedagem_slug: hospedagem.id,
+    pousada_id: String(pousadaRow.id),
+    quarto_id: quarto.dbId,
+    checkin: payload.checkin,
+    checkout: payload.checkout,
+    hospedes: payload.hospedes,
+    total: resumo.total,
+    sinal: resumo.sinal,
+  });
+
   const { data, error } = await supabase
     .from("caminho_hospedagem_reservas")
     .insert(insertPayload)
@@ -719,11 +731,27 @@ export async function criarReservaHospedagem(payload: {
     .single();
 
   if (error || !data) {
+    console.log("[hospedagens.reserva] erro_supabase", {
+      tenant_id: tenantId,
+      hospedagem_slug: hospedagem.id,
+      quarto_id: quarto.dbId,
+      code: error?.code || null,
+      message: error?.message || "Reserva sem retorno do Supabase.",
+    });
     if (error?.code === "23P01") {
       throw new Error("Este quarto já possui reserva pendente ou confirmada nesse período.");
     }
     throw new Error(error?.message || "Não foi possível criar a reserva no Supabase.");
   }
+
+  console.log("[hospedagens.reserva] reserva_criada", {
+    reserva_id: String(data.id),
+    tenant_id: tenantId,
+    hospedagem_slug: hospedagem.id,
+    quarto_id: quarto.dbId,
+    status: "aguardando_pagamento",
+    status_pagamento: "pendente",
+  });
 
   return { reservaId: String(data.id), resumo };
 }
@@ -780,9 +808,15 @@ export async function obterReservaHospedagemPorId(reservaId: string) {
 
 async function invokeHospedagemPaymentFunction(body: Record<string, unknown>) {
   const reservaId = String(body.reservaId || "");
+  const metodo = String(body.metodo || "pix");
   if (reservaId.startsWith("local-")) {
     throw new Error("Reserva local não é aceita no GO LIVE. Crie a reserva no Supabase antes do pagamento.");
   }
+
+  console.log("[hospedagens.pagamento] pagamento_solicitado", {
+    reserva_id: reservaId,
+    metodo,
+  });
 
   const { data, error } = await supabase.functions.invoke("create-caminho-hospedagem-pix-payment", {
     body,
@@ -799,8 +833,22 @@ async function invokeHospedagemPaymentFunction(body: Record<string, unknown>) {
         // noop
       }
     }
+    console.log("[hospedagens.pagamento] erro_supabase_function", {
+      reserva_id: reservaId,
+      metodo,
+      message: detalhe || error.message || "Falha ao invocar Edge Function.",
+    });
     throw new Error(detalhe || error.message || "Não foi possível preparar o pagamento do sinal.");
   }
+
+  console.log("[hospedagens.pagamento] pagamento_preparado", {
+    reserva_id: reservaId,
+    metodo,
+    provider: typeof data?.provider === "string" ? data.provider : null,
+    payment_id: typeof data?.payment_id === "string" ? data.payment_id : null,
+    status_pagamento: typeof data?.status_pagamento === "string" ? data.status_pagamento : null,
+    checkout_configured: Boolean(data?.checkoutConfigured),
+  });
 
   return data;
 }
@@ -1042,7 +1090,7 @@ export async function adicionarPainelPousadaQuarto(
       descricao: payload.descricao?.trim() || null,
       fotos: payload.fotos || [],
     })
-    .select("slug,nome,tipo,capacidade,diaria,disponivel,descricao,fotos")
+    .select("id,slug,nome,tipo,capacidade,diaria,disponivel,descricao,fotos")
     .single();
 
   if (error || !data) {
