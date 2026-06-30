@@ -1,0 +1,13 @@
+{
+  "name": "Casa Mineira SaaS / CMS Platform",
+  "slug": "cms-platform",
+  "type": "control_plane",
+  "tenant_slug": "casa-mineira-saas",
+  "product_slug": "cms-platform",
+  "domain_production": "plataforma.cmsgroup.com.br",
+  "domain_staging": "staging.plataforma.cmsgroup.com.br",
+  "primary_color": "#0B0F1A",
+  "logo": "./assets/images/icons/icon.png",
+  "app_name": "Casa Mineira SaaS",
+  "description": "Control Plane para tenants, produtos, billing SaaS, Business DNA, templates, IA e administracao."
+}

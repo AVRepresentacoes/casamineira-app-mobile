@@ -1,0 +1,13 @@
+{
+  "name": "Casa Mineira Servicos",
+  "slug": "casa-mineira-servicos",
+  "type": "product_app",
+  "tenant_slug": "casa-mineira-servicos",
+  "product_slug": "casa-mineira-servicos",
+  "domain_production": "casamineiraservicos.com.br",
+  "domain_staging": "staging.casamineiraservicos.com.br",
+  "primary_color": "#facc15",
+  "logo": "./assets/images/icons/icon.png",
+  "app_name": "Casa Mineira Servicos",
+  "description": "Produto independente para marketplace de servicos, clientes, profissionais, pedidos e pagamentos operacionais."
+}

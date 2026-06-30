@@ -1,0 +1,13 @@
+{
+  "name": "Hospedagens Caminhos da Fe",
+  "slug": "hospedagens-caminhos-da-fe",
+  "type": "product_app",
+  "tenant_slug": "hospedagens-caminhos-da-fe",
+  "product_slug": "hospedagens-caminhos-da-fe",
+  "domain_production": "hospedagenscaminhosdafe.com.br",
+  "domain_staging": "staging.hospedagenscaminhosdafe.com.br",
+  "primary_color": "#D8A84F",
+  "logo": "./assets/images/hospedagens-caminhos-da-fe/icon.png",
+  "app_name": "Hospedagens Caminhos da Fe",
+  "description": "Produto independente para pousadas, quartos, disponibilidade, reservas, pagamentos e painel da pousada."
+}

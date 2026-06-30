@@ -1,4 +1,14 @@
-# Clientes SaaS White-Label
+# Clientes e Produtos SaaS White-Label
+
+## Separacao oficial
+
+`clients/<slug>/product.json` descreve o limite estrategico de cada produto:
+
+- `cms-platform`: Casa Mineira SaaS / CMS Platform, o Control Plane.
+- `casa-mineira-servicos`: produto independente Casa Mineira Servicos.
+- `hospedagens-caminhos-da-fe`: produto independente Hospedagens Caminhos da Fe.
+
+`clients/<slug>/client.json` continua sendo a configuracao operacional usada pelos scripts de build/app white-label. A pasta historica `clients/casa-mineira` permanece por compatibilidade e representa o app operacional Casa Mineira Servicos ate uma migracao controlada de slug.
 
 Cada cliente com app próprio tem uma pasta `clients/<slug>/client.json`.
 
