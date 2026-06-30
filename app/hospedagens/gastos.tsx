@@ -4,6 +4,7 @@ import {
   listarMinhasReservasHospedagem,
   type CaminhoHospedagemReservaCliente,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -15,11 +16,15 @@ export default function ControleGastosHospedagensScreen() {
   const insets = useSafeAreaInsets();
   const [reservas, setReservas] = useState<CaminhoHospedagemReservaCliente[]>([]);
   const [loading, setLoading] = useState(true);
+  const { checkingAuth } = useRequireHospedagensAuth();
   const resumo = calcularResumoJornada(reservas);
 
   useFocusEffect(
     useCallback(() => {
       let mounted = true;
+      if (checkingAuth) return () => {
+        mounted = false;
+      };
       setLoading(true);
       listarMinhasReservasHospedagem()
         .then((data) => {
@@ -31,8 +36,16 @@ export default function ControleGastosHospedagensScreen() {
       return () => {
         mounted = false;
       };
-    }, []),
+    }, [checkingAuth]),
   );
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}>
@@ -89,6 +102,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   backButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

@@ -5,7 +5,7 @@ import {
   type CaminhoHospedagemReservaCliente,
 } from "@/lib/caminhosHospedagens";
 import { logout } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { clearHospedagensInvalidSessionCache, HOSPEDAGENS_PROFILE_CACHE_KEY, useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -21,8 +21,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const PROFILE_CACHE_KEY = "@hospedagens_cliente_profile_v1";
 
 type ClienteProfile = {
   nomeCompleto: string;
@@ -75,6 +73,7 @@ export default function HospedagensPerfilScreen() {
   const [reservas, setReservas] = useState<CaminhoHospedagemReservaCliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { checkingAuth, user } = useRequireHospedagensAuth();
   const resumo = calcularResumoJornada(reservas);
 
   const completion = useMemo(() => {
@@ -87,20 +86,25 @@ export default function HospedagensPerfilScreen() {
       let mounted = true;
 
       async function load() {
+        if (!user) return;
         setLoading(true);
-        const [{ data: userData }, reservasData, cachedProfile] = await Promise.all([
-          supabase.auth.getUser(),
+        const [reservasData, cachedProfile] = await Promise.all([
           listarMinhasReservasHospedagem(),
-          AsyncStorage.getItem(PROFILE_CACHE_KEY),
+          AsyncStorage.getItem(HOSPEDAGENS_PROFILE_CACHE_KEY),
         ]);
 
         if (!mounted) return;
-        setEmail(userData.user?.email || "");
+        setEmail(user.email || "");
         setReservas(reservasData);
 
         if (cachedProfile) {
           try {
-            setProfile({ ...EMPTY_PROFILE, ...JSON.parse(cachedProfile) });
+            const parsedProfile = { ...EMPTY_PROFILE, ...JSON.parse(cachedProfile) };
+            if (/^cliente peregrino$/i.test(parsedProfile.nomeCompleto.trim())) {
+              parsedProfile.nomeCompleto = "";
+              await AsyncStorage.setItem(HOSPEDAGENS_PROFILE_CACHE_KEY, JSON.stringify(parsedProfile));
+            }
+            setProfile(parsedProfile);
           } catch {
             setProfile(EMPTY_PROFILE);
           }
@@ -113,7 +117,7 @@ export default function HospedagensPerfilScreen() {
       return () => {
         mounted = false;
       };
-    }, []),
+    }, [user]),
   );
 
   function updateField(key: keyof ClienteProfile, value: string) {
@@ -123,7 +127,7 @@ export default function HospedagensPerfilScreen() {
   async function handleSaveProfile() {
     try {
       setSaving(true);
-      await AsyncStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+      await AsyncStorage.setItem(HOSPEDAGENS_PROFILE_CACHE_KEY, JSON.stringify(profile));
       Alert.alert("Cadastro atualizado", "Suas informações foram salvas neste aparelho. A estrutura já está pronta para sincronizar com o banco.");
     } catch {
       Alert.alert("Erro", "Não foi possível salvar seus dados agora.");
@@ -140,10 +144,19 @@ export default function HospedagensPerfilScreen() {
         style: "destructive",
         onPress: async () => {
           await logout();
+          await clearHospedagensInvalidSessionCache();
           router.replace("/(auth)/login");
         },
       },
     ]);
+  }
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
   }
 
   return (
@@ -166,7 +179,7 @@ export default function HospedagensPerfilScreen() {
           <Ionicons name="person-outline" size={28} color="#12372A" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.profileName}>{profile.nomeCompleto.trim() || "Cliente peregrino"}</Text>
+          <Text style={styles.profileName}>{profile.nomeCompleto.trim() || email || "Conta autenticada"}</Text>
           <Text style={styles.profileEmail}>{email}</Text>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${completion}%` }]} />
@@ -308,6 +321,7 @@ function MenuItem({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphM
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

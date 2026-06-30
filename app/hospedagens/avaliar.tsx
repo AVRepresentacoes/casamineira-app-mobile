@@ -1,4 +1,5 @@
 import { salvarAvaliacaoHospedagem } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -20,6 +21,7 @@ export default function AvaliarHospedagemScreen() {
   });
   const [comentario, setComentario] = useState("");
   const [saving, setSaving] = useState(false);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   function setScore(key: ScoreKey, value: number) {
     setScores((current) => ({ ...current, [key]: value }));
@@ -53,6 +55,14 @@ export default function AvaliarHospedagemScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
   }
 
   return (
@@ -112,6 +122,7 @@ function Score({ label, value, onChange }: { label: string; value: number; onCha
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

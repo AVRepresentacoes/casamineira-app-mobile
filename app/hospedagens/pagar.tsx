@@ -5,6 +5,7 @@ import {
   pagarSinalHospedagemComCartao,
   type HospedagemPixPagamento,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -113,9 +114,10 @@ export default function PagarHospedagemScreen() {
   const [validade, setValidade] = useState("");
   const [cvv, setCvv] = useState("");
   const [cpfTitular, setCpfTitular] = useState("");
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   const carregarReserva = useCallback(async () => {
-    if (!reservaId) return;
+    if (checkingAuth || !reservaId) return;
     try {
       setLoading(true);
       const data = await obterReservaHospedagemPorId(String(reservaId));
@@ -125,7 +127,7 @@ export default function PagarHospedagemScreen() {
     } finally {
       setLoading(false);
     }
-  }, [reservaId]);
+  }, [checkingAuth, reservaId]);
 
   useEffect(() => {
     void carregarReserva();
@@ -258,7 +260,7 @@ export default function PagarHospedagemScreen() {
     await Share.share({ title: "Código PIX", message: pixData.qr_code });
   }
 
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color="#D8A84F" size="large" />

@@ -8,6 +8,7 @@ import {
   type HospedagensAdminPousada,
   type HospedagensAdminReserva,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -38,9 +39,13 @@ export default function HospedagensAdminScreen() {
   const [data, setData] = useState<HospedagensAdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   const load = useCallback(() => {
     let mounted = true;
+    if (checkingAuth) return () => {
+      mounted = false;
+    };
     setLoading(true);
     carregarAdminHospedagens()
       .then((result) => {
@@ -52,7 +57,7 @@ export default function HospedagensAdminScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [checkingAuth]);
 
   useFocusEffect(load);
 
@@ -92,7 +97,7 @@ export default function HospedagensAdminScreen() {
     }
   }
 
-  if (loading || !data) {
+  if (checkingAuth || loading || !data) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color="#12372A" size="large" />

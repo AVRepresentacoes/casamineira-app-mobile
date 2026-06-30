@@ -3,6 +3,7 @@ import {
   listarMinhasReservasHospedagem,
   type CaminhoHospedagemReservaCliente,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -16,12 +17,16 @@ export default function KmPercorridosHospedagensScreen() {
   const insets = useSafeAreaInsets();
   const [reservas, setReservas] = useState<CaminhoHospedagemReservaCliente[]>([]);
   const [loading, setLoading] = useState(true);
+  const { checkingAuth } = useRequireHospedagensAuth();
   const resumo = calcularResumoJornada(reservas);
   const progresso = Math.min(100, Math.round((resumo.kmPercorridos / CAMINHO_TOTAL_KM) * 100));
 
   useFocusEffect(
     useCallback(() => {
       let mounted = true;
+      if (checkingAuth) return () => {
+        mounted = false;
+      };
       setLoading(true);
       listarMinhasReservasHospedagem()
         .then((data) => {
@@ -33,8 +38,16 @@ export default function KmPercorridosHospedagensScreen() {
       return () => {
         mounted = false;
       };
-    }, []),
+    }, [checkingAuth]),
   );
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}>
@@ -87,6 +100,7 @@ export default function KmPercorridosHospedagensScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   backButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

@@ -3,6 +3,7 @@ import {
   listarFavoritosHospedagens,
   type CaminhoHospedagemFavorito,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -14,9 +15,13 @@ export default function MinhaRotaHospedagensScreen() {
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<CaminhoHospedagemFavorito[]>([]);
   const [loading, setLoading] = useState(true);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   const load = useCallback(() => {
     let mounted = true;
+    if (checkingAuth) return () => {
+      mounted = false;
+    };
     setLoading(true);
     listarFavoritosHospedagens()
       .then((data) => {
@@ -28,9 +33,17 @@ export default function MinhaRotaHospedagensScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [checkingAuth]);
 
   useFocusEffect(load);
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
+  }
 
   async function updateItem(id: string, payload: { etapaOrdem?: number | null; checkinPlanejado?: string | null; observacao?: string }) {
     setItems((current) => current.map((item) => item.id === id ? {
@@ -117,6 +130,7 @@ export default function MinhaRotaHospedagensScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

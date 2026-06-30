@@ -10,6 +10,7 @@ import {
   type CaminhoQuarto,
   type CaminhoServicoAdicional,
 } from "@/lib/caminhosHospedagens";
+import { getValidHospedagensUser } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -101,6 +102,15 @@ export default function HospedagemDetailScreen() {
 
   async function handleFavorite() {
     if (!hospedagem) return;
+    const user = await getValidHospedagensUser();
+    if (!user) {
+      router.replace({
+        pathname: "/(auth)/login",
+        params: { redirectTo: `/hospedagens/${hospedagem.id}` },
+      });
+      return;
+    }
+
     try {
       const next = await alternarFavoritoHospedagem(hospedagem);
       setFavorite(next);

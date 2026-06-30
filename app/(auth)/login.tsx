@@ -2,10 +2,11 @@ import { setActiveRole } from "@/lib/auth";
 import { SaasLoginScreen } from "@/components/saas/SaasLoginScreen";
 import { supabase } from "@/lib/supabase";
 import { useBranding } from "@/hooks/useBranding";
+import { getSafeHospedagensRedirect } from "@/lib/hospedagensAuth";
 import { ensureCurrentUserTenantContext, getConfiguredTenantSlug, getCurrentTenantId } from "@/lib/tenant";
 import { AuthMarketingShell } from "@/components/shared/AuthMarketingShell";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,9 +30,11 @@ function normalizeEmail(value: string) {
 
 export default function Login() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ redirectTo?: string }>();
   const { branding } = useBranding();
   const tenantSlug = getConfiguredTenantSlug();
   const isHospedagensApp = tenantSlug === "hospedagens-caminhos-da-fe";
+  const hospedagensRedirectTo = getSafeHospedagensRedirect(params.redirectTo);
   const logoSource = isHospedagensApp
     ? require("../../assets/images/hospedagens-caminhos-da-fe/icon.png")
     : branding.logoUrl
@@ -344,7 +347,7 @@ export default function Login() {
 
       await setActiveRole(roleFinal);
       if (isHospedagensApp) {
-        router.replace(roleFinal === "fornecedor" ? "/hospedagens/pousada" : "/hospedagens");
+        router.replace(roleFinal === "fornecedor" ? "/hospedagens/pousada" : hospedagensRedirectTo || "/hospedagens");
         return;
       }
 

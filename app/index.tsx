@@ -82,7 +82,7 @@ export default function Index() {
           } = await supabase.auth.getSession();
 
           if (!session?.user) {
-            setRoute("/hospedagens");
+            setRoute("/(auth)/login");
             return;
           }
 

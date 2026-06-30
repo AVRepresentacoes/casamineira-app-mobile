@@ -3,6 +3,7 @@ import {
   listarChamadosHospedagens,
   type CaminhoHospedagemChamado,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -28,9 +29,13 @@ export default function HospedagensSuportePousadaScreen() {
   const [descricao, setDescricao] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   const load = useCallback(() => {
     let mounted = true;
+    if (checkingAuth) return () => {
+      mounted = false;
+    };
     setLoading(true);
     listarChamadosHospedagens("pousada")
       .then((data) => {
@@ -42,9 +47,17 @@ export default function HospedagensSuportePousadaScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [checkingAuth]);
 
   useFocusEffect(load);
+
+  if (checkingAuth) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#12372A" />
+      </View>
+    );
+  }
 
   async function handleOpenTicket() {
     if (!titulo.trim() || !descricao.trim()) {
@@ -142,6 +155,7 @@ function Field({ label, multiline, ...props }: { label: string; value: string; o
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F7F0DF" },
+  center: { flex: 1, backgroundColor: "#F7F0DF", alignItems: "center", justifyContent: "center" },
   content: { padding: 16, gap: 16, paddingBottom: 34 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconButton: { width: 42, height: 42, borderRadius: 8, backgroundColor: "#FFF9EA", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E5D9BD" },

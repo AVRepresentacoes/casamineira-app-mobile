@@ -17,6 +17,7 @@ import {
   type PainelPousadaReserva,
 } from "@/lib/caminhosHospedagens";
 import { logout } from "@/lib/auth";
+import { clearHospedagensInvalidSessionCache, useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { uploadImageAsync } from "@/lib/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -102,9 +103,11 @@ export default function PainelPousadaHospedagensScreen() {
     descricao: "",
   });
   const [uploadingRoomId, setUploadingRoomId] = useState<string | null>(null);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   const handleLogout = useCallback(async () => {
     await logout();
+    await clearHospedagensInvalidSessionCache();
     router.replace("/(auth)/login");
   }, [router]);
 
@@ -124,6 +127,9 @@ export default function PainelPousadaHospedagensScreen() {
 
   useEffect(() => {
     let mounted = true;
+    if (checkingAuth) return () => {
+      mounted = false;
+    };
     setLoading(true);
     carregarPainelPousadaHospedagens()
       .then((data) => {
@@ -154,7 +160,7 @@ export default function PainelPousadaHospedagensScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [checkingAuth]);
 
   const metrics = useMemo(() => {
     const reservasAtivas = reservas.filter((item) => !["cancelada"].includes(item.status));
@@ -331,7 +337,7 @@ export default function PainelPousadaHospedagensScreen() {
     void atualizarPainelPousadaOperacao(pousadaDbId, { respostaRapida: value });
   }
 
-  if (loading || !pousada) {
+  if (checkingAuth || loading || !pousada) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color="#12372A" size="large" />

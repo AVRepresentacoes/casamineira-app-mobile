@@ -8,6 +8,7 @@ import {
   type CaminhoQuarto,
   type CaminhoServicoAdicional,
 } from "@/lib/caminhosHospedagens";
+import { useRequireHospedagensAuth } from "@/lib/hospedagensAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -44,6 +45,7 @@ export default function ReservarHospedagemScreen() {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { checkingAuth } = useRequireHospedagensAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -129,7 +131,7 @@ export default function ReservarHospedagemScreen() {
     }
   }
 
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color="#12372A" />
